@@ -64,20 +64,24 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  email: nodemailerAdapter({
-    defaultFromAddress: process.env.SMTP_FROM || 'cms@sigterm.vodka',
-    defaultFromName: 'Templ3 CMS',
-    transportOptions: {
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    },
-  }),
+  email: process.env.SMTP_HOST
+    ? nodemailerAdapter({
+        defaultFromAddress: process.env.SMTP_FROM || 'cms@sigterm.vodka',
+        defaultFromName: 'Templ3 CMS',
+        transportOptions: {
+          host: process.env.SMTP_HOST,
+          port: Number(process.env.SMTP_PORT) || 587,
+          auth: process.env.SMTP_USER
+            ? {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+              }
+            : undefined,
+        },
+      })
+    : undefined,
   db: postgresAdapter({
-    push: true,
+    push: process.env.NODE_ENV !== 'production',
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },

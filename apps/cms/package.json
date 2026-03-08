@@ -18,7 +18,8 @@
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "migrate:prod": "node -e \"const { execSync } = require('child_process'); require('dotenv').config(); execSync('pnpm run payload migrate', { env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL_PROD }, stdio: 'inherit' })\""
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1004.0",

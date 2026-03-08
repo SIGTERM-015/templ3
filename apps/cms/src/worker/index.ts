@@ -35,7 +35,8 @@ async function resolveSecret(binding: SecretBinding | undefined): Promise<string
 
 export default {
   async fetch(request, env) {
-    const container = env.CMS_CONTAINER.getByName('templ3-cms')
+    const id = env.CMS_CONTAINER.idFromName('templ3-cms', { locationHint: 'weur' })
+    const container = env.CMS_CONTAINER.get(id)
 
     const [databaseUrl, payloadSecret, r2AccessKeyId, r2Bucket, r2SecretAccessKey, smtpUser, smtpPass] =
       await Promise.all([
