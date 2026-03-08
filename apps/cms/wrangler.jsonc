@@ -9,7 +9,7 @@
   "containers": [
     {
       "class_name": "PayloadContainer",
-      "image": "./Dockerfile",
+      "image": "../../Dockerfile.cms",
       "max_instances": 2
     }
   ],
@@ -34,8 +34,8 @@
   },
   "routes": [
     {
-      "pattern": "cms.sigterm.vodka/*",
-      "zone_name": "sigterm.vodka"
+      "pattern": "cms.sigterm.vodka",
+      "custom_domain": true
     }
   ],
   "vars": {

@@ -16,12 +16,12 @@
 	},
 	"routes": [
 		{
-			"pattern": "sigterm.vodka/*",
-			"zone_name": "sigterm.vodka"
+			"pattern": "sigterm.vodka",
+			"custom_domain": true
 		},
 		{
-			"pattern": "www.sigterm.vodka/*",
-			"zone_name": "sigterm.vodka"
+			"pattern": "www.sigterm.vodka",
+			"custom_domain": true
 		}
 	],
 	"vars": {
