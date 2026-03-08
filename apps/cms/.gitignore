@@ -5,7 +5,7 @@
 /.pnp
 .pnp.js
 .yarn/install-state.gz
-
+.open-next/
 /.idea/*
 !/.idea/runConfigurations
 
@@ -48,3 +48,7 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# OpenNext / Cloudflare
+.open-next
+.wrangler
