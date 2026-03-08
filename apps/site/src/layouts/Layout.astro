@@ -1,0 +1,74 @@
+---
+import { BootSequence } from '../components/os/BootSequence'
+import CRTOverlay from '../components/os/CRTOverlay.astro'
+import { DesktopShell } from '../components/os/DesktopShell'
+import MonitorFrame from '../components/os/MonitorFrame.astro'
+import '../styles/global.css'
+
+type Props = {
+  title?: string
+  description?: string
+  initialApp?: string
+  serverData?: string
+  maximized?: boolean
+}
+
+const {
+  title = 'Templ3 | Sigterm',
+  description = 'Sigterm\'s personal web: DevSecOps, hacking, hardware, AI, and a retro cyberpunk aesthetic.',
+  initialApp,
+  serverData,
+  maximized,
+} = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <link href="/sigterm-logo.svg" rel="icon" type="image/svg+xml" />
+    <meta content={Astro.generator} name="generator" />
+    <meta content={description} name="description" />
+    <meta content="Templ3" property="og:site_name" />
+    <meta content={title} property="og:title" />
+    <meta content={description} property="og:description" />
+    <meta content="website" property="og:type" />
+    <meta content="summary_large_image" name="twitter:card" />
+    <title>{title}</title>
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href="https://cdn.jsdelivr.net/fontsource/fonts/monaspace-neon@latest/latin-400-normal.woff2"
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href="https://cdn.jsdelivr.net/fontsource/fonts/monaspace-argon@latest/latin-400-normal.woff2"
+    />
+    <script is:inline>
+      if (sessionStorage.getItem('templ3-booted') || window.location.search.includes('maximized')) {
+        document.documentElement.classList.add('has-booted')
+        sessionStorage.setItem('templ3-booted', '1')
+      }
+    </script>
+  </head>
+  <body>
+    <BootSequence client:load />
+    <MonitorFrame>
+      <DesktopShell
+        client:load
+        initialApp={initialApp}
+        serverData={serverData}
+        maximized={maximized}
+      />
+      <CRTOverlay />
+    </MonitorFrame>
+  </body>
+</html>

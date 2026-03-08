@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { getProjects } from '../lib/cms'
+
+export const prerender = false
+
+const projects = await getProjects()
+---
+
+<Layout
+  title="Arsenal | Templ3"
+  description="Templ3 Arsenal: projects, tooling, labs, and pieces of Sigterm's technical stack."
+  initialApp="armory"
+  serverData={JSON.stringify({ projects })}
+  maximized={Astro.url.searchParams.has('maximized')}
+/>

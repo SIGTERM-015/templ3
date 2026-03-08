@@ -1,0 +1,39 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "templ3-cms",
+  "main": "./src/worker/index.ts",
+  "compatibility_date": "2026-03-07",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "containers": [
+    {
+      "class_name": "PayloadContainer",
+      "image": "./Dockerfile",
+      "max_instances": 2
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CMS_CONTAINER",
+        "class_name": "PayloadContainer"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "PayloadContainer"
+      ]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "NEXT_PUBLIC_SERVER_URL": "https://cms.sigterm.vodka",
+    "R2_REGION": "auto"
+  }
+}

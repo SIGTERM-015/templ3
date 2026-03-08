@@ -1,0 +1,111 @@
+:root {
+  color-scheme: dark;
+
+  /* ── Backgrounds — neutrals tinted toward amber (hue ~60) ── */
+  --bg:            oklch(6% 0.01 60);
+  --bg-elevated:   oklch(10% 0.012 60);
+  --bg-deep:       oklch(8% 0.01 55);
+  --bg-html:       oklch(12% 0.01 55);
+  --bg-code:       oklch(10% 0.012 60 / 0.8);
+  --bg-glass:      oklch(6% 0.01 60 / 0.8);
+  --panel:         oklch(13% 0.015 55);
+  --panel-border:  oklch(22% 0.02 55);
+
+  /* ── Text — warm white, never pure ── */
+  --text:          oklch(94% 0.015 70);
+  --text-bright:   oklch(95% 0 0);
+  --text-dim:      oklch(80% 0 0);
+  --muted:         oklch(65% 0.02 60);
+  --faded:         oklch(45% 0.02 55);
+
+  /* ── Primary — Magenta Sigterm ── */
+  --magenta:        oklch(45% 0.22 350);
+  --magenta-bright: oklch(72% 0.18 345);
+  --magenta-a40:    oklch(45% 0.22 350 / 0.4);
+
+  /* ── Soviet accent — Amber (CRT phosphor) ── */
+  --amber:      oklch(72% 0.14 80);
+  --amber-glow: oklch(82% 0.16 85);
+
+  /* ── Amber alpha scale (interactive states) ── */
+  --amber-a3:   oklch(72% 0.14 80 / 0.03);
+  --amber-a4:   oklch(72% 0.14 80 / 0.04);
+  --amber-a6:   oklch(72% 0.14 80 / 0.06);
+  --amber-a8:   oklch(72% 0.14 80 / 0.08);
+  --amber-a10:  oklch(72% 0.14 80 / 0.1);
+  --amber-a15:  oklch(72% 0.14 80 / 0.15);
+  --amber-a20:  oklch(72% 0.14 80 / 0.2);
+  --amber-a30:  oklch(72% 0.14 80 / 0.3);
+  --amber-a80:  oklch(72% 0.14 80 / 0.8);
+
+  /* ── Secondary accents ── */
+  --oxide:           oklch(38% 0.12 30);
+  --oxide-bright:    oklch(52% 0.16 30);
+  --oxide-a20:       oklch(38% 0.12 30 / 0.2);
+  --oxide-a40:       oklch(38% 0.12 30 / 0.4);
+  --stamp:           oklch(55% 0.18 30);
+  --military:        oklch(42% 0.08 145);
+  --military-dim:    oklch(28% 0.06 145);
+  --military-bright: oklch(72% 0.14 145);
+  --military-bright-a40: oklch(72% 0.14 145 / 0.4);
+
+  /* ── Terminal (CRT green phosphor) ── */
+  --terminal:        oklch(72% 0.18 145);
+  --terminal-dim:    oklch(65% 0.04 145);
+  --terminal-faded:  oklch(35% 0.04 145);
+  --terminal-bg:     oklch(5% 0.015 145);
+  --terminal-border: oklch(20% 0.03 145);
+
+  /* ── Surfaces ── */
+  --metal:      oklch(26% 0.015 55);
+  --aged-paper: oklch(76% 0.05 75);
+  --rust:       oklch(30% 0.06 45);
+  --bsod:       oklch(25% 0.15 260);
+
+  /* ── Monitor frame ── */
+  --bezel-inner:      oklch(20% 0.01 55);
+  --bezel-kbd:        oklch(22% 0.012 55);
+  --bezel-kbd-border: oklch(28% 0.015 55);
+  --bezel-brand:      oklch(40% 0.02 55);
+
+  /* ── Overlays (pure black, various opacity) ── */
+  --overlay-subtle: oklch(0% 0 0 / 0.04);
+  --overlay-light:  oklch(0% 0 0 / 0.06);
+  --overlay-medium: oklch(0% 0 0 / 0.35);
+  --overlay-dark:   oklch(0% 0 0 / 0.7);
+  --overlay-inset:  oklch(0% 0 0 / 0.4);
+
+  /* ── Spacing — 4pt base ── */
+  --space-xs:   4px;
+  --space-sm:   8px;
+  --space-md:   16px;
+  --space-lg:   24px;
+  --space-xl:   48px;
+  --space-2xl:  80px;
+  --space-3xl:  128px;
+  --space-4xl:  200px;
+
+  /* ── Easing ── */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:        cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out:    cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ── Shadows (warm-tinted) ── */
+  --shadow-sm:  0 2px 8px oklch(4% 0.01 55 / 0.5);
+  --shadow-md:  0 8px 32px oklch(4% 0.01 55 / 0.5);
+  --shadow-lg:  0 24px 80px oklch(4% 0.01 55 / 0.55);
+
+  /* ── Z-index scale ── */
+  --z-base:     0;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-overlay:  300;
+  --z-modal:    400;
+  --z-terminal: 500;
+  --z-toast:    600;
+
+  /* ── Layout ── */
+  --shell-width: 1180px;
+  --shell-padding: var(--space-md);
+}

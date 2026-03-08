@@ -1,0 +1,24 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import { getPostBySlug, getPosts } from '../../lib/cms'
+
+export const prerender = false
+
+const { slug } = Astro.params
+const [post, posts] = await Promise.all([
+  slug ? getPostBySlug(slug) : null,
+  getPosts(),
+])
+
+if (!post) {
+  return Astro.redirect('/blog')
+}
+---
+
+<Layout
+  title={`${post.title} | Templ3`}
+  description={post.excerpt || `${post.title} article on Templ3.`}
+  initialApp="gazette"
+  serverData={JSON.stringify({ posts, post })}
+  maximized={Astro.url.searchParams.has('maximized')}
+/>

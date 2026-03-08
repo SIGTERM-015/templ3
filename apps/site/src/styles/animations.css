@@ -1,0 +1,62 @@
+/* ── Boot sequence (CRT turn on) ── */
+@keyframes crt-on {
+  0%   { transform: scaleY(0.005) scaleX(0.8); filter: brightness(30); opacity: 0.5; }
+  40%  { transform: scaleY(0.005) scaleX(0.8); filter: brightness(10); opacity: 0.8; }
+  45%  { transform: scaleY(1) scaleX(1); filter: brightness(3); opacity: 1; }
+  70%  { transform: scaleY(1) scaleX(1); filter: brightness(1.2); }
+  100% { transform: scaleY(1) scaleX(1); filter: brightness(1); }
+}
+
+/* ── Boot reveal for scroll sections ── */
+@keyframes boot-reveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Scanline sweep ── */
+@keyframes scanline-sweep {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+/* ── Glitch effect ── */
+@keyframes glitch {
+  0%, 100% { transform: translate(0); filter: none; }
+  10%      { transform: translate(-2px, 1px); filter: hue-rotate(90deg); }
+  20%      { transform: translate(2px, -1px); filter: hue-rotate(-90deg); }
+  30%      { transform: translate(-1px, 2px); filter: hue-rotate(45deg); }
+  40%      { transform: translate(1px, -2px); }
+  50%      { transform: translate(-2px, 0); filter: hue-rotate(180deg); }
+  60%      { transform: translate(2px, 1px); }
+  70%      { transform: translate(0, -1px); filter: hue-rotate(-45deg); }
+  80%      { transform: translate(-1px, 0); }
+  90%      { transform: translate(1px, 1px); filter: hue-rotate(90deg); }
+}
+
+/* ── Blink cursor ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+/* ── LED pulse (status badges) ── */
+@keyframes pulse-led {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px currentColor; }
+  50%      { opacity: 0.5; box-shadow: 0 0 8px currentColor, 0 0 16px currentColor; }
+}
+
+/* ── Fade in ── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

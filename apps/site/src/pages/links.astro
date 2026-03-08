@@ -1,0 +1,15 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { getLinks } from '../lib/cms'
+
+export const prerender = false
+
+const links = await getLinks()
+---
+
+<Layout
+  title="Links | Templ3"
+  description="Sigterm's public links."
+  initialApp="comms"
+  serverData={JSON.stringify({ links })}
+/>

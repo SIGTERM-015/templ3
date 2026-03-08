@@ -1,0 +1,30 @@
+{
+	"name": "site",
+	"type": "module",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro build && wrangler dev",
+		"astro": "astro",
+		"deploy": "astro build && wrangler deploy",
+		"cf-typegen": "wrangler types"
+	},
+	"dependencies": {
+		"@astrojs/cloudflare": "^12.6.12",
+		"@astrojs/react": "^4.4.2",
+		"@payloadcms/richtext-lexical": "3.79.0",
+		"@react-three/drei": "^10.7.7",
+		"@react-three/fiber": "^9.5.0",
+		"@react-three/postprocessing": "^3.0.4",
+		"astro": "^5.17.1",
+		"postprocessing": "^6.38.3",
+		"react": "19.2.1",
+		"react-dom": "19.2.1",
+		"three": "^0.183.2"
+	},
+	"devDependencies": {
+		"@types/node": "^25.3.5",
+		"wrangler": "^4.71.0"
+	}
+}

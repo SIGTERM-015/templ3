@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import { getPosts } from '../../lib/cms'
+
+export const prerender = false
+
+const posts = await getPosts()
+---
+
+<Layout
+  title="Blog | Templ3"
+  description="Archive of Templ3 articles and writeups."
+  initialApp="gazette"
+  serverData={JSON.stringify({ posts })}
+  maximized={Astro.url.searchParams.has('maximized')}
+/>

@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { getFavouriteMedia } from '../lib/cms'
+
+export const prerender = false
+
+const media = await getFavouriteMedia()
+---
+
+<Layout
+  title="Favourite Media | Templ3"
+  description="Anime, games, books, and everything Sigterm has watched, read, and played."
+  initialApp="media"
+  serverData={JSON.stringify({ media })}
+  maximized={Astro.url.searchParams.has('maximized')}
+/>

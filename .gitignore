@@ -1,0 +1,10 @@
+node_modules
+.pnpm-store
+dist
+.wrangler
+.astro
+.mf
+.env
+.env.*
+.next
+.payload
