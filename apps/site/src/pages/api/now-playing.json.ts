@@ -8,12 +8,6 @@ const CACHE_ORIGIN = 'https://spotify-cache.internal'
 
 type CfCacheStorage = CacheStorage & { default: Cache }
 
-type SpotifyEnv = {
-  SPOTIFY_CLIENT_ID?: string
-  SPOTIFY_CLIENT_SECRET?: string
-  SPOTIFY_REFRESH_TOKEN?: string
-}
-
 function getEdgeCache(): Cache | null {
   try {
     return (caches as CfCacheStorage).default ?? null
@@ -22,14 +16,15 @@ function getEdgeCache(): Cache | null {
   }
 }
 
-export const GET: APIRoute = async ({ locals }) => {
-  const env = (locals.runtime?.env ?? {}) as SpotifyEnv
-  const clientId = env.SPOTIFY_CLIENT_ID ?? import.meta.env.SPOTIFY_CLIENT_ID
-  const clientSecret = env.SPOTIFY_CLIENT_SECRET ?? import.meta.env.SPOTIFY_CLIENT_SECRET
-  const refreshToken = env.SPOTIFY_REFRESH_TOKEN ?? import.meta.env.SPOTIFY_REFRESH_TOKEN
+export const GET: APIRoute = async (context) => {
+  const env = (context.locals as any)?.runtime?.env || import.meta.env
+  
+  const clientId = env.SPOTIFY_CLIENT_ID
+  const clientSecret = env.SPOTIFY_CLIENT_SECRET
+  const refreshToken = env.SPOTIFY_REFRESH_TOKEN
 
   if (!clientId || !clientSecret || !refreshToken) {
-    return Response.json({ isPlaying: false }, { status: 200 })
+    return Response.json({ isPlaying: false, error: 'Missing Spotify credentials in env' }, { status: 500 })
   }
 
   const cache = getEdgeCache()
@@ -42,7 +37,7 @@ export const GET: APIRoute = async ({ locals }) => {
 
   const accessToken = await getAccessToken(clientId, clientSecret, refreshToken)
   if (!accessToken) {
-    return Response.json({ isPlaying: false }, { status: 200 })
+    return Response.json({ isPlaying: false, error: 'Failed to get Spotify access token' }, { status: 500 })
   }
 
   const data = await getNowPlaying(accessToken) ?? await getRecentlyPlayed(accessToken) ?? { isPlaying: false }
