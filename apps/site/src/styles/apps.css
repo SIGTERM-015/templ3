@@ -100,7 +100,7 @@
   justify-content: center;
   border: 1px solid var(--panel-border);
   background: var(--panel);
-  color: var(--muted);
+  color: var(--amber);
   text-decoration: none;
   font-family: var(--font-mono);
   font-size: 12px;
@@ -109,19 +109,21 @@
 }
 
 .dossier-quick-link:hover {
-  border-color: var(--amber);
-  background: var(--amber-a8);
+  border-color: var(--amber-a30);
+  background: var(--amber-a4);
   color: var(--amber);
 }
 
-.dossier-quick-link img {
+.dossier-quick-link__icon {
   width: 18px;
   height: 18px;
-  filter: brightness(0.7);
-}
-
-.dossier-quick-link:hover img {
-  filter: brightness(1);
+  background-color: var(--amber);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
 }
 
 .dossier-bio-column {
@@ -131,6 +133,14 @@
 
 .dossier-bio-column .copy {
   margin-top: var(--space-sm);
+}
+
+.dossier-now-column {
+  flex-shrink: 0;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
 .dossier-section {
@@ -662,12 +672,135 @@
   flex-shrink: 0;
 }
 
+/* ── NOW CARD (shared square card for all "Now" sections) ── */
+
+.now-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  cursor: pointer;
+  text-align: center;
+  font-family: inherit;
+  text-decoration: none;
+  color: var(--text);
+  border-radius: 6px;
+  transition: border-color 200ms ease, background 200ms ease;
+}
+
+.now-card:hover {
+  border-color: var(--amber-a30);
+  background: var(--amber-a4);
+  color: var(--text);
+}
+
+.now-card__cover {
+  width: 100%;
+  aspect-ratio: 1;
+  background-color: var(--bg-deep);
+  background-size: cover;
+  background-position: center;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.now-card__placeholder {
+  font-size: 28px;
+  opacity: 0.3;
+}
+
+.now-card__bars {
+  position: absolute;
+  bottom: var(--space-xs);
+  right: var(--space-xs);
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+  background: var(--overlay-dark);
+  padding: 3px 5px;
+  border-radius: 3px;
+}
+
+.now-card__bar {
+  width: 3px;
+  background: var(--amber);
+  border-radius: 1px;
+  animation: eq-bounce 1.2s ease-in-out infinite;
+}
+
+.now-card__bar:nth-child(1) {
+  height: 60%;
+  animation-delay: 0s;
+}
+
+.now-card__bar:nth-child(2) {
+  height: 100%;
+  animation-delay: 0.2s;
+}
+
+.now-card__bar:nth-child(3) {
+  height: 40%;
+  animation-delay: 0.4s;
+}
+
+@keyframes eq-bounce {
+  0%, 100% { transform: scaleY(0.3); }
+  50%      { transform: scaleY(1); }
+}
+
+.now-card__title {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  line-height: 1.3;
+}
+
+.now-card__subtitle {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
 /* ── FAVOURITE MEDIA ── */
 
 .mediapp {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+}
+
+.mediapp-now {
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.mediapp-now__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+}
+
+.mediapp-now__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
 }
 
 .mediapp-toolbar {
@@ -1034,5 +1167,14 @@
 
   .armory-grid {
     grid-template-columns: 1fr;
+  }
+
+  .dossier-now-column {
+    display: none;
+  }
+
+  .mediapp-now__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
   }
 }

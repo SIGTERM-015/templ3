@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CmsFavMedia, CmsMedia, CmsPost } from '../../../lib/cms'
+import { NowPlaying, NowCard } from '../../NowPlaying'
 
 const TYPE_LABELS: Record<string, string> = {
   anime: '🎌 Anime',
@@ -68,8 +69,54 @@ export function MediaApp({ serverData, onOpenApp }: Props) {
 
   const goBack = useCallback(() => setSelected(null), [])
 
+  const inProgress = useMemo(
+    () => items.filter(i => i.progress === 'in-progress'),
+    [items],
+  )
+
+  const NOW_CATEGORIES: { key: string; label: string; types: string[] }[] = [
+    { key: 'listening', label: 'Now listening', types: ['music'] },
+    { key: 'watching', label: 'Now watching', types: ['anime', 'series', 'movie'] },
+    { key: 'reading', label: 'Now reading', types: ['manga', 'book'] },
+    { key: 'playing', label: 'Now playing', types: ['game'] },
+  ]
+
+  type NowGroup = { key: string; label: string; types: string[]; items: CmsFavMedia[] }
+
+  const nowGroups: NowGroup[] = useMemo(() => {
+    return NOW_CATEGORIES.map(cat => ({
+      ...cat,
+      items: inProgress.filter((i: CmsFavMedia) => cat.types.includes(i.mediaType)),
+    })).filter((g): g is NowGroup => g.items.length > 0)
+  }, [inProgress])
+
   return (
     <div className="mediapp">
+      {!selected && (
+        <div className="mediapp-now">
+          <div className="mediapp-now__grid">
+            <div className="mediapp-now__card">
+              <h3 className="eyebrow">Now listening</h3>
+              <NowPlaying />
+            </div>
+            {nowGroups.map((group: NowGroup) => {
+              const item = group.items[0]
+              const cover = coverUrl(item)
+              return (
+                <div key={group.key} className="mediapp-now__card">
+                  <h3 className="eyebrow">{group.label}</h3>
+                  <NowCard
+                    cover={cover}
+                    title={item.title}
+                    onClick={() => setSelected(item)}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="mediapp-toolbar">
         <div className="mediapp-filters">
           <button
