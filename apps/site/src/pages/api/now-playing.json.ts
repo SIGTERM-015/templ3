@@ -17,11 +17,9 @@ function getEdgeCache(): Cache | null {
 }
 
 export const GET: APIRoute = async (context) => {
-  const env = (context.locals as any)?.runtime?.env || import.meta.env
-  
-  const clientId = env.SPOTIFY_CLIENT_ID
-  const clientSecret = env.SPOTIFY_CLIENT_SECRET
-  const refreshToken = env.SPOTIFY_REFRESH_TOKEN
+  const clientId = import.meta.env.SPOTIFY_CLIENT_ID || (context.locals as any)?.runtime?.env?.SPOTIFY_CLIENT_ID
+  const clientSecret = import.meta.env.SPOTIFY_CLIENT_SECRET || (context.locals as any)?.runtime?.env?.SPOTIFY_CLIENT_SECRET
+  const refreshToken = import.meta.env.SPOTIFY_REFRESH_TOKEN || (context.locals as any)?.runtime?.env?.SPOTIFY_REFRESH_TOKEN
 
   if (!clientId || !clientSecret || !refreshToken) {
     return Response.json({ isPlaying: false, error: 'Missing Spotify credentials in env' }, { status: 500 })

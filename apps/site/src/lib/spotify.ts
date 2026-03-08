@@ -22,7 +22,10 @@ export async function getAccessToken(
   clientSecret: string,
   refreshToken: string,
 ): Promise<string | { error: string }> {
-  const basic = btoa(`${clientId}:${clientSecret}`)
+  const cleanClientId = String(clientId).trim()
+  const cleanClientSecret = String(clientSecret).trim()
+  const cleanRefreshToken = String(refreshToken).trim()
+  const basic = btoa(`${cleanClientId}:${cleanClientSecret}`)
 
   try {
     const res = await fetch(TOKEN_URL, {
@@ -33,7 +36,7 @@ export async function getAccessToken(
       },
       body: new URLSearchParams({
         grant_type: 'refresh_token',
-        refresh_token: refreshToken,
+        refresh_token: cleanRefreshToken,
       }),
     })
 
