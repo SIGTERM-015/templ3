@@ -25,18 +25,18 @@ export async function getAccessToken(
   const cleanClientId = String(clientId).trim()
   const cleanClientSecret = String(clientSecret).trim()
   const cleanRefreshToken = String(refreshToken).trim()
-  const basic = btoa(`${cleanClientId}:${cleanClientSecret}`)
 
   try {
     const res = await fetch(TOKEN_URL, {
       method: 'POST',
       headers: {
-        Authorization: `Basic ${basic}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
         grant_type: 'refresh_token',
         refresh_token: cleanRefreshToken,
+        client_id: cleanClientId,
+        client_secret: cleanClientSecret,
       }),
     })
 
