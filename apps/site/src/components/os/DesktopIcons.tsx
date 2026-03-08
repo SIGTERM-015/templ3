@@ -109,7 +109,16 @@ export function DesktopIcons({ openApps, onOpen }: Props) {
             window.addEventListener('pointerup', onUp)
           }}
         >
-          <span className="desktop-icon__glyph">{app.glyph}</span>
+          {app.svgIcon ? (
+            <span
+              className="desktop-icon__glyph"
+              // SVG is a hardcoded string defined in siteConfig — not user input
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: app.svgIcon }}
+            />
+          ) : (
+            <span className="desktop-icon__glyph">{app.glyph}</span>
+          )}
           <span className="desktop-icon__label">{app.label}</span>
         </button>
       ))}

@@ -19,6 +19,13 @@ export const Categories: CollectionConfig = {
     },
     slugField({ source: 'name' }),
     {
+      name: 'description',
+      type: 'textarea',
+      admin: {
+        description: 'Optional description shown in the gazette sidebar',
+      },
+    },
+    {
       name: 'icon',
       type: 'relationship',
       relationTo: 'media',

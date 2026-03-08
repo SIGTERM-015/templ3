@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { desktopApps, site } from '../../data/siteConfig'
+import type { CmsNote, CmsSiteIdentity } from '../../lib/cms'
 import { WindowFrame } from './WindowFrame'
 import { DesktopIcons } from './DesktopIcons'
 import { TaskbarReact } from './TaskbarReact'
@@ -11,6 +12,8 @@ import { CommsApp } from './apps/CommsApp'
 import { ReadmeApp } from './apps/ReadmeApp'
 import { TerminalApp } from './apps/TerminalApp'
 import { SettingsApp } from './apps/SettingsApp'
+import { NotesApp } from './apps/NotesApp'
+import { NoteViewerApp } from './apps/NoteViewerApp'
 import {
   buildCustomThemeVariables,
   DEFAULT_CUSTOM_THEME,
@@ -21,7 +24,17 @@ import {
   type ThemePresetId,
 } from './themePresets'
 
-export type AppId = 'dossier' | 'gazette' | 'armory' | 'media' | 'comms' | 'readme' | 'terminal' | 'settings'
+export type AppId =
+  | 'dossier'
+  | 'gazette'
+  | 'armory'
+  | 'media'
+  | 'comms'
+  | 'readme'
+  | 'terminal'
+  | 'settings'
+  | 'notes'
+  | 'note-viewer'
 
 export type WindowState = {
   id: string
@@ -85,6 +98,7 @@ function reducer(state: WindowState[], action: Action): WindowState[] {
 
 const EXTRA_APPS: Record<string, { title: string; icon: string; w: number; h: number; x: number; y: number }> = {
   terminal: { title: 'terminal', icon: '>_', w: 65, h: 70, x: 18, y: 10 },
+  'note-viewer': { title: 'note', icon: '//', w: 55, h: 72, x: 22, y: 8 },
 }
 
 function createWindow(appId: AppId, zIndex: number, maximized = false, meta?: Record<string, unknown>): WindowState {
@@ -108,7 +122,7 @@ function createWindow(appId: AppId, zIndex: number, maximized = false, meta?: Re
   }
 }
 
-const FULL_BLEED_APPS = new Set<string>(['gazette', 'terminal'])
+const FULL_BLEED_APPS = new Set<string>(['gazette', 'terminal', 'notes', 'note-viewer'])
 
 type Props = {
   initialApp?: string
@@ -132,8 +146,18 @@ function parseThemeId(value: unknown): ThemePresetId | 'custom' {
   return 'default'
 }
 
+function resolveWallpaperUrl(
+  siteIdentity: CmsSiteIdentity | undefined,
+  fallback: string,
+): string {
+  const w = siteIdentity?.wallpaper
+  if (!w) return fallback
+  if (typeof w === 'string') return fallback // just an ID, can't use
+  return (w as { url?: string }).url ?? fallback
+}
+
 function getDesktopBackground(wallpaper: string): React.CSSProperties {
-  const value = wallpaper.trim() || site.wallpaper || ''
+  const value = wallpaper.trim() || ''
   if (!value) return {}
   if (value.includes('gradient(') || value.startsWith('url(')) {
     return { backgroundImage: value, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -146,7 +170,16 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
   const [ready, setReady] = useState(false)
   const [themeId, setThemeId] = useState<ThemePresetId | 'custom'>('default')
   const [customTheme, setCustomTheme] = useState<CustomThemeColors>(DEFAULT_CUSTOM_THEME)
-  const [wallpaper, setWallpaper] = useState(site.wallpaper ?? '')
+
+  // Parse siteIdentity from serverData once at mount — it's shared across all apps
+  const parsedServerData = (() => {
+    if (!serverData) return undefined
+    try { return JSON.parse(serverData) as Record<string, unknown> } catch { return undefined }
+  })()
+  const siteIdentity = parsedServerData?.siteIdentity as CmsSiteIdentity | undefined
+
+  const defaultWallpaper = resolveWallpaperUrl(siteIdentity, site.wallpaper ?? '')
+  const [wallpaper, setWallpaper] = useState(defaultWallpaper)
   const zRef = useRef(10)
 
   const nextZ = useCallback(() => ++zRef.current, [])
@@ -287,14 +320,63 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
 
   const renderApp = (win: WindowState) => {
     const sd = win.meta?.serverData as Record<string, unknown> | undefined
+    // Merge the top-level siteIdentity into each window's serverData
+    // so every app can access it regardless of which page opened it
+    const merged = sd ? { ...sd, siteIdentity: sd.siteIdentity ?? siteIdentity } : (siteIdentity ? { siteIdentity } : undefined)
+
     switch (win.appId) {
-      case 'dossier': return <DossierApp onOpenApp={(id) => openWindow(id)} />
-      case 'gazette': return <GazetteApp serverData={sd} onUpdateRoute={(r) => updateRoute(win.id, r)} />
-      case 'armory': return <ArmoryApp serverData={sd} />
-      case 'media': return <MediaApp serverData={sd} onOpenApp={(id) => openWindow(id)} />
-      case 'comms': return <CommsApp serverData={sd} />
-      case 'readme': return <ReadmeApp />
-      case 'terminal': return <TerminalApp onNavigate={handleNavigate} onOpenApp={(id) => openWindow(id)} />
+      case 'dossier':
+        return (
+          <DossierApp
+            onOpenApp={(id) => openWindow(id)}
+            siteIdentity={merged?.siteIdentity as CmsSiteIdentity | undefined}
+          />
+        )
+      case 'gazette':
+        return <GazetteApp serverData={merged} onUpdateRoute={(r) => updateRoute(win.id, r)} />
+      case 'armory':
+        return <ArmoryApp serverData={merged} />
+      case 'media':
+        return <MediaApp serverData={merged} onOpenApp={(id) => openWindow(id)} />
+      case 'comms':
+        return <CommsApp serverData={merged} />
+      case 'readme':
+        return (
+          <ReadmeApp
+            siteIdentity={merged?.siteIdentity as CmsSiteIdentity | undefined}
+          />
+        )
+      case 'terminal':
+        return (
+          <TerminalApp
+            onNavigate={handleNavigate}
+            onOpenApp={(id) => openWindow(id)}
+            siteIdentity={merged?.siteIdentity as CmsSiteIdentity | undefined}
+          />
+        )
+      case 'notes':
+        return (
+          <NotesApp
+            serverData={merged}
+            onOpenNote={(note: CmsNote) => {
+              const filename = note.filename || `${note.slug}.md`
+              // Each note gets its own window; reuse if already open
+              const existingId = `note-viewer-${note.id}`
+              const existing = windows.find(w => w.id === existingId)
+              if (existing) {
+                dispatch({ type: 'FOCUS', id: existingId, zIndex: nextZ() })
+                return
+              }
+              const w = createWindow('note-viewer', nextZ(), false, { note })
+              dispatch({ type: 'OPEN', window: { ...w, id: existingId, title: filename } })
+            }}
+          />
+        )
+      case 'note-viewer': {
+        const note = win.meta?.note as CmsNote | undefined
+        if (!note) return null
+        return <NoteViewerApp note={note} />
+      }
       case 'settings':
         return (
           <SettingsApp
@@ -304,7 +386,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
             onCustomThemeChange={setCustomTheme}
             wallpaper={wallpaper}
             onWallpaperChange={setWallpaper}
-            defaultWallpaper={site.wallpaper ?? ''}
+            defaultWallpaper={defaultWallpaper}
           />
         )
       default: return null

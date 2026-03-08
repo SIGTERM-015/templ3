@@ -1,7 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro'
+import { getSiteIdentity } from '../lib/cms'
 
 export const prerender = false
+
+const siteIdentity = await getSiteIdentity()
 ---
 
-<Layout title="Templ3 | Sigterm" initialApp="dossier" />
+<Layout
+  initialApp="dossier"
+  serverData={JSON.stringify({ siteIdentity })}
+  siteName={siteIdentity?.siteName}
+  siteDescription={siteIdentity?.siteDescription}
+/>

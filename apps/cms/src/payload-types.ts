@@ -75,6 +75,10 @@ export interface Config {
     projects: Project;
     links: Link;
     'favourite-media': FavouriteMedia;
+    notes: Note;
+    'media-types': MediaType;
+    'media-statuses': MediaStatus;
+    'project-statuses': ProjectStatus;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +94,10 @@ export interface Config {
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     links: LinksSelect<false> | LinksSelect<true>;
     'favourite-media': FavouriteMediaSelect<false> | FavouriteMediaSelect<true>;
+    notes: NotesSelect<false> | NotesSelect<true>;
+    'media-types': MediaTypesSelect<false> | MediaTypesSelect<true>;
+    'media-statuses': MediaStatusesSelect<false> | MediaStatusesSelect<true>;
+    'project-statuses': ProjectStatusesSelect<false> | ProjectStatusesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -99,8 +107,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-identity': SiteIdentity;
+  };
+  globalsSelect: {
+    'site-identity': SiteIdentitySelect<false> | SiteIdentitySelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -225,6 +237,10 @@ export interface Category {
   name: string;
   slug: string;
   /**
+   * Optional description shown in the gazette sidebar
+   */
+  description?: string | null;
+  /**
    * Image icon shown in the sidebar folder
    */
   icon?: (number | null) | Media;
@@ -278,7 +294,10 @@ export interface Project {
   title: string;
   slug: string;
   summary: string;
-  projectStatus: 'building' | 'active' | 'planned' | 'concept' | 'archived';
+  /**
+   * Project status (configured in Project Statuses)
+   */
+  projectStatus: number | ProjectStatus;
   featured?: boolean | null;
   order: number;
   stack?:
@@ -311,6 +330,41 @@ export interface Project {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Status definitions for Projects — controls label, color, and icon
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-statuses".
+ */
+export interface ProjectStatus {
+  id: number;
+  /**
+   * Slug key used in Project entries (e.g. "active", "building", "planned", "concept", "archived")
+   */
+  value: string;
+  /**
+   * Display name shown on project cards (e.g. "Active", "Building")
+   */
+  label: string;
+  /**
+   * CSS color value for this status badge (e.g. "oklch(72% 0.14 80)" or "#4ade80")
+   */
+  color?: string | null;
+  /**
+   * Image icon for this status (preferred over glyph)
+   */
+  icon?: (number | null) | Media;
+  /**
+   * ASCII/symbol fallback if no icon image (e.g. "●", "◐", "○")
+   */
+  glyph?: string | null;
+  /**
+   * Sort order (lower = first)
+   */
+  order: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "links".
  */
@@ -337,8 +391,14 @@ export interface FavouriteMedia {
   id: number;
   title: string;
   slug: string;
-  mediaType: 'anime' | 'manga' | 'game' | 'movie' | 'series' | 'book' | 'music' | 'other';
-  progress: 'completed' | 'in-progress' | 'dropped' | 'planned';
+  /**
+   * Type of media (configured in Media Types)
+   */
+  mediaType: number | MediaType;
+  /**
+   * Current progress/status (configured in Media Statuses)
+   */
+  progress: number | MediaStatus;
   /**
    * Rating from 1 to 10
    */
@@ -361,6 +421,106 @@ export interface FavouriteMedia {
    */
   completedAt?: string | null;
   featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Media type definitions: display label, icon, and "Now X" widget category
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-types".
+ */
+export interface MediaType {
+  id: number;
+  /**
+   * Slug key — must match the value used in Favourite Media entries (e.g. "anime", "game", "book")
+   */
+  value: string;
+  /**
+   * Display name shown in filters and cards (e.g. "Anime", "Games")
+   */
+  label: string;
+  /**
+   * Image icon shown in filters and cards (preferred over glyph)
+   */
+  icon?: (number | null) | Media;
+  /**
+   * ASCII/text fallback if no icon image is set (e.g. ">>")
+   */
+  glyph?: string | null;
+  /**
+   * Which "Now X" widget this media type belongs to on the media app
+   */
+  nowCategory: 'none' | 'watching' | 'reading' | 'playing' | 'listening';
+  /**
+   * Custom label for the "Now X" widget (e.g. "Now watching"). Only used if nowCategory is not "none".
+   */
+  nowLabel?: string | null;
+  /**
+   * Sort order in filter tabs (lower = first)
+   */
+  order: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Progress/status definitions for Favourite Media entries
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-statuses".
+ */
+export interface MediaStatus {
+  id: number;
+  /**
+   * Slug key used in Favourite Media entries (e.g. "completed", "in-progress", "dropped", "planned")
+   */
+  value: string;
+  /**
+   * Display name shown in tags and detail views (e.g. "Completed")
+   */
+  label: string;
+  /**
+   * Image icon for this status (preferred over glyph)
+   */
+  icon?: (number | null) | Media;
+  /**
+   * ASCII/symbol fallback if no icon image (e.g. "✓", "▶", "✕", "◌")
+   */
+  glyph?: string | null;
+  /**
+   * Sort order in status filters (lower = first)
+   */
+  order: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Markdown files shown as a folder on the desktop
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notes".
+ */
+export interface Note {
+  id: number;
+  title: string;
+  slug: string;
+  /**
+   * Filename shown on the desktop (e.g. "readme.md", "notes.md")
+   */
+  filename: string;
+  /**
+   * Plain markdown text. Rendered in the Notes desktop app.
+   */
+  content: string;
+  /**
+   * Date shown next to the filename on the desktop
+   */
+  publishedAt?: string | null;
+  /**
+   * Sort order in the desktop folder (lower = first)
+   */
+  order: number;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -420,6 +580,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'favourite-media';
         value: number | FavouriteMedia;
+      } | null)
+    | ({
+        relationTo: 'notes';
+        value: number | Note;
+      } | null)
+    | ({
+        relationTo: 'media-types';
+        value: number | MediaType;
+      } | null)
+    | ({
+        relationTo: 'media-statuses';
+        value: number | MediaStatus;
+      } | null)
+    | ({
+        relationTo: 'project-statuses';
+        value: number | ProjectStatus;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -555,6 +731,7 @@ export interface TagsSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  description?: T;
   icon?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -647,6 +824,63 @@ export interface FavouriteMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notes_select".
+ */
+export interface NotesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  filename?: T;
+  content?: T;
+  publishedAt?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-types_select".
+ */
+export interface MediaTypesSelect<T extends boolean = true> {
+  value?: T;
+  label?: T;
+  icon?: T;
+  glyph?: T;
+  nowCategory?: T;
+  nowLabel?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-statuses_select".
+ */
+export interface MediaStatusesSelect<T extends boolean = true> {
+  value?: T;
+  label?: T;
+  icon?: T;
+  glyph?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-statuses_select".
+ */
+export interface ProjectStatusesSelect<T extends boolean = true> {
+  value?: T;
+  label?: T;
+  color?: T;
+  icon?: T;
+  glyph?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -684,6 +918,158 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * Global site identity, operator profile, and terminal config
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-identity".
+ */
+export interface SiteIdentity {
+  id: number;
+  /**
+   * Used in page titles and OG tags
+   */
+  siteName?: string | null;
+  siteDomain?: string | null;
+  siteEmail?: string | null;
+  /**
+   * Default meta description for the site
+   */
+  siteDescription?: string | null;
+  /**
+   * Default desktop wallpaper image
+   */
+  wallpaper?: (number | null) | Media;
+  handle?: string | null;
+  /**
+   * Alternative handles / usernames
+   */
+  aliases?:
+    | {
+        alias: string;
+        id?: string | null;
+      }[]
+    | null;
+  role?: string | null;
+  specialty?: string | null;
+  status?: ('active' | 'away' | 'inactive') | null;
+  /**
+   * Short tagline shown in profile
+   */
+  claim?: string | null;
+  /**
+   * One-line intro shown in dossier header
+   */
+  intro?: string | null;
+  /**
+   * Bio paragraphs shown in the dossier app
+   */
+  bio?:
+    | {
+        paragraph: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Profile photo shown in dossier
+   */
+  avatar?: (number | null) | Media;
+  /**
+   * Tags shown in the Inspirations section of dossier
+   */
+  inspirations?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Title shown at the top of the README window
+   */
+  navGuideTitle?: string | null;
+  /**
+   * Lines of text shown in the README.txt desktop app
+   */
+  navGuideLines?:
+    | {
+        line?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shell prompt string shown in the terminal
+   */
+  terminalPrompt?: string | null;
+  /**
+   * Output of the `pwd` command
+   */
+  terminalPwd?: string | null;
+  /**
+   * Output of the `uname -a` command
+   */
+  terminalUname?: string | null;
+  /**
+   * Full text block output of the `whoami` terminal command
+   */
+  whoamiOutput?: string | null;
+  /**
+   * Full neofetch-style output string. Leave empty to use the hardcoded default in code.
+   */
+  neofetchOutput?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-identity_select".
+ */
+export interface SiteIdentitySelect<T extends boolean = true> {
+  siteName?: T;
+  siteDomain?: T;
+  siteEmail?: T;
+  siteDescription?: T;
+  wallpaper?: T;
+  handle?: T;
+  aliases?:
+    | T
+    | {
+        alias?: T;
+        id?: T;
+      };
+  role?: T;
+  specialty?: T;
+  status?: T;
+  claim?: T;
+  intro?: T;
+  bio?:
+    | T
+    | {
+        paragraph?: T;
+        id?: T;
+      };
+  avatar?: T;
+  inspirations?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  navGuideTitle?: T;
+  navGuideLines?:
+    | T
+    | {
+        line?: T;
+        id?: T;
+      };
+  terminalPrompt?: T;
+  terminalPwd?: T;
+  terminalUname?: T;
+  whoamiOutput?: T;
+  neofetchOutput?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

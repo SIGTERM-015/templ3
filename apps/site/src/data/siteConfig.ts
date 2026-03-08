@@ -107,6 +107,7 @@ export type DesktopApp = {
   windowTitle: string
   defaultSize?: { w: number; h: number }
   defaultPos?: { x: number; y: number }
+  svgIcon?: string   // optional inline SVG string — overrides glyph in desktop icons
 }
 
 export const desktopApps: DesktopApp[] = [
@@ -115,6 +116,16 @@ export const desktopApps: DesktopApp[] = [
   { id: 'armory', route: '/arsenal', glyph: '{}', label: 'armory', windowTitle: 'ARMORY', defaultSize: { w: 72, h: 82 }, defaultPos: { x: 14, y: 6 } },
   { id: 'media', route: '/media', glyph: '♪', label: 'media', windowTitle: 'FAV MEDIA', defaultSize: { w: 68, h: 80 }, defaultPos: { x: 18, y: 6 } },
   { id: 'comms', route: '/links', glyph: '::', label: 'comms', windowTitle: 'COMMS', defaultSize: { w: 55, h: 75 }, defaultPos: { x: 22, y: 8 } },
+  {
+    id: 'notes',
+    route: '/notes',
+    glyph: '//',
+    label: 'notes',
+    windowTitle: 'NOTES',
+    defaultSize: { w: 62, h: 78 },
+    defaultPos: { x: 19, y: 7 },
+    svgIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h3.5l2 2H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`,
+  },
   { id: 'readme', route: '', glyph: '[]', label: 'readme', windowTitle: 'README', defaultSize: { w: 42, h: 55 }, defaultPos: { x: 52, y: 12 } },
   { id: 'settings', route: '', glyph: '::', label: 'settings', windowTitle: 'SETTINGS', defaultSize: { w: 58, h: 72 }, defaultPos: { x: 20, y: 10 } },
 ]

@@ -1,7 +1,45 @@
-import { operator, socialLinks, inspirations } from '../../../data/siteConfig'
+import { operator, socialLinks as defaultSocialLinks, inspirations as defaultInspirations } from '../../../data/siteConfig'
+import type { CmsSiteIdentity, CmsMedia } from '../../../lib/cms'
 import { NowPlaying } from '../../NowPlaying'
 
-export function DossierApp({ onOpenApp }: { onOpenApp?: (appId: string) => void }) {
+type Props = {
+  onOpenApp?: (appId: string) => void
+  siteIdentity?: CmsSiteIdentity
+}
+
+function resolveMediaUrl(value: CmsMedia | string | null | undefined): string | undefined {
+  if (!value) return undefined
+  if (typeof value === 'string') return undefined
+  return value.url ?? undefined
+}
+
+export function DossierApp({ onOpenApp, siteIdentity }: Props) {
+  // CMS-first, siteConfig fallback for every field
+  const handle = siteIdentity?.handle ?? operator.handle
+  const status = siteIdentity?.status?.toUpperCase() ?? operator.status
+  const role = siteIdentity?.role ?? operator.role
+  const specialty = siteIdentity?.specialty ?? operator.specialty
+
+  const aliases = siteIdentity?.aliases?.length
+    ? siteIdentity.aliases.map(a => a.alias)
+    : operator.aliases
+
+  const bio = siteIdentity?.bio?.length
+    ? siteIdentity.bio.map(b => b.paragraph)
+    : operator.bio
+
+  const avatarUrl = resolveMediaUrl(siteIdentity?.avatar) ?? operator.avatar
+
+  const links = siteIdentity?.aliases !== undefined
+    // If CMS has siteIdentity, social links come from the CMS Links collection (CommsApp)
+    // but for the quick-link icons in Dossier we fall back to siteConfig
+    ? defaultSocialLinks
+    : defaultSocialLinks
+
+  const inspirations = siteIdentity?.inspirations?.length
+    ? siteIdentity.inspirations.map(i => i.tag)
+    : defaultInspirations
+
   return (
     <div className="dossier">
       <div className="dossier-top">
@@ -11,13 +49,13 @@ export function DossierApp({ onOpenApp }: { onOpenApp?: (appId: string) => void 
               <span className="dossier-stamp-line dossier-stamp-line--redacted">CLASSIFIED</span>
               <span className="dossier-stamp-line dossier-stamp-line--clear">DECLASSIFIED</span>
             </div>
-            <img src={operator.avatar} alt={operator.handle} className="dossier-photo" />
+            <img src={avatarUrl} alt={handle} className="dossier-photo" />
           </div>
-          <span className="dossier-status" data-status={operator.status.toLowerCase()}>
-            {operator.status}
+          <span className="dossier-status" data-status={status.toLowerCase()}>
+            {status}
           </span>
           <div className="dossier-quick-links">
-            {socialLinks.map((link) => (
+            {links.map((link) => (
               <a
                 key={link.id}
                 href={link.href}
@@ -43,7 +81,7 @@ export function DossierApp({ onOpenApp }: { onOpenApp?: (appId: string) => void 
         </div>
         <div className="dossier-bio-column">
           <h3 className="eyebrow">Bio</h3>
-          {operator.bio.map((p, i) => (
+          {bio.map((p, i) => (
             <p key={i} className="copy">{p}</p>
           ))}
         </div>
@@ -56,10 +94,10 @@ export function DossierApp({ onOpenApp }: { onOpenApp?: (appId: string) => void 
       <section className="dossier-section dossier-section--ficha">
         <h3 className="eyebrow">Record</h3>
         <div className="dossier-fields">
-          <Field label="Handle" value={operator.handle} />
-          <Field label="AKA" value={operator.aliases.join(', ')} />
-          <Field label="Role" value={operator.role} />
-          <Field label="Specialty" value={operator.specialty} />
+          <Field label="Handle" value={handle} />
+          <Field label="AKA" value={aliases.join(', ')} />
+          <Field label="Role" value={role} />
+          <Field label="Specialty" value={specialty} />
         </div>
       </section>
 

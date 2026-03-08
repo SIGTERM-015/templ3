@@ -1,4 +1,5 @@
 import { desktopApps, operator } from '../../data/siteConfig'
+import type { CmsSiteIdentity } from '../../lib/cms'
 import { BSOD, HELP_TABLE, NEOFETCH, NMAP_OUTPUT } from './ascii'
 
 export type CommandResult = {
@@ -9,45 +10,33 @@ export type CommandResult = {
   openUrl?: string
 }
 
+export type TerminalConfig = {
+  siteIdentity?: CmsSiteIdentity | null
+}
+
 const HOME_FILES = [
   ...desktopApps.map(a => a.id),
   'terminal',
   'sigterm.txt',
 ]
 
-const WHOAMI = `Handle:    Sigterm / Sigterm015
-Role:      DevSecOps → Red Team
-Status:    ACTIVE
-Specialty: Pentesting, Bug Bounty, Automation
-Domain:    sigterm.vodka
-Codename:  Templ3`
-
-const CAT_SIGTERM = operator.bio.join('\n\n')
-
 const RICKROLL_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ'
 
-function fakePing(): string {
+function fakePing(domain: string): string {
   const lines = []
-  lines.push('PING sigterm.vodka (104.21.xx.xx) 56(84) bytes of data.')
+  lines.push(`PING ${domain} (104.21.xx.xx) 56(84) bytes of data.`)
   for (let i = 0; i < 4; i++) {
     const ms = (Math.random() * 15 + 5).toFixed(1)
-    lines.push(`64 bytes from sigterm.vodka: icmp_seq=${i + 1} ttl=57 time=${ms} ms`)
+    lines.push(`64 bytes from ${domain}: icmp_seq=${i + 1} ttl=57 time=${ms} ms`)
   }
   lines.push('')
-  lines.push('--- sigterm.vodka ping statistics ---')
+  lines.push(`--- ${domain} ping statistics ---`)
   lines.push('4 packets transmitted, 4 received, 0% packet loss')
   return lines.join('\n')
 }
 
 function formatLs(): string {
-  const cols: string[] = []
-  for (const f of HOME_FILES) {
-    if (f === 'sigterm.txt') {
-      cols.push(f)
-    } else {
-      cols.push(f)
-    }
-  }
+  const cols = [...HOME_FILES]
   let out = ''
   const colWidth = 14
   for (let i = 0; i < cols.length; i++) {
@@ -57,7 +46,30 @@ function formatLs(): string {
   return out
 }
 
-export function executeCommand(input: string): CommandResult {
+export function executeCommand(input: string, config?: TerminalConfig): CommandResult {
+  const si = config?.siteIdentity
+
+  // Resolved values: CMS-first, siteConfig fallback
+  const handle = si?.handle ?? operator.handle
+  const domain = si?.siteDomain ?? 'sigterm.vodka'
+  const pwd = si?.terminalPwd ?? '/home/sigterm'
+  const uname = si?.terminalUname ?? 'Templ3 OS 0.6.6.6 sigterm-sanctum x86_64 GNU/Linux'
+  const siteName = si?.siteName ?? 'Templ3'
+
+  const whoami = si?.whoamiOutput ??
+    `Handle:    ${handle} / ${si?.aliases?.map(a => a.alias).join(' / ') ?? 'Sigterm015'}
+Role:      ${si?.role ?? operator.role}
+Status:    ${si?.status?.toUpperCase() ?? operator.status}
+Specialty: ${si?.specialty ?? operator.specialty}
+Domain:    ${domain}
+Codename:  ${siteName}`
+
+  const catSigterm = si?.bio?.length
+    ? si.bio.map(b => b.paragraph).join('\n\n')
+    : operator.bio.join('\n\n')
+
+  const neofetch = si?.neofetchOutput ? si.neofetchOutput : NEOFETCH
+
   const trimmed = input.trim()
   const [cmd, ...args] = trimmed.split(/\s+/)
   const command = cmd?.toLowerCase() || ''
@@ -85,10 +97,10 @@ export function executeCommand(input: string): CommandResult {
       return { output: HELP_TABLE }
 
     case 'whoami':
-      return { output: WHOAMI }
+      return { output: whoami }
 
     case 'neofetch':
-      return { output: NEOFETCH }
+      return { output: neofetch }
 
     case 'ls':
       return { output: formatLs() }
@@ -103,7 +115,7 @@ export function executeCommand(input: string): CommandResult {
 
     case 'cat':
       if (args[0] === 'sigterm' || args[0] === 'sigterm.txt') {
-        return { output: CAT_SIGTERM }
+        return { output: catSigterm }
       }
       return { output: `cat: ${args[0] || ''}: No such file or directory` }
 
@@ -124,7 +136,7 @@ export function executeCommand(input: string): CommandResult {
       return { output: `sudo: ${args.join(' ')}: command not found` }
 
     case 'ping':
-      return { output: fakePing() }
+      return { output: fakePing(domain) }
 
     case 'nmap':
       return { output: NMAP_OUTPUT }
@@ -139,13 +151,13 @@ export function executeCommand(input: string): CommandResult {
       return { output: args.join(' ') }
 
     case 'pwd':
-      return { output: '/home/sigterm' }
+      return { output: pwd }
 
     case 'date':
       return { output: new Date().toUTCString() }
 
     case 'uname':
-      return { output: 'Templ3 OS 0.6.6.6 sigterm-sanctum x86_64 GNU/Linux' }
+      return { output: uname }
 
     default:
       return { output: `${command}: command not found. Type 'help' for available commands.` }

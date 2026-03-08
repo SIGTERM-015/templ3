@@ -3,6 +3,7 @@ import { BootSequence } from '../components/os/BootSequence'
 import CRTOverlay from '../components/os/CRTOverlay.astro'
 import { DesktopShell } from '../components/os/DesktopShell'
 import MonitorFrame from '../components/os/MonitorFrame.astro'
+import { site } from '../data/siteConfig'
 import '../styles/global.css'
 
 type Props = {
@@ -11,15 +12,25 @@ type Props = {
   initialApp?: string
   serverData?: string
   maximized?: boolean
+  /** Overrides from CMS SiteIdentity — passed by pages that pre-fetch it */
+  siteName?: string
+  siteDescription?: string
 }
 
 const {
-  title = 'Templ3 | Sigterm',
-  description = 'Sigterm\'s personal web: DevSecOps, hacking, hardware, AI, and a retro cyberpunk aesthetic.',
+  title,
+  description,
   initialApp,
   serverData,
   maximized,
+  siteName,
+  siteDescription,
 } = Astro.props
+
+// CMS values take priority, then explicit props, then siteConfig fallback
+const resolvedSiteName = siteName ?? site.name
+const resolvedDescription = siteDescription ?? description ?? site.description
+const resolvedTitle = title ?? `${resolvedSiteName} | Sigterm`
 ---
 
 <!doctype html>
@@ -29,13 +40,13 @@ const {
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
     <link href="/sigterm-logo.svg" rel="icon" type="image/svg+xml" />
     <meta content={Astro.generator} name="generator" />
-    <meta content={description} name="description" />
-    <meta content="Templ3" property="og:site_name" />
-    <meta content={title} property="og:title" />
-    <meta content={description} property="og:description" />
+    <meta content={resolvedDescription} name="description" />
+    <meta content={resolvedSiteName} property="og:site_name" />
+    <meta content={resolvedTitle} property="og:title" />
+    <meta content={resolvedDescription} property="og:description" />
     <meta content="website" property="og:type" />
     <meta content="summary_large_image" name="twitter:card" />
-    <title>{title}</title>
+    <title>{resolvedTitle}</title>
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link

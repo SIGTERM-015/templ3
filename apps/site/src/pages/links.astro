@@ -1,15 +1,18 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import { getLinks } from '../lib/cms'
+import { getLinks, getSiteIdentity } from '../lib/cms'
 
 export const prerender = false
 
-const links = await getLinks()
+const [links, siteIdentity] = await Promise.all([
+  getLinks(),
+  getSiteIdentity(),
+])
 ---
 
 <Layout
-  title="Links | Templ3"
+  title={siteIdentity?.siteName ? `Links | ${siteIdentity.siteName}` : 'Links | Templ3'}
   description="Sigterm's public links."
   initialApp="comms"
-  serverData={JSON.stringify({ links })}
+  serverData={JSON.stringify({ links, siteIdentity })}
 />
