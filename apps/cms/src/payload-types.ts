@@ -138,6 +138,8 @@ export interface User {
   displayName?: string | null;
   handle?: string | null;
   role: 'admin' | 'editor';
+  totpSecret?: string | null;
+  hasTotp?: boolean | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -465,6 +467,8 @@ export interface UsersSelect<T extends boolean = true> {
   displayName?: T;
   handle?: T;
   role?: T;
+  totpSecret?: T;
+  hasTotp?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

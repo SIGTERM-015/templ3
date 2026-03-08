@@ -14,34 +14,32 @@ export default async function HomePage() {
   return (
     <div className="home">
       <div className="content">
-        <span className="eyebrow">templ3 cms / payload node</span>
-        {!user && <h1>Editorial sanctum online.</h1>}
-        {user && <h1>Welcome back, {user.email}</h1>}
+        <img src="/sigterm-logo.svg" alt="Templ3" className="logo" />
+        <span className="eyebrow">templ3 cms</span>
+        {!user && <h1>EDITORIAL SANCTUM</h1>}
+        {user && (
+          <>
+            <h1>WELCOME BACK</h1>
+            <div className="status-line">
+              <span className="status-dot" />
+              {user.email}
+            </div>
+          </>
+        )}
         <p>
-          Este panel gestiona los contenidos publicos de <strong>Templ3</strong>: posts, projects,
-          links, tags y media. La web publica consume esta API desde Cloudflare Workers.
+          Content management node for sigterm.vodka — posts, projects, links, media and tags.
         </p>
         <div className="links">
-          <a
-            className="admin"
-            href={payloadConfig.routes.admin}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Open admin
+          <a className="admin" href={payloadConfig.routes.admin}>
+            Enter admin
           </a>
-          <a
-            className="docs"
-            href="https://sigterm.vodka"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
+          <a className="docs" href="https://sigterm.vodka" rel="noopener noreferrer" target="_blank">
             Visit site
           </a>
         </div>
       </div>
       <div className="footer">
-        <p>Neon handles Postgres, R2 stores media and Cloudflare Containers hosts the CMS.</p>
+        <p>Neon &middot; R2 &middot; Cloudflare Containers</p>
       </div>
     </div>
   )

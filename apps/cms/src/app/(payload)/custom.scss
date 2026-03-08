@@ -1,0 +1,293 @@
+@import url('https://cdn.jsdelivr.net/fontsource/fonts/monaspace-neon@latest/latin-400-normal.woff2');
+@import url('https://cdn.jsdelivr.net/fontsource/fonts/monaspace-neon@latest/latin-700-normal.woff2');
+
+:root {
+  --color-base-0: #0f0d0a;
+  --color-base-50: #161310;
+  --color-base-100: #1c1915;
+  --color-base-150: #23201a;
+  --color-base-200: #2b2720;
+  --color-base-250: #332e26;
+  --color-base-300: #3d372d;
+  --color-base-350: #474034;
+  --color-base-400: #52493b;
+  --color-base-450: #5e5443;
+  --color-base-500: #6b604c;
+  --color-base-550: #796d57;
+  --color-base-600: #887b63;
+  --color-base-650: #988a71;
+  --color-base-700: #a99b81;
+  --color-base-750: #baac93;
+  --color-base-800: #cbbea7;
+  --color-base-850: #ddd0bc;
+  --color-base-900: #eee3d2;
+  --color-base-950: #f5ede0;
+  --color-base-1000: #faf5ec;
+
+  --color-success-500: #4a9e5c;
+  --color-success-400: #5ab86e;
+  --color-success-300: #6fd182;
+
+  --color-warning-500: #b9860d;
+  --color-warning-400: #d4a020;
+
+  --color-error-500: #b04848;
+  --color-error-400: #d05555;
+
+  --font-body: 'Monaspace Neon', 'SF Mono', Menlo, Consolas, monospace;
+  --font-mono: 'Monaspace Neon', 'SF Mono', Menlo, Consolas, monospace;
+}
+
+html[data-theme='dark'] {
+  --theme-elevation-0: #0f0d0a;
+  --theme-elevation-50: #161310;
+  --theme-elevation-100: #1c1915;
+  --theme-elevation-150: #23201a;
+  --theme-elevation-200: #2b2720;
+  --theme-elevation-250: #332e26;
+  --theme-elevation-300: #3d372d;
+  --theme-elevation-350: #474034;
+  --theme-elevation-400: #52493b;
+  --theme-elevation-450: #5e5443;
+  --theme-elevation-500: #6b604c;
+  --theme-elevation-550: #796d57;
+  --theme-elevation-600: #887b63;
+  --theme-elevation-650: #988a71;
+  --theme-elevation-700: #a99b81;
+  --theme-elevation-750: #baac93;
+  --theme-elevation-800: #cbbea7;
+  --theme-elevation-850: #ddd0bc;
+  --theme-elevation-900: #eee3d2;
+  --theme-elevation-950: #f5ede0;
+  --theme-elevation-1000: #faf5ec;
+
+  --theme-bg: #0f0d0a;
+  --theme-input-bg: #161310;
+  --theme-text: #eee3d2;
+}
+
+body {
+  font-family: var(--font-body) !important;
+}
+
+.nav {
+  background: #12100d;
+  border-right: 1px solid #23201a;
+}
+
+.nav__wrapper {
+  border-color: #23201a;
+}
+
+.template-default__nav {
+  border-color: #23201a;
+}
+
+.app-header {
+  background: #12100d;
+  border-bottom: 1px solid #23201a;
+}
+
+.btn {
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+}
+
+.btn--style-primary {
+  background: #b8860b;
+  color: #0f0d0a;
+
+  &:hover {
+    background: #d4a020;
+  }
+
+  &:active {
+    background: #a07208;
+  }
+}
+
+.field-type.text input,
+.field-type.email input,
+.field-type.password input,
+.field-type.number input,
+.field-type.textarea textarea,
+.react-select__control,
+.code-field .inputWrap {
+  border-color: #23201a;
+  background: #161310;
+
+  &:focus,
+  &:focus-within {
+    border-color: #b8860b;
+    box-shadow: 0 0 0 1px #b8860b33;
+  }
+}
+
+.react-select__option--is-selected {
+  background: #b8860b !important;
+  color: #0f0d0a !important;
+}
+
+.react-select__option--is-focused {
+  background: #b8860b33 !important;
+}
+
+a:not(.btn) {
+  &:hover {
+    color: #d4a020;
+  }
+}
+
+.step-nav a {
+  color: #887b63;
+
+  &:hover {
+    color: #d4a020;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f0d0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #332e26;
+  border-radius: 4px;
+
+  &:hover {
+    background: #474034;
+  }
+}
+
+.login {
+  position: relative;
+  background: #0a0908;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(184, 134, 11, 0.015) 2px,
+      rgba(184, 134, 11, 0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+    animation: scanlines 8s linear infinite;
+  }
+}
+
+@keyframes scanlines {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 100%;
+  }
+}
+
+.login__form {
+  position: relative;
+  z-index: 1;
+  border: 1px solid #23201a;
+  background: #12100d;
+  box-shadow: 0 0 60px rgba(184, 134, 11, 0.05), 0 0 120px rgba(176, 11, 105, 0.03);
+}
+
+.login__form .btn--style-primary {
+  background: #b8860b;
+  color: #0f0d0a;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+
+  &:hover {
+    background: #d4a020;
+    box-shadow: 0 0 20px rgba(184, 134, 11, 0.3);
+  }
+}
+
+.login .template-minimal__branding {
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard__card-list .card {
+  border-color: #23201a;
+  background: #161310;
+
+  &:hover {
+    border-color: #b8860b66;
+    box-shadow: 0 0 16px rgba(184, 134, 11, 0.06);
+  }
+}
+
+.dashboard__label {
+  color: #b8860b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.pill {
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+}
+
+.pill--style-light {
+  background: #1c1915;
+  border-color: #23201a;
+}
+
+.cell-id {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: #796d57;
+}
+
+.table table {
+  border-color: #23201a;
+}
+
+.table th {
+  background: #12100d;
+  border-color: #23201a;
+  text-transform: uppercase;
+  font-size: 0.75em;
+  letter-spacing: 0.08em;
+  color: #796d57;
+}
+
+.table td {
+  border-color: #1c1915;
+}
+
+.table tr:hover td {
+  background: #161310;
+}
+
+.rich-text {
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: rgba(184, 134, 11, 0.3);
+  color: #faf5ec;
+}
+
+::-moz-selection {
+  background: rgba(184, 134, 11, 0.3);
+  color: #faf5ec;
+}
+
+:focus-visible {
+  outline-color: #b8860b;
+}

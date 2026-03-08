@@ -12,6 +12,14 @@ export const Users: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'avatar',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'Profile photo displayed on the site',
+      },
+    },
+    {
       name: 'handle',
       type: 'text',
       defaultValue: 'sigterm015',

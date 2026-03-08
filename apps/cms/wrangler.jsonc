@@ -34,6 +34,10 @@
   },
   "vars": {
     "NEXT_PUBLIC_SERVER_URL": "https://cms.sigterm.vodka",
-    "R2_REGION": "auto"
+    "SITE_URL": "https://sigterm.vodka",
+    "R2_REGION": "auto",
+    "R2_ENDPOINT": "https://5a8a68f51a16d9f4168b0ef57fc22ac4.r2.cloudflarestorage.com",
+    "SMTP_HOST": "smtp.protonmail.ch",
+    "SMTP_PORT": "587",
   }
 }
