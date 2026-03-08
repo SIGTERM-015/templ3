@@ -70,7 +70,7 @@
     {
       "binding": "R2_SECRET_ACCESS_KEY",
       "store_id": "9bbd052d61d14736b8b75c325de3c23e",
-      "secret_name": "templ3-cms-secret-access-key"
+      "secret_name": "templ3-cms-r2-secret-access-key"
     },
     {
       "binding": "SMTP_USER",
