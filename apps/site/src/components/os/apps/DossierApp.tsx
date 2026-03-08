@@ -1,4 +1,5 @@
 import { operator, socialLinks, inspirations } from '../../../data/siteConfig'
+import { NowPlaying } from '../../NowPlaying'
 
 export function DossierApp({ onOpenApp }: { onOpenApp?: (appId: string) => void }) {
   return (
@@ -25,9 +26,17 @@ export function DossierApp({ onOpenApp }: { onOpenApp?: (appId: string) => void 
                 className="dossier-quick-link"
                 title={link.label}
               >
-                {link.logo
-                  ? <img src={link.logo} alt={link.label} />
-                  : <span>{link.icon}</span>}
+                {link.logo ? (
+                  <span
+                    className="dossier-quick-link__icon"
+                    style={{
+                      maskImage: `url(${link.logo})`,
+                      WebkitMaskImage: `url(${link.logo})`,
+                    } as React.CSSProperties}
+                  />
+                ) : (
+                  <span>{link.icon}</span>
+                )}
               </a>
             ))}
           </div>
@@ -37,6 +46,10 @@ export function DossierApp({ onOpenApp }: { onOpenApp?: (appId: string) => void 
           {operator.bio.map((p, i) => (
             <p key={i} className="copy">{p}</p>
           ))}
+        </div>
+        <div className="dossier-now-column">
+          <h3 className="eyebrow">Now listening</h3>
+          <NowPlaying />
         </div>
       </div>
 

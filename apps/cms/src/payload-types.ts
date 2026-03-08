@@ -136,6 +136,10 @@ export interface UserAuthOperations {
 export interface User {
   id: number;
   displayName?: string | null;
+  /**
+   * Profile photo displayed on the site
+   */
+  avatar?: (number | null) | Media;
   handle?: string | null;
   role: 'admin' | 'editor';
   totpSecret?: string | null;
@@ -465,6 +469,7 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   displayName?: T;
+  avatar?: T;
   handle?: T;
   role?: T;
   totpSecret?: T;
