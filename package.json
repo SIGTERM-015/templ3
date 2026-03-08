@@ -3,14 +3,14 @@
   "private": true,
   "packageManager": "pnpm@10.30.3",
   "scripts": {
-    "dev": "pnpm -r --parallel --filter ./apps/* dev",
-    "dev:site": "pnpm --dir apps/site dev",
-    "dev:cms": "pnpm --dir apps/cms dev",
-    "build:site": "pnpm --dir apps/site build",
-    "build:cms": "pnpm --dir apps/cms build",
-    "deploy:site": "pnpm --dir apps/site deploy",
-    "deploy:cms": "pnpm --dir apps/cms cf:deploy",
-    "generate:cms-types": "pnpm --dir apps/cms generate:types"
+    "dev": "pnpm -r --parallel --filter ./apps/* run dev",
+    "dev:site": "pnpm --dir apps/site run dev",
+    "dev:cms": "pnpm --dir apps/cms run dev",
+    "build:site": "pnpm --dir apps/site run build",
+    "build:cms": "pnpm --dir apps/cms run build",
+    "deploy:site": "pnpm --dir apps/site run deploy",
+    "deploy:cms": "pnpm --dir apps/cms run cf:deploy",
+    "generate:cms-types": "pnpm --dir apps/cms run generate:types"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
