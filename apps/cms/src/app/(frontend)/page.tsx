@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { headers as getHeaders } from 'next/headers.js'
 import { getPayload } from 'payload'
 import React from 'react'
@@ -39,7 +40,7 @@ export default async function HomePage() {
         </div>
       </div>
       <div className="footer">
-        <p>Neon &middot; R2 &middot; Cloudflare Containers</p>
+        <p>Neon &middot; R2 &middot; Cloudflare Workers</p>
       </div>
     </div>
   )

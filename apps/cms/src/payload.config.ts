@@ -49,8 +49,7 @@ const cloudflareLogger = {
   error: createLog('error', console.error),
   fatal: createLog('fatal', console.error),
   silent: () => {},
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any
+} as unknown as import('payload').Logger
 
 function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
   return import(/* webpackIgnore: true */ `${'__wrangler'.replaceAll('_', '')}`)
@@ -60,7 +59,7 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
         remoteBindings: isProduction,
       }),
     )
-    .catch(() => ({ env: {} as any } as CloudflareContext))
+    .catch(() => ({ env: {} as CloudflareContext['env'] } as CloudflareContext))
 }
 
 const cloudflare =
@@ -129,8 +128,7 @@ export default buildConfig({
       maxUses: process.env.NODE_ENV === 'production' ? 1 : undefined,
     },
   }),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sharp: sharp as any,
+  sharp: sharp as unknown as NonNullable<import('payload').Config['sharp']>,
   plugins: [
     r2Storage({
       enabled: Boolean(cloudflare?.env?.R2),
@@ -140,8 +138,7 @@ export default buildConfig({
         },
       },
       // Using binding if available
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      bucket: (cloudflare?.env?.R2 || null) as any,
+      bucket: (cloudflare?.env?.R2 || null) as unknown as import('@payloadcms/storage-r2').R2Bucket,
     }),
     payloadTotp({ collection: 'users', disableAccessWrapper: true }),
   ],
