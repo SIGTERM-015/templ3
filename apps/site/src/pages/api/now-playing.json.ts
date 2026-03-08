@@ -19,9 +19,26 @@ function getEdgeCache(): Cache | null {
 export const GET: APIRoute = async (context) => {
   const env = (context.locals as any)?.runtime?.env || {}
   
-  const clientId = import.meta.env.SPOTIFY_CLIENT_ID || env.SPOTIFY_CLIENT_ID
-  const clientSecret = import.meta.env.SPOTIFY_CLIENT_SECRET || env.SPOTIFY_CLIENT_SECRET
-  const refreshToken = import.meta.env.SPOTIFY_REFRESH_TOKEN || env.SPOTIFY_REFRESH_TOKEN
+  const resolveSecret = async (binding: any): Promise<string | undefined> => {
+    if (!binding) return undefined
+    if (typeof binding === 'string') return binding
+    if (typeof binding.get === 'function') return binding.get()
+    return String(binding)
+  }
+
+  const clientIdPromise = resolveSecret(env.SPOTIFY_CLIENT_ID).then(v => v || import.meta.env.SPOTIFY_CLIENT_ID)
+  const clientSecretPromise = resolveSecret(env.SPOTIFY_CLIENT_SECRET).then(v => v || import.meta.env.SPOTIFY_CLIENT_SECRET)
+  const refreshTokenPromise = resolveSecret(env.SPOTIFY_REFRESH_TOKEN).then(v => v || import.meta.env.SPOTIFY_REFRESH_TOKEN)
+
+  const [rawClientId, rawClientSecret, rawRefreshToken] = await Promise.all([
+    clientIdPromise,
+    clientSecretPromise,
+    refreshTokenPromise
+  ])
+
+  const clientId = String(rawClientId || '').trim()
+  const clientSecret = String(rawClientSecret || '').trim()
+  const refreshToken = String(rawRefreshToken || '').trim()
 
   if (!clientId || !clientSecret || !refreshToken) {
     return Response.json({ 
@@ -52,7 +69,10 @@ export const GET: APIRoute = async (context) => {
       debug: {
         clientIdLength: String(clientId).length,
         clientSecretLength: String(clientSecret).length,
-        refreshTokenLength: String(refreshToken).length
+        refreshTokenLength: String(refreshToken).length,
+        clientIdType: typeof clientId,
+        clientIdPrefix: String(clientId).substring(0, 16),
+        clientIdJson: JSON.stringify(clientId)
       }
     }, { status: 500 })
   }
