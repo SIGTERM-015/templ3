@@ -1032,6 +1032,203 @@
   margin: 0;
 }
 
+/* ── SETTINGS ── */
+
+.settings-app {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.settings-app__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.settings-app__section .eyebrow {
+  margin-bottom: 0;
+}
+
+.settings-app__lead {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.settings-app__theme-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  align-items: flex-start;
+}
+
+.settings-app__theme-card {
+  margin: 0;
+  font: inherit;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border: 1px solid var(--panel-border);
+  background: var(--bg-elevated);
+  cursor: pointer;
+  transition: border-color 150ms var(--ease-out-quart), background 150ms var(--ease-out-quart);
+  width: 172px;
+  min-height: 220px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.settings-app__theme-card:hover,
+.settings-app__theme-card[data-active="true"] {
+  border-color: var(--amber-a30);
+  background: var(--amber-a4);
+}
+
+.settings-app__theme-card[data-active="true"] {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 1px var(--amber-a20);
+}
+
+.settings-app__swatches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+  width: 150px;
+  height: 96px;
+  flex-shrink: 0;
+}
+
+.settings-app__swatch {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  border: 1px solid var(--overlay-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.settings-app__swatch-letter {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow:
+    0 0 1px rgba(0, 0, 0, 1),
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 3px rgba(0, 0, 0, 0.8);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.settings-app__swatch--editable {
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.settings-app__swatch--editable .settings-app__swatch-bg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: inherit;
+}
+
+.settings-app__swatch--editable .settings-app__swatch-letter {
+  position: relative;
+  z-index: 1;
+}
+
+.settings-app__color-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.settings-app__theme-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-top: auto;
+}
+
+.settings-app__theme-card[data-active="true"] .settings-app__theme-name {
+  color: var(--amber);
+}
+
+.settings-app__reset {
+  width: fit-content;
+  margin-top: var(--space-xs);
+}
+
+.settings-app__wallpaper-row {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.settings-app__wallpaper-preview {
+  width: 240px;
+  height: 150px;
+  border: 1px solid var(--panel-border);
+  background: var(--bg-deep);
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  transition: border-color 150ms var(--ease-out-quart);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-app__wallpaper-preview:hover {
+  border-color: var(--amber-a30);
+}
+
+.settings-app__wallpaper-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.settings-app__wallpaper-placeholder {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--faded);
+}
+
+.settings-app__file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* ── TERMINAL (inside WindowFrame) ── */
 
 .term {
@@ -1176,5 +1373,26 @@
   .mediapp-now__grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-sm);
+  }
+
+  .settings-app__wallpaper-preview {
+    width: 180px;
+    height: 112px;
+  }
+
+  .settings-app__theme-card {
+    width: 140px;
+    min-height: 188px;
+    padding: var(--space-md);
+  }
+
+  .settings-app__swatches {
+    width: 120px;
+    height: 76px;
+    gap: 6px;
+  }
+
+  .settings-app__swatch-letter {
+    font-size: 11px;
   }
 }
