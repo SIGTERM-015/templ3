@@ -1,35 +1,16 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "templ3-cms",
-  "main": "./src/worker/index.ts",
+  "main": ".open-next/worker.js",
   "compatibility_date": "2026-03-07",
   "compatibility_flags": [
-    "nodejs_compat"
+    "nodejs_compat",
+    "global_fetch_strictly_public"
   ],
-  "containers": [
-    {
-      "class_name": "PayloadContainer",
-      "image": "../../Dockerfile.cms",
-      "instance_type": "standard-1",
-      "max_instances": 2
-    }
-  ],
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "CMS_CONTAINER",
-        "class_name": "PayloadContainer"
-      }
-    ]
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
   },
-  "migrations": [
-    {
-      "tag": "v1",
-      "new_sqlite_classes": [
-        "PayloadContainer"
-      ]
-    }
-  ],
   "observability": {
     "enabled": true
   },
@@ -37,6 +18,12 @@
     {
       "pattern": "cms.sigterm.vodka",
       "custom_domain": true
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "templ3-media"
     }
   ],
   "vars": {

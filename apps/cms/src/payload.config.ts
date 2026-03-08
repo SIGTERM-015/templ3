@@ -1,12 +1,14 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { s3Storage } from '@payloadcms/storage-s3'
+import { r2Storage } from '@payloadcms/storage-r2'
+import fs from 'fs'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import { payloadTotp } from 'payload-totp'
 import sharp from 'sharp'
+import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 
 import { Categories } from './collections/Categories'
 import { FavouriteMedia } from './collections/FavouriteMedia'
@@ -24,6 +26,45 @@ import { SiteIdentity } from './globals/SiteIdentity'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(value) : undefined)
+const isCLI = process.argv.some((value) => realpath(value)?.endsWith(path.join('payload', 'bin.js')))
+const isProduction = process.env.NODE_ENV === 'production'
+
+const createLog =
+  (level: string, fn: typeof console.log) => (objOrMsg: object | string, msg?: string) => {
+    if (typeof objOrMsg === 'string') {
+      fn(JSON.stringify({ level, msg: objOrMsg }))
+    } else {
+      fn(JSON.stringify({ level, ...objOrMsg, msg: msg ?? (objOrMsg as { msg?: string }).msg }))
+    }
+  }
+
+const cloudflareLogger = {
+  level: process.env.PAYLOAD_LOG_LEVEL || 'info',
+  trace: createLog('trace', console.debug),
+  debug: createLog('debug', console.debug),
+  info: createLog('info', console.log),
+  warn: createLog('warn', console.warn),
+  error: createLog('error', console.error),
+  fatal: createLog('fatal', console.error),
+  silent: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any
+
+function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
+  return import(/* webpackIgnore: true */ `${'__wrangler'.replaceAll('_', '')}`)
+    .then(({ getPlatformProxy }) =>
+      getPlatformProxy({
+        environment: process.env.CLOUDFLARE_ENV,
+        remoteBindings: isProduction,
+      }),
+    )
+    .catch(() => ({ env: {} as any } as CloudflareContext))
+}
+
+const cloudflare =
+  isCLI || !isProduction ? await getCloudflareContextFromWrangler() : await getCloudflareContext({ async: true })
 
 export default buildConfig({
   admin: {
@@ -64,6 +105,7 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
+  logger: isProduction ? cloudflareLogger : undefined,
   email: process.env.SMTP_HOST
     ? nodemailerAdapter({
         defaultFromAddress: process.env.SMTP_FROM || 'cms@sigterm.vodka',
@@ -84,32 +126,22 @@ export default buildConfig({
     push: process.env.NODE_ENV !== 'production',
     pool: {
       connectionString: process.env.DATABASE_URL || '',
+      maxUses: process.env.NODE_ENV === 'production' ? 1 : undefined,
     },
   }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sharp: sharp as any,
   plugins: [
-    s3Storage({
-      enabled: Boolean(
-        process.env.R2_BUCKET &&
-          process.env.R2_ACCESS_KEY_ID &&
-          process.env.R2_SECRET_ACCESS_KEY &&
-          process.env.R2_ENDPOINT,
-      ),
+    r2Storage({
+      enabled: Boolean(cloudflare?.env?.R2),
       collections: {
         media: {
           prefix: 'templ3/media',
         },
       },
-      bucket: process.env.R2_BUCKET || '',
-      config: {
-        credentials: {
-          accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
-        },
-        endpoint: process.env.R2_ENDPOINT || '',
-        forcePathStyle: true,
-        region: process.env.R2_REGION || 'auto',
-      },
+      // Using binding if available
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      bucket: (cloudflare?.env?.R2 || null) as any,
     }),
     payloadTotp({ collection: 'users', disableAccessWrapper: true }),
   ],
