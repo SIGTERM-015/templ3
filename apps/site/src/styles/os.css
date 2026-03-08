@@ -159,15 +159,13 @@
 
 .desktop-icons {
   position: absolute;
-  top: var(--space-md);
-  left: var(--space-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
+  inset: 0;
+  display: block;
   z-index: var(--z-base);
 }
 
 .desktop-icon {
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -180,6 +178,8 @@
   color: var(--muted);
   transition: all 150ms var(--ease-out-quart);
   width: 80px;
+  touch-action: none;
+  user-select: none;
 }
 
 .desktop-icon:hover {
@@ -522,11 +522,7 @@
   }
 
   .desktop-icons {
-    top: var(--space-sm);
-    left: var(--space-sm);
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: var(--space-sm);
+    inset: 0;
   }
 
   .desktop-icon {

@@ -10,8 +10,18 @@ import { MediaApp } from './apps/MediaApp'
 import { CommsApp } from './apps/CommsApp'
 import { ReadmeApp } from './apps/ReadmeApp'
 import { TerminalApp } from './apps/TerminalApp'
+import { SettingsApp } from './apps/SettingsApp'
+import {
+  buildCustomThemeVariables,
+  DEFAULT_CUSTOM_THEME,
+  PRESET_THEME_IDS,
+  THEME_OVERRIDE_KEYS,
+  THEME_PRESETS,
+  type CustomThemeColors,
+  type ThemePresetId,
+} from './themePresets'
 
-export type AppId = 'dossier' | 'gazette' | 'armory' | 'media' | 'comms' | 'readme' | 'terminal'
+export type AppId = 'dossier' | 'gazette' | 'armory' | 'media' | 'comms' | 'readme' | 'terminal' | 'settings'
 
 export type WindowState = {
   id: string
@@ -106,9 +116,37 @@ type Props = {
   maximized?: boolean
 }
 
+type PersonalizationState = {
+  themeId: ThemePresetId | 'custom'
+  customTheme: CustomThemeColors
+  wallpaper: string
+}
+
+const PERSONALIZATION_KEY = 'templ3-personalization'
+
+function parseThemeId(value: unknown): ThemePresetId | 'custom' {
+  if (value === 'custom') return 'custom'
+  if (typeof value === 'string' && PRESET_THEME_IDS.includes(value as ThemePresetId)) {
+    return value as ThemePresetId
+  }
+  return 'default'
+}
+
+function getDesktopBackground(wallpaper: string): React.CSSProperties {
+  const value = wallpaper.trim() || site.wallpaper || ''
+  if (!value) return {}
+  if (value.includes('gradient(') || value.startsWith('url(')) {
+    return { backgroundImage: value, backgroundSize: 'cover', backgroundPosition: 'center' }
+  }
+  return { backgroundImage: `url(${value})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+}
+
 export function DesktopShell({ initialApp, serverData, maximized: initialMaximized }: Props) {
-  const [windows, dispatch] = useReducer(reducer, [])
+  const [windows, dispatch] = useReducer(reducer, []) as [WindowState[], (action: Action) => void]
   const [ready, setReady] = useState(false)
+  const [themeId, setThemeId] = useState<ThemePresetId | 'custom'>('default')
+  const [customTheme, setCustomTheme] = useState<CustomThemeColors>(DEFAULT_CUSTOM_THEME)
+  const [wallpaper, setWallpaper] = useState(site.wallpaper ?? '')
   const zRef = useRef(10)
 
   const nextZ = useCallback(() => ++zRef.current, [])
@@ -158,6 +196,42 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
     dispatch({ type: 'SET', windows: initial })
     setReady(true)
   }, [])
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PERSONALIZATION_KEY)
+      if (!raw) return
+      const parsed = JSON.parse(raw) as Partial<PersonalizationState>
+      setThemeId(parseThemeId(parsed.themeId))
+      if (parsed.customTheme && typeof parsed.customTheme === 'object') {
+        setCustomTheme({ ...DEFAULT_CUSTOM_THEME, ...parsed.customTheme })
+      }
+      if (typeof parsed.wallpaper === 'string') {
+        setWallpaper(parsed.wallpaper)
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    const root = document.documentElement
+    const preset = THEME_PRESETS.find((entry) => entry.id === themeId)
+    const vars = themeId === 'custom'
+      ? buildCustomThemeVariables(customTheme)
+      : (preset?.variables ?? {})
+
+    for (const key of THEME_OVERRIDE_KEYS) {
+      root.style.removeProperty(key)
+    }
+
+    for (const [name, value] of Object.entries(vars)) {
+      root.style.setProperty(name, value)
+    }
+  }, [themeId, customTheme])
+
+  useEffect(() => {
+    const state: PersonalizationState = { themeId, customTheme, wallpaper }
+    localStorage.setItem(PERSONALIZATION_KEY, JSON.stringify(state))
+  }, [themeId, customTheme, wallpaper])
 
   useEffect(() => {
     if (!ready) return
@@ -221,6 +295,18 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
       case 'comms': return <CommsApp serverData={sd} />
       case 'readme': return <ReadmeApp />
       case 'terminal': return <TerminalApp onNavigate={handleNavigate} onOpenApp={(id) => openWindow(id)} />
+      case 'settings':
+        return (
+          <SettingsApp
+            themeId={themeId}
+            onThemeChange={setThemeId}
+            customTheme={customTheme}
+            onCustomThemeChange={setCustomTheme}
+            wallpaper={wallpaper}
+            onWallpaperChange={setWallpaper}
+            defaultWallpaper={site.wallpaper ?? ''}
+          />
+        )
       default: return null
     }
   }
@@ -229,9 +315,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
     .filter(w => !w.minimized)
     .sort((a, b) => b.zIndex - a.zIndex)[0]?.id
 
-  const desktopBg: React.CSSProperties = site.wallpaper
-    ? { backgroundImage: `url(${site.wallpaper})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-    : {}
+  const desktopBg = getDesktopBackground(wallpaper)
 
   return (
     <div className="desktop" style={desktopBg}>

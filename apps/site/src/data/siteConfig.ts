@@ -116,6 +116,7 @@ export const desktopApps: DesktopApp[] = [
   { id: 'media', route: '/media', glyph: '♪', label: 'media', windowTitle: 'FAV MEDIA', defaultSize: { w: 68, h: 80 }, defaultPos: { x: 18, y: 6 } },
   { id: 'comms', route: '/links', glyph: '::', label: 'comms', windowTitle: 'COMMS', defaultSize: { w: 55, h: 75 }, defaultPos: { x: 22, y: 8 } },
   { id: 'readme', route: '', glyph: '[]', label: 'readme', windowTitle: 'README', defaultSize: { w: 42, h: 55 }, defaultPos: { x: 52, y: 12 } },
+  { id: 'settings', route: '', glyph: '::', label: 'settings', windowTitle: 'SETTINGS', defaultSize: { w: 58, h: 72 }, defaultPos: { x: 20, y: 10 } },
 ]
 
 export const statusColors: Record<string, string> = {
