@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
+import type { CmsSiteIdentity } from '../../../lib/cms'
 import { useTerminal, type TerminalLine } from '../../terminal/useTerminal'
+import { BSOD } from '../../terminal/ascii'
 
 type Props = {
   onNavigate: (route: string) => void
   onOpenApp?: (appId: string) => void
+  siteIdentity?: CmsSiteIdentity
 }
 
-export function TerminalApp({ onNavigate, onOpenApp }: Props) {
-  const { lines, input, setInput, submit, navigateHistory } = useTerminal()
+export function TerminalApp({ onNavigate, onOpenApp, siteIdentity }: Props) {
+  const config = { siteIdentity }
+  const { lines, input, setInput, submit, navigateHistory, prompt } = useTerminal(config)
   const [showBsod, setShowBsod] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
@@ -68,7 +72,7 @@ export function TerminalApp({ onNavigate, onOpenApp }: Props) {
           ))}
         </div>
         <form className="term-input-row" onSubmit={handleSubmit}>
-          <span className="term-prompt">sigterm@templ3:~$&nbsp;</span>
+          <span className="term-prompt">{prompt}&nbsp;</span>
           <input
             ref={inputRef}
             className="term-input"
@@ -84,20 +88,7 @@ export function TerminalApp({ onNavigate, onOpenApp }: Props) {
 
       {showBsod && (
         <div className="term-bsod" onClick={() => setShowBsod(false)} role="button" tabIndex={0}>
-          <pre className="term-bsod__text">{`
-  ╔══════════════════════════════════════════════════════╗
-  ║                                                      ║
-  ║    TEMPL3 OS - CRITICAL ERROR                        ║
-  ║                                                      ║
-  ║    A fatal exception 0x000DEAD has occurred at       ║
-  ║    0028:C0011E69 in SIGTERM_DAEMON.ko                ║
-  ║                                                      ║
-  ║    The current operation has been terminated.        ║
-  ║                                                      ║
-  ║    Nice try.                                         ║
-  ║                                                      ║
-  ╚══════════════════════════════════════════════════════╝`}
-          </pre>
+          <pre className="term-bsod__text">{BSOD}</pre>
           <span className="term-bsod__hint">Press anywhere to reboot sanctum...</span>
         </div>
       )}

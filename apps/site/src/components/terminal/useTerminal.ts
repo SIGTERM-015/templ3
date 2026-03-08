@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { executeCommand, type CommandResult } from './commands'
+import { executeCommand, type CommandResult, type TerminalConfig } from './commands'
 import { SIGTERM_SKULL } from './ascii'
 
 export type TerminalLine = {
@@ -8,21 +8,26 @@ export type TerminalLine = {
   content: string
 }
 
-function buildInitialLines(): TerminalLine[] {
+function buildInitialLines(bootMessage: string): TerminalLine[] {
   const lines: TerminalLine[] = []
   let id = 0
   for (const line of SIGTERM_SKULL.split('\n')) {
     lines.push({ id: id++, type: 'output', content: line })
   }
-  lines.push({ id: id++, type: 'output', content: 'TEMPL3 OS v0.6.6.6 — Type "help" for commands.' })
+  lines.push({ id: id++, type: 'output', content: bootMessage })
   return lines
 }
 
-export function useTerminal() {
-  const [lines, setLines] = useState<TerminalLine[]>(buildInitialLines)
+export function useTerminal(config?: TerminalConfig) {
+  const siteName = config?.siteIdentity?.siteName ?? 'TEMPL3'
+  const bootMessage = `${siteName} OS — Type "help" for commands.`
+
+  const [lines, setLines] = useState<TerminalLine[]>(() => buildInitialLines(bootMessage))
   const [history, setHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [input, setInput] = useState('')
+
+  const prompt = config?.siteIdentity?.terminalPrompt ?? 'sigterm@templ3:~$'
 
   const addLine = useCallback(
     (type: 'input' | 'output', content: string) => {
@@ -33,9 +38,9 @@ export function useTerminal() {
 
   const submit = useCallback(
     (value: string): CommandResult => {
-      addLine('input', `sigterm@templ3:~$ ${value}`)
+      addLine('input', `${prompt} ${value}`)
 
-      const result = executeCommand(value)
+      const result = executeCommand(value, config)
 
       if (result.action === 'clear') {
         setLines([])
@@ -53,7 +58,7 @@ export function useTerminal() {
 
       return result
     },
-    [addLine]
+    [addLine, config, prompt]
   )
 
   const navigateHistory = useCallback(
@@ -85,5 +90,6 @@ export function useTerminal() {
     setInput,
     submit,
     navigateHistory,
+    prompt,
   }
 }

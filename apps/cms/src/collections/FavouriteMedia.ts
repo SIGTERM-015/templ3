@@ -6,12 +6,16 @@ import { createPurgeHook } from '../hooks/purgeCache'
 export const FavouriteMedia: CollectionConfig = {
   slug: 'favourite-media',
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => {
+      if (user) return true
+      return { _status: { equals: 'published' } }
+    },
   },
   hooks: {
     afterChange: [createPurgeHook()],
   },
   admin: {
+    group: 'Content',
     useAsTitle: 'title',
     defaultColumns: ['title', 'mediaType', 'rating', '_status'],
   },
@@ -25,31 +29,22 @@ export const FavouriteMedia: CollectionConfig = {
     slugField(),
     {
       name: 'mediaType',
-      type: 'select',
+      type: 'relationship',
+      relationTo: 'media-types',
       required: true,
-      options: [
-        { label: 'Anime', value: 'anime' },
-        { label: 'Manga', value: 'manga' },
-        { label: 'Game', value: 'game' },
-        { label: 'Movie', value: 'movie' },
-        { label: 'Series', value: 'series' },
-        { label: 'Book', value: 'book' },
-        { label: 'Music', value: 'music' },
-        { label: 'Other', value: 'other' },
-      ],
+      admin: {
+        description: 'Type of media (configured in Media Types)',
+      },
     },
     {
       name: 'progress',
       label: 'Status',
-      type: 'select',
+      type: 'relationship',
+      relationTo: 'media-statuses',
       required: true,
-      defaultValue: 'completed',
-      options: [
-        { label: 'Completed', value: 'completed' },
-        { label: 'In Progress', value: 'in-progress' },
-        { label: 'Dropped', value: 'dropped' },
-        { label: 'Plan to Start', value: 'planned' },
-      ],
+      admin: {
+        description: 'Current progress/status (configured in Media Statuses)',
+      },
     },
     {
       name: 'rating',

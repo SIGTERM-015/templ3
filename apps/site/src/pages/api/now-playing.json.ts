@@ -22,7 +22,14 @@ export const GET: APIRoute = async (context) => {
   const resolveSecret = async (binding: any): Promise<string | undefined> => {
     if (!binding) return undefined
     if (typeof binding === 'string') return binding
-    if (typeof binding.get === 'function') return binding.get()
+    if (typeof binding.get === 'function') {
+      try {
+        return await binding.get()
+      } catch {
+        // Secrets Store bindings are unavailable in local dev — fall through to import.meta.env
+        return undefined
+      }
+    }
     return String(binding)
   }
 

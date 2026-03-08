@@ -11,11 +11,16 @@ import sharp from 'sharp'
 import { Categories } from './collections/Categories'
 import { FavouriteMedia } from './collections/FavouriteMedia'
 import { Links } from './collections/Links'
+import { MediaStatuses } from './collections/MediaStatuses'
+import { MediaTypes } from './collections/MediaTypes'
+import { Notes } from './collections/Notes'
+import { ProjectStatuses } from './collections/ProjectStatuses'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { Projects } from './collections/Projects'
 import { Tags } from './collections/Tags'
+import { SiteIdentity } from './globals/SiteIdentity'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -38,7 +43,21 @@ export default buildConfig({
       },
     },
   },
-  collections: [Users, Media, Tags, Categories, Posts, Projects, Links, FavouriteMedia],
+  collections: [
+    Users,
+    Media,
+    Tags,
+    Categories,
+    Posts,
+    Projects,
+    Links,
+    FavouriteMedia,
+    Notes,
+    MediaTypes,
+    MediaStatuses,
+    ProjectStatuses,
+  ],
+  globals: [SiteIdentity],
   editor: lexicalEditor(),
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL,
   secret: process.env.PAYLOAD_SECRET || '',
@@ -88,6 +107,6 @@ export default buildConfig({
         region: process.env.R2_REGION || 'auto',
       },
     }),
-    payloadTotp({ collection: 'users' }),
+    payloadTotp({ collection: 'users', disableAccessWrapper: true }),
   ],
 })

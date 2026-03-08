@@ -1,13 +1,14 @@
 ---
 import Layout from '../../layouts/Layout.astro'
-import { getPostBySlug, getPosts } from '../../lib/cms'
+import { getPostBySlug, getPosts, getSiteIdentity } from '../../lib/cms'
 
 export const prerender = false
 
 const { slug } = Astro.params
-const [post, posts] = await Promise.all([
+const [post, posts, siteIdentity] = await Promise.all([
   slug ? getPostBySlug(slug) : null,
   getPosts(),
+  getSiteIdentity(),
 ])
 
 if (!post) {
@@ -16,9 +17,9 @@ if (!post) {
 ---
 
 <Layout
-  title={`${post.title} | Templ3`}
-  description={post.excerpt || `${post.title} article on Templ3.`}
+  title={`${post.title} | ${siteIdentity?.siteName ?? 'Templ3'}`}
+  description={post.excerpt || `${post.title} article on ${siteIdentity?.siteName ?? 'Templ3'}.`}
   initialApp="gazette"
-  serverData={JSON.stringify({ posts, post })}
+  serverData={JSON.stringify({ posts, post, siteIdentity })}
   maximized={Astro.url.searchParams.has('maximized')}
 />

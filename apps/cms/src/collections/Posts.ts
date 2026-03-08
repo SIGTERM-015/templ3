@@ -6,7 +6,10 @@ import { createPurgeHook } from '../hooks/purgeCache'
 export const Posts: CollectionConfig = {
   slug: 'posts',
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => {
+      if (user) return true
+      return { _status: { equals: 'published' } }
+    },
   },
   hooks: {
     afterChange: [createPurgeHook({ sendSlugs: true })],

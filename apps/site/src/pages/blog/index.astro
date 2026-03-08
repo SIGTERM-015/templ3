@@ -1,16 +1,19 @@
 ---
 import Layout from '../../layouts/Layout.astro'
-import { getPosts } from '../../lib/cms'
+import { getPosts, getSiteIdentity } from '../../lib/cms'
 
 export const prerender = false
 
-const posts = await getPosts()
+const [posts, siteIdentity] = await Promise.all([
+  getPosts(),
+  getSiteIdentity(),
+])
 ---
 
 <Layout
-  title="Blog | Templ3"
+  title={siteIdentity?.siteName ? `Blog | ${siteIdentity.siteName}` : 'Blog | Templ3'}
   description="Archive of Templ3 articles and writeups."
   initialApp="gazette"
-  serverData={JSON.stringify({ posts })}
+  serverData={JSON.stringify({ posts, siteIdentity })}
   maximized={Astro.url.searchParams.has('maximized')}
 />

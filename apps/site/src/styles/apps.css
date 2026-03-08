@@ -539,6 +539,19 @@
 
 .armory-card__header {
   display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.armory-card__status-icon {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  display: block;
+}
+
+.armory-card__title-row {
+  display: flex;
   align-items: center;
   gap: var(--space-sm);
 }
@@ -1331,6 +1344,200 @@
   color: var(--text-dim);
   margin-top: var(--space-lg);
   animation: pulse-led 2s ease-in-out infinite;
+}
+
+/* ── NOTES EXPLORER ── */
+
+.notes-explorer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: var(--bg);
+}
+
+.notes-explorer__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px var(--space-md);
+  border-bottom: 1px solid var(--panel-border);
+  background: var(--panel);
+  flex-shrink: 0;
+}
+
+.notes-explorer__path {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.notes-explorer__path-root {
+  color: var(--amber);
+  font-weight: 700;
+}
+
+.notes-explorer__path-sep {
+  color: var(--faded);
+  margin: 0 1px;
+}
+
+.notes-explorer__path-seg {
+  color: var(--fg);
+}
+
+.notes-explorer__count {
+  color: var(--faded);
+  font-size: var(--text-xs);
+}
+
+.notes-explorer__cols {
+  display: grid;
+  grid-template-columns: 1fr 110px 60px;
+  padding: 4px var(--space-md);
+  border-bottom: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--faded);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.notes-explorer__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-xs) 0;
+}
+
+.notes-explorer__empty {
+  padding: var(--space-lg);
+  text-align: center;
+  color: var(--faded);
+  font-size: var(--text-xs);
+}
+
+.notes-explorer__item {
+  display: grid;
+  grid-template-columns: 20px 1fr 110px 60px;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 5px var(--space-md);
+  cursor: pointer;
+  color: var(--fg);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  margin: 1px 4px;
+  transition: background 80ms, border-color 80ms;
+  outline: none;
+}
+
+.notes-explorer__item:hover {
+  background: var(--amber-a6);
+}
+
+.notes-explorer__item--selected {
+  background: var(--amber-a10);
+  border-color: var(--amber-a20);
+  color: var(--amber);
+}
+
+.notes-explorer__item:focus-visible {
+  border-color: var(--amber-a40);
+}
+
+.notes-explorer__item-icon {
+  display: flex;
+  align-items: center;
+  color: var(--amber);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.notes-explorer__item--selected .notes-explorer__item-icon {
+  opacity: 1;
+}
+
+.notes-explorer__item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+}
+
+.notes-explorer__item-date {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.notes-explorer__item--selected .notes-explorer__item-date {
+  color: var(--amber);
+  opacity: 0.7;
+}
+
+.notes-explorer__item-size {
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.notes-explorer__statusbar {
+  padding: 5px var(--space-md);
+  border-top: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--faded);
+  font-size: 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── NOTE VIEWER ── */
+
+.note-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.note-viewer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px var(--space-md);
+  border-bottom: 1px solid var(--panel-border);
+  background: var(--panel);
+  flex-shrink: 0;
+  gap: var(--space-sm);
+}
+
+.note-viewer__filename {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--amber);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.note-viewer__date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--faded);
+  white-space: nowrap;
+}
+
+.note-viewer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
 }
 
 /* ── Responsive App Overrides ── */

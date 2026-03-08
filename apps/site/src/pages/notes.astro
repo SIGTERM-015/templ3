@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { getNotes, getSiteIdentity } from '../lib/cms'
+
+export const prerender = false
+
+const [notes, siteIdentity] = await Promise.all([
+  getNotes(),
+  getSiteIdentity(),
+])
+---
+
+<Layout
+  title={siteIdentity?.siteName ? `Notes | ${siteIdentity.siteName}` : 'Notes | Templ3'}
+  description="Notes and markdown files."
+  initialApp="notes"
+  serverData={JSON.stringify({ notes, siteIdentity })}
+  maximized={Astro.url.searchParams.has('maximized')}
+/>

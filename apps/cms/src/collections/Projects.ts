@@ -6,14 +6,18 @@ import { createPurgeHook } from '../hooks/purgeCache'
 export const Projects: CollectionConfig = {
   slug: 'projects',
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => {
+      if (user) return true
+      return { _status: { equals: 'published' } }
+    },
   },
   hooks: {
     afterChange: [createPurgeHook()],
   },
   admin: {
-    defaultColumns: ['title', 'projectStatus', 'featured', '_status'],
+    group: 'Content',
     useAsTitle: 'title',
+    defaultColumns: ['title', 'projectStatus', 'featured', '_status'],
   },
   defaultSort: 'order',
   fields: [
@@ -30,16 +34,12 @@ export const Projects: CollectionConfig = {
     },
     {
       name: 'projectStatus',
-      type: 'select',
-      defaultValue: 'building',
-      options: [
-        { label: 'Building', value: 'building' },
-        { label: 'Active', value: 'active' },
-        { label: 'Planned', value: 'planned' },
-        { label: 'Concept', value: 'concept' },
-        { label: 'Archived', value: 'archived' },
-      ],
+      type: 'relationship',
+      relationTo: 'project-statuses',
       required: true,
+      admin: {
+        description: 'Project status (configured in Project Statuses)',
+      },
     },
     {
       name: 'featured',
