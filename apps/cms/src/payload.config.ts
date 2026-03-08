@@ -49,7 +49,7 @@ const cloudflareLogger = {
   error: createLog('error', console.error),
   fatal: createLog('fatal', console.error),
   silent: () => {},
-} as unknown as import('payload').Logger
+} as unknown as import('payload').PayloadLogger
 
 function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
   return import(/* webpackIgnore: true */ `${'__wrangler'.replaceAll('_', '')}`)
@@ -138,7 +138,8 @@ export default buildConfig({
         },
       },
       // Using binding if available
-      bucket: (cloudflare?.env?.R2 || null) as unknown as import('@payloadcms/storage-r2').R2Bucket,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      bucket: (cloudflare?.env?.R2 || null) as any,
     }),
     payloadTotp({ collection: 'users', disableAccessWrapper: true }),
   ],
