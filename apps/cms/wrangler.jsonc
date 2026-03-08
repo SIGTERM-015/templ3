@@ -10,6 +10,7 @@
     {
       "class_name": "PayloadContainer",
       "image": "../../Dockerfile.cms",
+      "instance_type": "standard-1",
       "max_instances": 2
     }
   ],
