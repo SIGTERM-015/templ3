@@ -21,7 +21,7 @@ export async function getAccessToken(
   clientId: string,
   clientSecret: string,
   refreshToken: string,
-): Promise<string | null> {
+): Promise<string | { error: string }> {
   const basic = btoa(`${clientId}:${clientSecret}`)
 
   try {
@@ -37,12 +37,15 @@ export async function getAccessToken(
       }),
     })
 
-    if (!res.ok) return null
+    if (!res.ok) {
+      const err = await res.text()
+      return { error: `Spotify token error [${res.status}]: ${err}` }
+    }
 
     const data = (await res.json()) as { access_token: string }
     return data.access_token
-  } catch {
-    return null
+  } catch (e: any) {
+    return { error: `Fetch error: ${e.message}` }
   }
 }
 

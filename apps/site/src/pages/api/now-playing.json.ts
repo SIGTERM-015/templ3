@@ -35,10 +35,12 @@ export const GET: APIRoute = async (context) => {
     if (cached) return cached
   }
 
-  const accessToken = await getAccessToken(clientId, clientSecret, refreshToken)
-  if (!accessToken) {
-    return Response.json({ isPlaying: false, error: 'Failed to get Spotify access token' }, { status: 500 })
+  const accessTokenOrError = await getAccessToken(clientId, clientSecret, refreshToken)
+  if (typeof accessTokenOrError === 'object' && 'error' in accessTokenOrError) {
+    return Response.json({ isPlaying: false, error: accessTokenOrError.error }, { status: 500 })
   }
+  
+  const accessToken = accessTokenOrError as string
 
   const data = await getNowPlaying(accessToken) ?? await getRecentlyPlayed(accessToken) ?? { isPlaying: false }
 
