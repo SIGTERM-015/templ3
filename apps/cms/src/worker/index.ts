@@ -15,9 +15,9 @@ type SecretBinding = { get(): Promise<string> }
 
 type Env = {
   CMS_CONTAINER: DurableObjectNamespace<PayloadContainer>
-  DATABASE_URL: string
+  DATABASE_URL?: SecretBinding
   NEXT_PUBLIC_SERVER_URL?: string
-  PAYLOAD_SECRET: string
+  PAYLOAD_SECRET?: SecretBinding
   SITE_URL?: string
   R2_ACCESS_KEY_ID?: SecretBinding
   R2_BUCKET?: SecretBinding
@@ -36,20 +36,30 @@ async function resolveSecret(binding: SecretBinding | undefined): Promise<string
 export default {
   async fetch(request, env) {
     const container = env.CMS_CONTAINER.getByName('templ3-cms')
-    const envVars: Record<string, string> = {
-      DATABASE_URL: env.DATABASE_URL,
-      NEXT_PUBLIC_SERVER_URL: env.NEXT_PUBLIC_SERVER_URL || new URL(request.url).origin,
-      PAYLOAD_SECRET: env.PAYLOAD_SECRET,
-      ...(env.SITE_URL && { SITE_URL: env.SITE_URL }),
+
+    const [databaseUrl, payloadSecret, r2AccessKeyId, r2Bucket, r2SecretAccessKey, smtpUser, smtpPass] =
+      await Promise.all([
+        resolveSecret(env.DATABASE_URL),
+        resolveSecret(env.PAYLOAD_SECRET),
+        resolveSecret(env.R2_ACCESS_KEY_ID),
+        resolveSecret(env.R2_BUCKET),
+        resolveSecret(env.R2_SECRET_ACCESS_KEY),
+        resolveSecret(env.SMTP_USER),
+        resolveSecret(env.SMTP_PASS),
+      ])
+
+    if (!databaseUrl || !payloadSecret) {
+      return new Response('CMS misconfigured: DATABASE_URL or PAYLOAD_SECRET missing', {
+        status: 503,
+      })
     }
 
-    const [r2AccessKeyId, r2Bucket, r2SecretAccessKey, smtpUser, smtpPass] = await Promise.all([
-      resolveSecret(env.R2_ACCESS_KEY_ID),
-      resolveSecret(env.R2_BUCKET),
-      resolveSecret(env.R2_SECRET_ACCESS_KEY),
-      resolveSecret(env.SMTP_USER),
-      resolveSecret(env.SMTP_PASS),
-    ])
+    const envVars: Record<string, string> = {
+      DATABASE_URL: databaseUrl,
+      NEXT_PUBLIC_SERVER_URL: env.NEXT_PUBLIC_SERVER_URL || new URL(request.url).origin,
+      PAYLOAD_SECRET: payloadSecret,
+      ...(env.SITE_URL && { SITE_URL: env.SITE_URL }),
+    }
 
     if (r2Bucket && r2AccessKeyId && r2SecretAccessKey && env.R2_ENDPOINT) {
       envVars.R2_BUCKET = r2Bucket

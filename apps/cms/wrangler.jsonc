@@ -32,6 +32,12 @@
   "observability": {
     "enabled": true
   },
+  "routes": [
+    {
+      "pattern": "cms.sigterm.vodka/*",
+      "zone_name": "sigterm.vodka"
+    }
+  ],
   "vars": {
     "NEXT_PUBLIC_SERVER_URL": "https://cms.sigterm.vodka",
     "SITE_URL": "https://sigterm.vodka",
@@ -41,6 +47,16 @@
     "SMTP_PORT": "587"
   },
   "secrets_store_secrets": [
+    {
+      "binding": "DATABASE_URL",
+      "store_id": "9bbd052d61d14736b8b75c325de3c23e",
+      "secret_name": "templ3-cms-neon-connection-string"
+    },
+    {
+      "binding": "PAYLOAD_SECRET",
+      "store_id": "9bbd052d61d14736b8b75c325de3c23e",
+      "secret_name": "templ3-cms-payload-secret"
+    },
     {
       "binding": "R2_ACCESS_KEY_ID",
       "store_id": "9bbd052d61d14736b8b75c325de3c23e",
