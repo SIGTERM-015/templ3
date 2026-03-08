@@ -17,12 +17,23 @@ function getEdgeCache(): Cache | null {
 }
 
 export const GET: APIRoute = async (context) => {
-  const clientId = import.meta.env.SPOTIFY_CLIENT_ID || (context.locals as any)?.runtime?.env?.SPOTIFY_CLIENT_ID
-  const clientSecret = import.meta.env.SPOTIFY_CLIENT_SECRET || (context.locals as any)?.runtime?.env?.SPOTIFY_CLIENT_SECRET
-  const refreshToken = import.meta.env.SPOTIFY_REFRESH_TOKEN || (context.locals as any)?.runtime?.env?.SPOTIFY_REFRESH_TOKEN
+  const env = (context.locals as any)?.runtime?.env || {}
+  
+  const clientId = import.meta.env.SPOTIFY_CLIENT_ID || env.SPOTIFY_CLIENT_ID
+  const clientSecret = import.meta.env.SPOTIFY_CLIENT_SECRET || env.SPOTIFY_CLIENT_SECRET
+  const refreshToken = import.meta.env.SPOTIFY_REFRESH_TOKEN || env.SPOTIFY_REFRESH_TOKEN
 
   if (!clientId || !clientSecret || !refreshToken) {
-    return Response.json({ isPlaying: false, error: 'Missing Spotify credentials in env' }, { status: 500 })
+    return Response.json({ 
+      isPlaying: false, 
+      error: 'Missing Spotify credentials in env',
+      debug: {
+        hasClientIdMeta: !!import.meta.env.SPOTIFY_CLIENT_ID,
+        hasClientIdLocals: !!env.SPOTIFY_CLIENT_ID,
+        hasSecretMeta: !!import.meta.env.SPOTIFY_CLIENT_SECRET,
+        hasSecretLocals: !!env.SPOTIFY_CLIENT_SECRET,
+      }
+    }, { status: 500 })
   }
 
   const cache = getEdgeCache()
@@ -35,7 +46,15 @@ export const GET: APIRoute = async (context) => {
 
   const accessTokenOrError = await getAccessToken(clientId, clientSecret, refreshToken)
   if (typeof accessTokenOrError === 'object' && 'error' in accessTokenOrError) {
-    return Response.json({ isPlaying: false, error: accessTokenOrError.error }, { status: 500 })
+    return Response.json({ 
+      isPlaying: false, 
+      error: accessTokenOrError.error,
+      debug: {
+        clientIdLength: String(clientId).length,
+        clientSecretLength: String(clientSecret).length,
+        refreshTokenLength: String(refreshToken).length
+      }
+    }, { status: 500 })
   }
   
   const accessToken = accessTokenOrError as string
