@@ -11,16 +11,26 @@ export class PayloadContainer extends Container {
   }
 }
 
+type SecretBinding = { get(): Promise<string> }
+
 type Env = {
   CMS_CONTAINER: DurableObjectNamespace<PayloadContainer>
   DATABASE_URL: string
   NEXT_PUBLIC_SERVER_URL?: string
   PAYLOAD_SECRET: string
-  R2_ACCESS_KEY_ID?: string
-  R2_BUCKET?: string
+  SITE_URL?: string
+  R2_ACCESS_KEY_ID?: SecretBinding
+  R2_BUCKET?: SecretBinding
   R2_ENDPOINT?: string
   R2_REGION?: string
-  R2_SECRET_ACCESS_KEY?: string
+  R2_SECRET_ACCESS_KEY?: SecretBinding
+  SMTP_PASS?: SecretBinding
+  SMTP_USER?: SecretBinding
+}
+
+async function resolveSecret(binding: SecretBinding | undefined): Promise<string | undefined> {
+  if (!binding) return undefined
+  return binding.get()
 }
 
 export default {
@@ -30,15 +40,27 @@ export default {
       DATABASE_URL: env.DATABASE_URL,
       NEXT_PUBLIC_SERVER_URL: env.NEXT_PUBLIC_SERVER_URL || new URL(request.url).origin,
       PAYLOAD_SECRET: env.PAYLOAD_SECRET,
+      ...(env.SITE_URL && { SITE_URL: env.SITE_URL }),
     }
 
-    if (env.R2_BUCKET && env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY && env.R2_ENDPOINT) {
-      envVars.R2_BUCKET = env.R2_BUCKET
-      envVars.R2_ACCESS_KEY_ID = env.R2_ACCESS_KEY_ID
-      envVars.R2_SECRET_ACCESS_KEY = env.R2_SECRET_ACCESS_KEY
+    const [r2AccessKeyId, r2Bucket, r2SecretAccessKey, smtpUser, smtpPass] = await Promise.all([
+      resolveSecret(env.R2_ACCESS_KEY_ID),
+      resolveSecret(env.R2_BUCKET),
+      resolveSecret(env.R2_SECRET_ACCESS_KEY),
+      resolveSecret(env.SMTP_USER),
+      resolveSecret(env.SMTP_PASS),
+    ])
+
+    if (r2Bucket && r2AccessKeyId && r2SecretAccessKey && env.R2_ENDPOINT) {
+      envVars.R2_BUCKET = r2Bucket
+      envVars.R2_ACCESS_KEY_ID = r2AccessKeyId
+      envVars.R2_SECRET_ACCESS_KEY = r2SecretAccessKey
       envVars.R2_ENDPOINT = env.R2_ENDPOINT
       envVars.R2_REGION = env.R2_REGION || 'auto'
     }
+
+    if (smtpUser) envVars.SMTP_USER = smtpUser
+    if (smtpPass) envVars.SMTP_PASS = smtpPass
 
     await container.startAndWaitForPorts({
       ports: 3000,
