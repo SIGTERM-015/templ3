@@ -22,7 +22,7 @@ export default {
     },
   },
   build: {
-    esbuildOptions: (options) => {
+    esbuildOptions: (options: any) => {
       options.logOverride = {
         ...options.logOverride,
         'direct-eval': 'silent',
