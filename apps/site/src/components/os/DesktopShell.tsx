@@ -241,8 +241,25 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
 
     const shouldMaximize = initialMaximized || (typeof window !== 'undefined' && window.location.search.includes('maximized'))
 
-    if (initialApp) {
-      const appId = initialApp as AppId
+    const appsToOpen: string[] = []
+    if (initialApp) appsToOpen.push(initialApp)
+
+    // Check for editor flag after Discord login
+    if (typeof window !== 'undefined' && window.location.search.includes('editor=true')) {
+      if (!appsToOpen.includes('guestbook-editor')) {
+        appsToOpen.push('guestbook-editor')
+      }
+      
+      // Clean up the URL silently so reloading doesn't keep spawning editors
+      try {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('editor')
+        window.history.replaceState({}, '', url.toString())
+      } catch {}
+    }
+
+    for (const appIdStr of appsToOpen) {
+      const appId = appIdStr as AppId
       const existing = initial.find(w => w.appId === appId)
       if (existing) {
         existing.zIndex = maxZ++
