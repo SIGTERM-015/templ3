@@ -1,13 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import { getProjects, getProjectStatuses, getSiteIdentity } from '../lib/cms'
+import { getProjects, getProjectStatuses, getSiteIdentity, getWebApps } from '../lib/cms'
 
 export const prerender = false
 
-const [projects, projectStatuses, siteIdentity] = await Promise.all([
+const [projects, projectStatuses, siteIdentity, webApps] = await Promise.all([
   getProjects(),
   getProjectStatuses(),
   getSiteIdentity(),
+  getWebApps(),
 ])
 ---
 
@@ -15,6 +16,6 @@ const [projects, projectStatuses, siteIdentity] = await Promise.all([
   title={siteIdentity?.siteName ? `Arsenal | ${siteIdentity.siteName}` : 'Arsenal | Templ3'}
   description="Templ3 Arsenal: projects, tooling, labs, and pieces of Sigterm's technical stack."
   initialApp="armory"
-  serverData={JSON.stringify({ projects, projectStatuses, siteIdentity })}
+  serverData={JSON.stringify({ projects, projectStatuses, siteIdentity, webApps })}
   maximized={Astro.url.searchParams.has('maximized')}
 />

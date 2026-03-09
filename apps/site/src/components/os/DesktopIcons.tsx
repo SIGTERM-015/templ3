@@ -1,22 +1,46 @@
+import type { CmsWebApp } from '../../lib/cms'
 import type { DesktopApp } from '../../data/siteConfig'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { desktopApps } from '../../data/siteConfig'
 
+type IconItem = {
+  id: string
+  glyph: string
+  label: string
+}
+
 type Props = {
   openApps: string[]
   onOpen: (appId: string) => void
+  webApps?: CmsWebApp[]
+  onOpenWebApp?: (slug: string) => void
 }
 
-export function DesktopIcons({ openApps, onOpen }: Props) {
-  const orderedApps = useMemo<Array<DesktopApp>>(() => {
-    const apps: DesktopApp[] = [...desktopApps]
-    apps.push({ id: 'terminal', route: '', glyph: '>_', label: 'terminal', windowTitle: 'TERMINAL' })
+export function DesktopIcons({ openApps, onOpen, webApps = [], onOpenWebApp }: Props) {
+  // Combine static desktop apps with dynamic webApps
+  const orderedApps = useMemo<Array<IconItem>>(() => {
+    const apps: IconItem[] = desktopApps.map((app: DesktopApp) => ({
+      id: app.id,
+      glyph: app.glyph,
+      label: app.label,
+    }))
+    // Add terminal
+    apps.push({ id: 'terminal', glyph: '>_', label: 'terminal' })
+    // Add WebApps that should show on desktop
+    const desktopWebApps = webApps
+      .filter(w => w.showInDesktop !== false)
+      .map(w => ({
+        id: `webapp-${w.slug}`,
+        glyph: w.icon || '◎',
+        label: w.title.toLowerCase(),
+      }))
+    apps.push(...desktopWebApps)
     return apps
-  }, [])
+  }, [webApps])
 
   const defaultLayout = useMemo(
     () => Object.fromEntries(
-      orderedApps.map((app: DesktopApp, index: number) => {
+      orderedApps.map((app: IconItem, index: number) => {
         const row = index % 6
         const col = Math.floor(index / 6)
         return [app.id, { x: 12 + (col * 92), y: 12 + (row * 86) }]
@@ -51,9 +75,19 @@ export function DesktopIcons({ openApps, onOpen }: Props) {
     positionsRef.current = positions
   }, [positions])
 
+  // Handle icon click - route to appropriate handler based on app type
+  const handleIconClick = (appId: string) => {
+    if (appId.startsWith('webapp-') && onOpenWebApp) {
+      const slug = appId.replace('webapp-', '')
+      onOpenWebApp(slug)
+    } else {
+      onOpen(appId)
+    }
+  }
+
   return (
     <div className="desktop-icons">
-      {orderedApps.map((app: DesktopApp) => (
+      {orderedApps.map((app: IconItem) => (
         <button
           key={app.id}
           className="desktop-icon"
@@ -100,7 +134,7 @@ export function DesktopIcons({ openApps, onOpen }: Props) {
               window.removeEventListener('pointerup', onUp)
               if (!finalDrag) return
               if (!finalDrag.moved) {
-                onOpen(finalDrag.id)
+                handleIconClick(finalDrag.id)
               }
               localStorage.setItem('templ3-desktop-icons', JSON.stringify(positionsRef.current))
             }
@@ -109,16 +143,7 @@ export function DesktopIcons({ openApps, onOpen }: Props) {
             window.addEventListener('pointerup', onUp)
           }}
         >
-          {app.svgIcon ? (
-            <span
-              className="desktop-icon__glyph"
-              // SVG is a hardcoded string defined in siteConfig — not user input
-              // eslint-disable-next-line react/no-danger
-              dangerouslySetInnerHTML={{ __html: app.svgIcon }}
-            />
-          ) : (
-            <span className="desktop-icon__glyph">{app.glyph}</span>
-          )}
+          <span className="desktop-icon__glyph">{app.glyph}</span>
           <span className="desktop-icon__label">{app.label}</span>
         </button>
       ))}

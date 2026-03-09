@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { desktopApps, site } from '../../data/siteConfig'
-import type { CmsNote, CmsSiteIdentity } from '../../lib/cms'
+import type { CmsNote, CmsSiteIdentity, CmsWebApp } from '../../lib/cms'
 import { WindowFrame } from './WindowFrame'
 import { DesktopIcons } from './DesktopIcons'
 import { TaskbarReact } from './TaskbarReact'
+import { AppMenu } from './AppMenu'
 import { DossierApp } from './apps/DossierApp'
 import { GazetteApp } from './apps/GazetteApp'
 import { ArmoryApp } from './apps/ArmoryApp'
@@ -14,6 +15,7 @@ import { TerminalApp } from './apps/TerminalApp'
 import { SettingsApp } from './apps/SettingsApp'
 import { NotesApp } from './apps/NotesApp'
 import { NoteViewerApp } from './apps/NoteViewerApp'
+import { BrowserApp } from './apps/BrowserApp'
 import {
   buildCustomThemeVariables,
   DEFAULT_CUSTOM_THEME,
@@ -24,7 +26,8 @@ import {
   type ThemePresetId,
 } from './themePresets'
 
-export type AppId =
+// Static app IDs - WebApps use dynamic `webapp-{slug}` pattern
+export type StaticAppId =
   | 'dossier'
   | 'gazette'
   | 'armory'
@@ -35,6 +38,9 @@ export type AppId =
   | 'settings'
   | 'notes'
   | 'note-viewer'
+
+// AppId can be a static app or a dynamic webapp
+export type AppId = StaticAppId | `webapp-${string}`
 
 export type WindowState = {
   id: string
@@ -105,6 +111,25 @@ function createWindow(appId: AppId, zIndex: number, maximized = false, meta?: Re
   const desktopDef = desktopApps.find(a => a.id === appId)
   const extra = EXTRA_APPS[appId]
 
+  // Handle dynamic webapp-{slug} apps
+  if (appId.startsWith('webapp-') && meta?.webApp) {
+    const webApp = meta.webApp as CmsWebApp
+    return {
+      id: `${appId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      appId,
+      title: webApp.title.toUpperCase(),
+      icon: webApp.icon || '◎',
+      x: 10 + Math.random() * 10,
+      y: 5 + Math.random() * 10,
+      w: webApp.defaultSize?.width ?? 80,
+      h: webApp.defaultSize?.height ?? 85,
+      zIndex,
+      minimized: false,
+      maximized,
+      meta,
+    }
+  }
+
   return {
     id: `${appId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     appId,
@@ -123,6 +148,11 @@ function createWindow(appId: AppId, zIndex: number, maximized = false, meta?: Re
 }
 
 const FULL_BLEED_APPS = new Set<string>(['gazette', 'terminal', 'notes', 'note-viewer'])
+
+// Helper to check if an app should be full-bleed (includes all webapp-* apps)
+function isFullBleedApp(appId: string): boolean {
+  return FULL_BLEED_APPS.has(appId) || appId.startsWith('webapp-')
+}
 
 type Props = {
   initialApp?: string
@@ -170,13 +200,15 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
   const [ready, setReady] = useState(false)
   const [themeId, setThemeId] = useState<ThemePresetId | 'custom'>('default')
   const [customTheme, setCustomTheme] = useState<CustomThemeColors>(DEFAULT_CUSTOM_THEME)
+  const [appMenuOpen, setAppMenuOpen] = useState(false)
 
-  // Parse siteIdentity from serverData once at mount — it's shared across all apps
+  // Parse siteIdentity and webApps from serverData once at mount
   const parsedServerData = (() => {
     if (!serverData) return undefined
     try { return JSON.parse(serverData) as Record<string, unknown> } catch { return undefined }
   })()
   const siteIdentity = parsedServerData?.siteIdentity as CmsSiteIdentity | undefined
+  const webApps = (parsedServerData?.webApps as CmsWebApp[] | undefined) ?? []
 
   const defaultWallpaper = resolveWallpaperUrl(siteIdentity, site.wallpaper ?? '')
   const [wallpaper, setWallpaper] = useState(defaultWallpaper)
@@ -293,6 +325,19 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
     dispatch({ type: 'OPEN', window: createWindow(id, nextZ(), opts?.maximized, opts?.meta) })
   }, [windows, nextZ])
 
+  // Helper to open a WebApp by slug
+  const openWebApp = useCallback((slug: string) => {
+    const webApp = webApps.find(w => w.slug === slug)
+    if (!webApp) return
+    const appId = `webapp-${slug}` as AppId
+    const existing = windows.find(w => w.appId === appId)
+    if (existing) {
+      dispatch({ type: 'FOCUS', id: existing.id, zIndex: nextZ() })
+      return
+    }
+    dispatch({ type: 'OPEN', window: createWindow(appId, nextZ(), false, { webApp }) })
+  }, [windows, webApps, nextZ])
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === '`' && e.ctrlKey) {
@@ -352,6 +397,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
             onNavigate={handleNavigate}
             onOpenApp={(id) => openWindow(id)}
             siteIdentity={merged?.siteIdentity as CmsSiteIdentity | undefined}
+            webApps={webApps}
           />
         )
       case 'notes':
@@ -389,7 +435,21 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
             defaultWallpaper={defaultWallpaper}
           />
         )
-      default: return null
+      default:
+        // Handle dynamic webapp-{slug} apps
+        if (win.appId.startsWith('webapp-')) {
+          const webAppData = win.meta?.webApp as CmsWebApp | undefined
+          if (webAppData) {
+            return (
+              <BrowserApp
+                url={webAppData.url}
+                title={webAppData.title}
+                showAddressBar={webAppData.showAddressBar ?? true}
+              />
+            )
+          }
+        }
+        return null
     }
   }
 
@@ -399,10 +459,20 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
 
   const desktopBg = getDesktopBackground(wallpaper)
 
+  const handleOpenFromMenu = useCallback((appId: AppId) => {
+    openWindow(appId)
+    setAppMenuOpen(false)
+  }, [openWindow])
+
   return (
     <div className="desktop" style={desktopBg}>
       <div className="desktop-area">
-        <DesktopIcons openApps={windows.map(w => w.appId)} onOpen={openWindow} />
+        <DesktopIcons
+          openApps={windows.map(w => w.appId)}
+          onOpen={openWindow}
+          webApps={webApps}
+          onOpenWebApp={openWebApp}
+        />
         {windows.filter(w => !w.minimized).map(win => (
           <WindowFrame
             key={win.id}
@@ -411,7 +481,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
             x={win.x} y={win.y} w={win.w} h={win.h}
             zIndex={win.zIndex}
             maximized={win.maximized}
-            noPadding={FULL_BLEED_APPS.has(win.appId)}
+            noPadding={isFullBleedApp(win.appId)}
             onFocus={() => focusWindow(win.id)}
             onClose={() => closeWindow(win.id)}
             onMinimize={() => minimizeWindow(win.id)}
@@ -423,11 +493,22 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
           </WindowFrame>
         ))}
       </div>
+      <AppMenu
+        isOpen={appMenuOpen}
+        onClose={() => setAppMenuOpen(false)}
+        onOpenApp={handleOpenFromMenu}
+        webApps={webApps}
+        onOpenWebApp={(slug) => {
+          openWebApp(slug)
+          setAppMenuOpen(false)
+        }}
+      />
       <TaskbarReact
         windows={windows}
         focusedId={focusedId}
         onFocusWindow={focusWindow}
         onOpenTerminal={() => openWindow('terminal')}
+        onToggleMenu={() => setAppMenuOpen(prev => !prev)}
       />
     </div>
   )

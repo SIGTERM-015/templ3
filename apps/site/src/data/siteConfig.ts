@@ -88,7 +88,7 @@ export const navGuide = {
     '  dossier    → Profile / About',
     '  gazette    → Blog / Writeups',
     '  armory     → Projects / Arsenal',
-    '  media      → Favourite Media',
+    '  media      → Media Log',
     '  comms      → Links / Contact',
     '  terminal   → Command line',
     '',
@@ -114,7 +114,7 @@ export const desktopApps: DesktopApp[] = [
   { id: 'dossier', route: '/', glyph: '//', label: 'dossier', windowTitle: 'DOSSIER', defaultSize: { w: 70, h: 85 }, defaultPos: { x: 15, y: 5 } },
   { id: 'gazette', route: '/blog', glyph: '>>', label: 'gazette', windowTitle: 'GAZETTE', defaultSize: { w: 80, h: 88 }, defaultPos: { x: 10, y: 4 } },
   { id: 'armory', route: '/arsenal', glyph: '{}', label: 'armory', windowTitle: 'ARMORY', defaultSize: { w: 72, h: 82 }, defaultPos: { x: 14, y: 6 } },
-  { id: 'media', route: '/media', glyph: '♪', label: 'media', windowTitle: 'FAV MEDIA', defaultSize: { w: 68, h: 80 }, defaultPos: { x: 18, y: 6 } },
+  { id: 'media', route: '/media', glyph: '♪', label: 'media', windowTitle: 'MEDIA', defaultSize: { w: 68, h: 80 }, defaultPos: { x: 18, y: 6 } },
   { id: 'comms', route: '/links', glyph: '::', label: 'comms', windowTitle: 'COMMS', defaultSize: { w: 55, h: 75 }, defaultPos: { x: 22, y: 8 } },
   {
     id: 'notes',

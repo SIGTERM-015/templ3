@@ -1,6 +1,24 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import {
+  BlocksFeature,
+  CodeBlock,
+  FixedToolbarFeature,
+  HeadingFeature,
+  HorizontalRuleFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
+import {
+  BookmarkBlock,
+  CalloutBlock,
+  CodePenBlock,
+  DividerBlock,
+  GitHubGistBlock,
+  SpotifyBlock,
+  TwitterBlock,
+  VideoBlock,
+  YouTubeBlock,
+} from './blocks/embeds'
 import { r2Storage } from '@payloadcms/storage-r2'
 import fs from 'fs'
 import path from 'path'
@@ -21,7 +39,9 @@ import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { Projects } from './collections/Projects'
 import { Tags } from './collections/Tags'
+import { WebApps } from './collections/WebApps'
 import { SiteIdentity } from './globals/SiteIdentity'
+import { mediaLookupEndpoint } from './endpoints/media-lookup'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -105,12 +125,59 @@ export default buildConfig({
     Links,
     FavouriteMedia,
     Notes,
+    WebApps,
     MediaTypes,
     MediaStatuses,
     ProjectStatuses,
   ],
   globals: [SiteIdentity],
-  editor: lexicalEditor(),
+  endpoints: [mediaLookupEndpoint],
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+      FixedToolbarFeature(),
+      HorizontalRuleFeature(),
+      BlocksFeature({
+        blocks: [
+          // Code with syntax highlighting
+          CodeBlock({
+            defaultLanguage: 'typescript',
+            languages: {
+              plaintext: 'Plain Text',
+              bash: 'Bash',
+              sh: 'Shell',
+              yaml: 'YAML',
+              json: 'JSON',
+              html: 'HTML',
+              css: 'CSS',
+              javascript: 'JavaScript',
+              typescript: 'TypeScript',
+              tsx: 'TSX',
+              jsx: 'JSX',
+              python: 'Python',
+              go: 'Go',
+              rust: 'Rust',
+              sql: 'SQL',
+              dockerfile: 'Dockerfile',
+              markdown: 'Markdown',
+            },
+          }),
+          // Embeds
+          YouTubeBlock,
+          SpotifyBlock,
+          TwitterBlock,
+          GitHubGistBlock,
+          CodePenBlock,
+          VideoBlock,
+          // Content blocks
+          CalloutBlock,
+          DividerBlock,
+          BookmarkBlock,
+        ],
+      }),
+    ],
+  }),
   serverURL: serverUrl,
   secret: payloadSecret,
   typescript: {

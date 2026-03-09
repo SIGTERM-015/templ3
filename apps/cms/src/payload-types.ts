@@ -76,6 +76,7 @@ export interface Config {
     links: Link;
     'favourite-media': FavouriteMedia;
     notes: Note;
+    'web-apps': WebApp;
     'media-types': MediaType;
     'media-statuses': MediaStatus;
     'project-statuses': ProjectStatus;
@@ -95,6 +96,7 @@ export interface Config {
     links: LinksSelect<false> | LinksSelect<true>;
     'favourite-media': FavouriteMediaSelect<false> | FavouriteMediaSelect<true>;
     notes: NotesSelect<false> | NotesSelect<true>;
+    'web-apps': WebAppsSelect<false> | WebAppsSelect<true>;
     'media-types': MediaTypesSelect<false> | MediaTypesSelect<true>;
     'media-statuses': MediaStatusesSelect<false> | MediaStatusesSelect<true>;
     'project-statuses': ProjectStatusesSelect<false> | ProjectStatusesSelect<true>;
@@ -390,6 +392,10 @@ export interface Link {
 export interface FavouriteMedia {
   id: number;
   title: string;
+  /**
+   * Author, artist, studio, or developer (shown on Now cards)
+   */
+  creator?: string | null;
   slug: string;
   /**
    * Type of media (configured in Media Types)
@@ -408,6 +414,22 @@ export interface FavouriteMedia {
    */
   review?: string | null;
   coverImage?: (number | null) | Media;
+  /**
+   * Cover image URL from external API (used if no uploaded cover)
+   */
+  externalCoverUrl?: string | null;
+  /**
+   * ID from external API (IGDB, TMDB, AniList, etc.)
+   */
+  externalId?: string | null;
+  /**
+   * Source API (igdb, tmdb, anilist, etc.)
+   */
+  externalSource?: string | null;
+  /**
+   * Link to the item on the external site
+   */
+  externalUrl?: string | null;
   /**
    * Link to a blog post with a full review
    */
@@ -461,6 +483,10 @@ export interface MediaType {
    * Sort order in filter tabs (lower = first)
    */
   order: number;
+  /**
+   * External API to fetch metadata from when adding new entries
+   */
+  lookupSource?: ('none' | 'igdb' | 'tmdb' | 'anilist-anime' | 'anilist-manga' | 'openlibrary' | 'musicbrainz') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -526,6 +552,67 @@ export interface Note {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * External websites that appear as browser windows in the desktop
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "web-apps".
+ */
+export interface WebApp {
+  id: number;
+  /**
+   * Display name in the window title bar and app menu
+   */
+  title: string;
+  slug: string;
+  /**
+   * Full URL to embed (e.g. https://cv.sigterm.vodka)
+   */
+  url: string;
+  /**
+   * ASCII/emoji glyph for desktop icon and taskbar (e.g. "◎", "CV", "📄")
+   */
+  icon?: string | null;
+  /**
+   * Short description shown in tooltips or app menu
+   */
+  description?: string | null;
+  /**
+   * Default window size as percentage of screen
+   */
+  defaultSize?: {
+    /**
+     * Width in % (30-100)
+     */
+    width?: number | null;
+    /**
+     * Height in % (30-100)
+     */
+    height?: number | null;
+  };
+  /**
+   * Show the browser address bar with the URL
+   */
+  showAddressBar?: boolean | null;
+  /**
+   * Show as a desktop icon
+   */
+  showInDesktop?: boolean | null;
+  /**
+   * Show in the mobile app menu
+   */
+  showInMenu?: boolean | null;
+  /**
+   * Enable/disable this web app
+   */
+  enabled?: boolean | null;
+  /**
+   * Lower numbers appear first in lists
+   */
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -584,6 +671,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'notes';
         value: number | Note;
+      } | null)
+    | ({
+        relationTo: 'web-apps';
+        value: number | WebApp;
       } | null)
     | ({
         relationTo: 'media-types';
@@ -808,12 +899,17 @@ export interface LinksSelect<T extends boolean = true> {
  */
 export interface FavouriteMediaSelect<T extends boolean = true> {
   title?: T;
+  creator?: T;
   slug?: T;
   mediaType?: T;
   progress?: T;
   rating?: T;
   review?: T;
   coverImage?: T;
+  externalCoverUrl?: T;
+  externalId?: T;
+  externalSource?: T;
+  externalUrl?: T;
   blogPost?: T;
   externalReviewUrl?: T;
   completedAt?: T;
@@ -839,6 +935,30 @@ export interface NotesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "web-apps_select".
+ */
+export interface WebAppsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  url?: T;
+  icon?: T;
+  description?: T;
+  defaultSize?:
+    | T
+    | {
+        width?: T;
+        height?: T;
+      };
+  showAddressBar?: T;
+  showInDesktop?: T;
+  showInMenu?: T;
+  enabled?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-types_select".
  */
 export interface MediaTypesSelect<T extends boolean = true> {
@@ -849,6 +969,7 @@ export interface MediaTypesSelect<T extends boolean = true> {
   nowCategory?: T;
   nowLabel?: T;
   order?: T;
+  lookupSource?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1014,7 +1135,7 @@ export interface SiteIdentity {
    */
   whoamiOutput?: string | null;
   /**
-   * Full neofetch-style output string. Leave empty to use the hardcoded default in code.
+   * Full neofetch-style ASCII art output. Leave empty to use the default. Use a strict monospace font for proper alignment.
    */
   neofetchOutput?: string | null;
   updatedAt?: string | null;

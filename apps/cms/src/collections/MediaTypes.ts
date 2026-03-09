@@ -79,5 +79,22 @@ export const MediaTypes: CollectionConfig = {
         description: 'Sort order in filter tabs (lower = first)',
       },
     },
+    {
+      name: 'lookupSource',
+      type: 'select',
+      defaultValue: 'none',
+      options: [
+        { label: 'None (manual entry only)', value: 'none' },
+        { label: 'IGDB (Games)', value: 'igdb' },
+        { label: 'TMDB (Movies & TV)', value: 'tmdb' },
+        { label: 'AniList (Anime)', value: 'anilist-anime' },
+        { label: 'AniList (Manga)', value: 'anilist-manga' },
+        { label: 'Open Library (Books)', value: 'openlibrary' },
+        { label: 'MusicBrainz (Music)', value: 'musicbrainz' },
+      ],
+      admin: {
+        description: 'External API to fetch metadata from when adding new entries',
+      },
+    },
   ],
 }

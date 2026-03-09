@@ -1,5 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro'
+import { getSiteIdentity, getWebApps } from '../lib/cms'
+
+export const prerender = false
+
+const [siteIdentity, webApps] = await Promise.all([
+  getSiteIdentity(),
+  getWebApps(),
+])
 ---
 
-<Layout title="404 | Templ3" description="Page not found" />
+<Layout
+  title="404 | Templ3"
+  description="Page not found"
+  serverData={JSON.stringify({ siteIdentity, webApps })}
+/>

@@ -40,7 +40,7 @@ export const NEOFETCH = `
   ║  ██  >_        ██  ║    Kernel:  Astro 5.17
   ║  ██            ██  ║    Shell:   React Three Fiber
   ║  ████████████████  ║    Uptime:  since 2026
-  ║                    ║    Pkgs:    Three.js, Drei, Payload
+  ║                    ║    Pkgs:    Payload
   ╚══════════╗         ║    Theme:   Soviet Warm [dark]
              ╚═════════╝    Terminal: amber phosphor
 
@@ -82,7 +82,10 @@ Nmap done: 1 IP address (1 host up) scanned in 0.42s`
 export const HELP_TABLE = `Available commands:
 
   ls              List files in home directory
+  apps            List all available applications
+  open <app>      Open an application by name
   ./<app>         Run an application (e.g. ./gazette)
+  goto <route>    Navigate to a page (e.g. goto /dossier)
   cat sigterm.txt Read operator bio
   whoami          Display operator info
   neofetch        System info with ASCII art
@@ -93,4 +96,12 @@ export const HELP_TABLE = `Available commands:
   nmap            Scan localhost ports
   clear           Clear terminal output
   exit            Close terminal
+
+Tab completion is available for commands and arguments.
+Use arrow keys (up/down) to navigate command history.
 `
+
+// Mobile versions - reuse same art, let CSS handle scaling
+export const SIGTERM_SKULL_MOBILE = SIGTERM_SKULL
+export const NEOFETCH_MOBILE = NEOFETCH
+export const BSOD_MOBILE = BSOD

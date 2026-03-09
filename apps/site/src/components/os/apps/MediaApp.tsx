@@ -203,9 +203,13 @@ export function MediaApp({ serverData, onOpenApp }: Props) {
   }
 
   const coverUrl = (item: CmsFavMedia): string | undefined => {
-    if (!item.coverImage) return undefined
-    if (typeof item.coverImage === 'string') return item.coverImage
-    return (item.coverImage as CmsMedia).url
+    // Prefer uploaded cover image
+    if (item.coverImage) {
+      if (typeof item.coverImage === 'string') return item.coverImage
+      return (item.coverImage as CmsMedia).url
+    }
+    // Fall back to external cover URL from API
+    return item.externalCoverUrl
   }
 
   const blogSlug = (item: CmsFavMedia): string | undefined => {
@@ -278,6 +282,7 @@ export function MediaApp({ serverData, onOpenApp }: Props) {
                   <NowCard
                     cover={cover}
                     title={item.title}
+                    subtitle={item.creator}
                     onClick={() => setSelected(item)}
                   />
                 </div>
@@ -384,6 +389,9 @@ export function MediaApp({ serverData, onOpenApp }: Props) {
             )}
             <div className="mediapp-detail__meta">
               <h2 className="mediapp-detail__title">{selected.title}</h2>
+              {selected.creator && (
+                <span className="mediapp-detail__creator">{selected.creator}</span>
+              )}
               <div className="mediapp-detail__tags">
                 {/* Type tag */}
                 {(() => {

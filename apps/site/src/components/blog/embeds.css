@@ -1,0 +1,227 @@
+/* ─── Embed containers ───────────────────────────────────────────────────── */
+
+.embed {
+  margin: 1.5rem 0;
+}
+
+.embed__wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.embed__wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.embed figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted, oklch(70% 0 0));
+  text-align: center;
+}
+
+.embed-error {
+  padding: 1rem;
+  background: oklch(30% 0.05 0);
+  border-radius: 8px;
+  color: oklch(70% 0.15 25);
+  font-style: italic;
+}
+
+/* ─── Spotify ────────────────────────────────────────────────────────────── */
+
+.embed--spotify iframe {
+  border-radius: 12px;
+}
+
+/* ─── Twitter ────────────────────────────────────────────────────────────── */
+
+.embed--twitter {
+  display: flex;
+  justify-content: center;
+}
+
+.embed--twitter blockquote {
+  max-width: 550px;
+  margin: 0;
+}
+
+/* ─── Video ──────────────────────────────────────────────────────────────── */
+
+.embed--video video {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* ─── Callout ────────────────────────────────────────────────────────────── */
+
+.callout {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.callout--info {
+  background: oklch(25% 0.03 240);
+  border-color: oklch(60% 0.15 240);
+}
+
+.callout--warning {
+  background: oklch(25% 0.03 80);
+  border-color: oklch(70% 0.15 80);
+}
+
+.callout--error {
+  background: oklch(25% 0.03 25);
+  border-color: oklch(60% 0.15 25);
+}
+
+.callout--success {
+  background: oklch(25% 0.03 145);
+  border-color: oklch(60% 0.15 145);
+}
+
+.callout--tip {
+  background: oklch(25% 0.03 300);
+  border-color: oklch(60% 0.15 300);
+}
+
+.callout__icon {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+
+.callout__content {
+  flex: 1;
+}
+
+.callout__title {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.callout__content p {
+  margin: 0;
+}
+
+/* ─── Divider ────────────────────────────────────────────────────────────── */
+
+.divider {
+  border: none;
+  text-align: center;
+  margin: 2rem 0;
+  color: var(--color-text-muted, oklch(50% 0 0));
+}
+
+.divider--line {
+  border-top: 1px solid oklch(30% 0 0);
+}
+
+.divider--dots::before,
+.divider--stars::before {
+  content: attr(data-content);
+  letter-spacing: 0.5em;
+}
+
+.divider--space {
+  height: 2rem;
+}
+
+/* ─── Bookmark card ──────────────────────────────────────────────────────── */
+
+.bookmark {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  background: oklch(20% 0.01 60);
+  border: 1px solid oklch(30% 0.01 60);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.bookmark:hover {
+  border-color: var(--color-accent, oklch(72% 0.14 80));
+  background: oklch(22% 0.01 60);
+}
+
+.bookmark__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.bookmark__title {
+  font-weight: 600;
+  color: var(--color-text, oklch(90% 0 0));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookmark__description {
+  font-size: 0.875rem;
+  color: var(--color-text-muted, oklch(70% 0 0));
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bookmark__url {
+  font-size: 0.75rem;
+  color: oklch(50% 0 0);
+}
+
+.bookmark__thumbnail {
+  flex-shrink: 0;
+  width: 120px;
+  height: 80px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bookmark__thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ─── Code block (from Lexical) ──────────────────────────────────────────── */
+
+.code-block {
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: oklch(15% 0.01 60);
+  border: 1px solid oklch(25% 0.01 60);
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.code-block code {
+  background: none;
+  padding: 0;
+}

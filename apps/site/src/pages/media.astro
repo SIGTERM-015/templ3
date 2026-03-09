@@ -1,21 +1,22 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import { getFavouriteMedia, getMediaTypes, getMediaStatuses, getSiteIdentity } from '../lib/cms'
+import { getFavouriteMedia, getMediaTypes, getMediaStatuses, getSiteIdentity, getWebApps } from '../lib/cms'
 
 export const prerender = false
 
-const [media, mediaTypes, mediaStatuses, siteIdentity] = await Promise.all([
+const [media, mediaTypes, mediaStatuses, siteIdentity, webApps] = await Promise.all([
   getFavouriteMedia(),
   getMediaTypes(),
   getMediaStatuses(),
   getSiteIdentity(),
+  getWebApps(),
 ])
 ---
 
 <Layout
-  title={siteIdentity?.siteName ? `Favourite Media | ${siteIdentity.siteName}` : 'Favourite Media | Templ3'}
+  title={siteIdentity?.siteName ? `Media | ${siteIdentity.siteName}` : 'Media | Templ3'}
   description="Anime, games, books, and everything Sigterm has watched, read, and played."
   initialApp="media"
-  serverData={JSON.stringify({ media, mediaTypes, mediaStatuses, siteIdentity })}
+  serverData={JSON.stringify({ media, mediaTypes, mediaStatuses, siteIdentity, webApps })}
   maximized={Astro.url.searchParams.has('maximized')}
 />

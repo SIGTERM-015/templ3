@@ -1,15 +1,18 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import { getSiteIdentity } from '../lib/cms'
+import { getSiteIdentity, getWebApps } from '../lib/cms'
 
 export const prerender = false
 
-const siteIdentity = await getSiteIdentity()
+const [siteIdentity, webApps] = await Promise.all([
+  getSiteIdentity(),
+  getWebApps(),
+])
 ---
 
 <Layout
   initialApp="dossier"
-  serverData={JSON.stringify({ siteIdentity })}
+  serverData={JSON.stringify({ siteIdentity, webApps })}
   siteName={siteIdentity?.siteName}
   siteDescription={siteIdentity?.siteDescription}
 />

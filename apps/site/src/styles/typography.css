@@ -72,6 +72,15 @@
   src: url('https://cdn.jsdelivr.net/fontsource/fonts/monaspace-radon@latest/latin-400-normal.woff2') format('woff2');
 }
 
+/* DejaVu Sans Mono - excellent Unicode box-drawing support */
+@font-face {
+  font-family: 'DejaVu Sans Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/npm/@fontsource/dejavu-mono@5.0.3/files/dejavu-mono-latin-400-normal.woff2') format('woff2');
+}
+
 /* ── Type scale — fluid with clamp() ── */
 
 :root {
@@ -80,6 +89,8 @@
   --font-body:    'Monaspace Argon', 'Courier New', monospace;
   --font-mono:    'Monaspace Neon', 'Cascadia Code', Consolas, monospace;
   --font-accent:  'Monaspace Radon', cursive, monospace;
+  /* Strictly monospace font for ASCII art - DejaVu has best Unicode support */
+  --font-ascii:   'DejaVu Sans Mono', 'Consolas', 'Monaco', 'Liberation Mono', 'Courier New', monospace;
 
   --text-xs:    clamp(0.7rem, 0.65rem + 0.25vw, 0.75rem);
   --text-sm:    clamp(0.8rem, 0.75rem + 0.25vw, 0.875rem);

@@ -4,6 +4,10 @@ import { slugField } from '../fields/slug'
 
 export const FavouriteMedia: CollectionConfig = {
   slug: 'favourite-media',
+  labels: {
+    singular: 'Media',
+    plural: 'Media',
+  },
   access: {
     read: ({ req: { user } }) => {
       if (user) return true
@@ -22,6 +26,13 @@ export const FavouriteMedia: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'creator',
+      type: 'text',
+      admin: {
+        description: 'Author, artist, studio, or developer (shown on Now cards)',
+      },
+    },
     slugField(),
     {
       name: 'mediaType',
@@ -30,6 +41,15 @@ export const FavouriteMedia: CollectionConfig = {
       required: true,
       admin: {
         description: 'Type of media (configured in Media Types)',
+      },
+    },
+    {
+      name: 'mediaLookup',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/components/MediaLookupField',
+        },
       },
     },
     {
@@ -62,6 +82,40 @@ export const FavouriteMedia: CollectionConfig = {
       name: 'coverImage',
       type: 'relationship',
       relationTo: 'media',
+    },
+    {
+      name: 'externalCoverUrl',
+      type: 'text',
+      admin: {
+        description: 'Cover image URL from external API (used if no uploaded cover)',
+      },
+    },
+    {
+      name: 'externalId',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'ID from external API (IGDB, TMDB, AniList, etc.)',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'externalSource',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'Source API (igdb, tmdb, anilist, etc.)',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'externalUrl',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'Link to the item on the external site',
+        readOnly: true,
+      },
     },
     {
       name: 'blogPost',
