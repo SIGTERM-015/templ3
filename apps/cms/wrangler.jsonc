@@ -20,14 +20,6 @@
       "custom_domain": true
     }
   ],
-  "migrations": [
-    {
-      "tag": "v1",
-      "deleted_classes": [
-        "PayloadContainer"
-      ]
-    }
-  ],
   "r2_buckets": [
     {
       "binding": "R2",

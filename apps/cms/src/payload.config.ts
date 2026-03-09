@@ -52,31 +52,19 @@ const cloudflareLogger = {
 } as unknown as import('payload').PayloadLogger
 
 function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
-  return import(/* webpackIgnore: true */ `${'__wrangler'.replaceAll('_', '')}`)
-    .then(({ getPlatformProxy }) =>
+  return import(/* webpackIgnore: true */ `${'__wrangler'.replaceAll('_', '')}`).then(
+    ({ getPlatformProxy }) =>
       getPlatformProxy({
         environment: process.env.CLOUDFLARE_ENV,
         remoteBindings: isProduction,
       }),
-    )
-    .catch(() => ({ env: {} as CloudflareContext['env'] } as CloudflareContext))
+  )
 }
 
-const getCloudflare = async (): Promise<CloudflareContext> => {
-  if (isCLI) return { env: {} as CloudflareContext['env'] } as CloudflareContext
-  try {
-    if (!isProduction) {
-      return await getCloudflareContextFromWrangler()
-    }
-    return await getCloudflareContext({ async: true })
-  } catch (_err) {
-    // This is expected during build when miniflare tries to load deleted_classes without the class present
-    console.warn('Skipping Cloudflare context (expected during build)')
-    return { env: {} as CloudflareContext['env'] } as CloudflareContext
-  }
-}
-
-const cloudflare = await getCloudflare()
+const cloudflare =
+  isCLI || !isProduction
+    ? await getCloudflareContextFromWrangler()
+    : await getCloudflareContext({ async: true })
 
 export default buildConfig({
   admin: {
