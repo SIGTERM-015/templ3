@@ -6,6 +6,7 @@
 .pnp.js
 .yarn/install-state.gz
 .open-next/
+.dev.vars
 /.idea/*
 !/.idea/runConfigurations
 
