@@ -1,14 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { createPurgeHook } from '../hooks/purgeCache'
-
 export const MediaStatuses: CollectionConfig = {
   slug: 'media-statuses',
   access: {
     read: () => true,
-  },
-  hooks: {
-    afterChange: [createPurgeHook()],
   },
   admin: {
     group: 'Config',

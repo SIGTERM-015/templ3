@@ -142,21 +142,34 @@ layout and scrolling.
 - All CMS types are manually maintained in `lib/cms.ts` with the `Cms` prefix.
   They are intentionally loose — relationship fields type as `T | string | null`
   to handle both populated objects and raw IDs.
-- `readCollection<T>` and `readGlobal<T>` handle fetch + Cloudflare Cache API
-  (12-hour TTL, only active on the edge runtime).
+- `readCollection<T>` and `readGlobal<T>` handle fetch with Cloudflare CDN caching
+  via `cf.cacheTtl` fetch option.
 - **Never throw** from fetch helpers — return `[]` or `null` on any failure.
 - The `PUBLIC_CMS_URL` env var must be set; if missing, all fetches short-circuit
   and return empty data (no crash).
 - Use `mediaUrl()` to safely resolve a `CmsMedia | string | null` to a URL.
 - Use `resolveValue()` to resolve populated relationship objects to their `.value`.
 
+### Caching Strategy
+
+Caching is handled automatically by Cloudflare CDN via `cf.cacheTtl` in fetch
+options. Different content types have different TTLs:
+- Posts listing: 5 min (300s)
+- Individual post: 1 hour (3600s)
+- Projects: 1 hour (3600s)
+- Links: 24 hours (86400s)
+- Favourite Media: 1 hour (3600s)
+- Notes: 15 min (900s)
+- Site Identity: 24 hours (86400s)
+- Media Types/Statuses/Project Statuses: 24 hours (86400s)
+
+To bypass cache for fresh content, append `?v=1` (or any query param) to the URL.
+
 ### API routes (`src/pages/api/*.json.ts`)
 
 - All routes: `export const prerender = false`, `export const GET: APIRoute`.
 - Rely on `lib/cms.ts` helpers — do not call the CMS directly from route handlers.
 - Return `new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } })`.
-- The purge route (`/api/purge.json`) accepts a `POST` from the CMS after content
-  changes to bust the Cloudflare cache.
 
 ---
 
@@ -193,5 +206,4 @@ layout and scrolling.
 | `src/components/os/DesktopShell.tsx` | Root React component — window reducer, theme, personalization |
 | `src/components/os/themePresets.ts` | Theme preset definitions + CSS variable builders |
 | `src/layouts/Layout.astro` | Single HTML shell for every page |
-| `src/pages/api/purge.json.ts` | Cache purge endpoint called by the CMS after content changes |
 | `worker-configuration.d.ts` | Auto-generated Cloudflare Worker env types — do not edit |

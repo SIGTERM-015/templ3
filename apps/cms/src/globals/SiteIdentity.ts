@@ -1,38 +1,9 @@
-import type { GlobalAfterChangeHook, GlobalConfig } from 'payload'
-
-const SITE_URL = process.env.SITE_URL?.replace(/\/$/, '')
-const PURGE_SECRET = process.env.PURGE_SECRET
-
-const purgeGlobalHook: GlobalAfterChangeHook = async ({ doc, req }) => {
-  if (!SITE_URL || !PURGE_SECRET) return doc
-
-  try {
-    const res = fetch(`${SITE_URL}/api/purge.json`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${PURGE_SECRET}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({}),
-    })
-
-    if (req.context?.waitUntil) {
-      ;(req.context.waitUntil as (p: Promise<unknown>) => void)(res)
-    }
-  } catch {
-    req.payload.logger.warn('Cache purge failed (SiteIdentity)')
-  }
-
-  return doc
-}
+import type { GlobalConfig } from 'payload'
 
 export const SiteIdentity: GlobalConfig = {
   slug: 'site-identity',
   access: {
     read: () => true,
-  },
-  hooks: {
-    afterChange: [purgeGlobalHook],
   },
   admin: {
     group: 'Site',

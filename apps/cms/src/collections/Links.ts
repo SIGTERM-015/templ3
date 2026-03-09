@@ -1,14 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { createPurgeHook } from '../hooks/purgeCache'
-
 export const Links: CollectionConfig = {
   slug: 'links',
   access: {
     read: () => true,
-  },
-  hooks: {
-    afterChange: [createPurgeHook()],
   },
   admin: {
     defaultColumns: ['label', 'platform', 'featured'],

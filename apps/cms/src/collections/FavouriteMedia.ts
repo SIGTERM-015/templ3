@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { slugField } from '../fields/slug'
-import { createPurgeHook } from '../hooks/purgeCache'
 
 export const FavouriteMedia: CollectionConfig = {
   slug: 'favourite-media',
@@ -10,9 +9,6 @@ export const FavouriteMedia: CollectionConfig = {
       if (user) return true
       return { _status: { equals: 'published' } }
     },
-  },
-  hooks: {
-    afterChange: [createPurgeHook()],
   },
   admin: {
     group: 'Content',

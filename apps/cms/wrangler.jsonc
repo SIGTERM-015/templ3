@@ -34,7 +34,6 @@
   ],
   "vars": {
     "NEXT_PUBLIC_SERVER_URL": "https://cms.sigterm.vodka",
-    "SITE_URL": "https://sigterm.vodka",
     "SMTP_HOST": "smtp.protonmail.ch",
     "SMTP_PORT": "587",
     "SMTP_USER": "cms@sigterm.vodka"

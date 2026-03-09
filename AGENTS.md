@@ -171,10 +171,9 @@ window managed by a single `useReducer` in `DesktopShell`.
 
 - Astro pages are **SSR** (`export const prerender = false`) — they fetch CMS
   data server-side and pass it to `DesktopShell` as a `serverData` JSON string prop.
-- Astro API routes (`src/pages/api/*.json.ts`) proxy CMS data with a 12-hour
-  Cloudflare Cache API TTL.
-- After CMS content changes, the CMS POSTs to `/api/purge.json` on the site to
-  bust the edge cache.
+- CMS data is cached at the edge via Cloudflare CDN (`cf.cacheTtl` fetch option)
+  with TTLs ranging from 5 min (posts listing) to 24 hours (static config).
+- To bypass cache for fresh content, append `?v=1` to the URL.
 - Theme and window state persist to `localStorage`/`sessionStorage`.
 
 ### CMS — Payload 3 + Next.js 15
@@ -196,8 +195,8 @@ See `apps/cms/AGENTS.md` for the full Payload-specific guide. Key points:
 Never commit `.env` files. Each app reads its own `.env` (or `.dev.vars` for
 Wrangler). Key vars:
 
-- `apps/cms/` — `DATABASE_URI`, `PAYLOAD_SECRET`, R2 credentials, SMTP, `PURGE_SECRET`
-- `apps/site/` — `CMS_URL`, `PURGE_SECRET`, R2/CDN base URL (via `wrangler.jsonc`)
+- `apps/cms/` — `DATABASE_URI`, `PAYLOAD_SECRET`, R2 credentials, SMTP
+- `apps/site/` — `PUBLIC_CMS_URL`, Spotify credentials (via `wrangler.jsonc`)
 
 ---
 
@@ -211,5 +210,4 @@ Wrangler). Key vars:
 | `apps/cms/src/payload.config.ts` | Main Payload config |
 | `apps/cms/src/payload-types.ts` | **Auto-generated** — do not edit |
 | `apps/cms/src/fields/slug.ts` | Reusable slug field factory |
-| `apps/cms/src/hooks/purgeCache.ts` | Cache purge hook factory |
 | `apps/cms/AGENTS.md` | Full Payload CMS development guide |

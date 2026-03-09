@@ -154,17 +154,18 @@ export type CmsSiteIdentity = {
   whoamiOutput?: string
   neofetchOutput?: string
 }
-
-// ─── Internal fetch helpers ─────────────────────────────────────────────────
-
 type CollectionResponse<T> = {
   docs: T[]
 }
 
-const CACHE_TTL = 43200 // 12 hours in seconds
-const CACHE_ORIGIN = 'https://cms-cache.internal'
-
 const cmsBaseUrl = import.meta.env.PUBLIC_CMS_URL?.replace(/\/$/, '')
+
+const TTL = {
+  SHORT: 300,    
+  MEDIUM: 900,   
+  STANDARD: 3600,
+  LONG: 86400,   
+} as const
 
 const COLLECTION_PATHS = {
   posts: '/api/posts?depth=2&limit=50&where[_status][equals]=published&sort=-publishedAt',
@@ -179,116 +180,55 @@ const COLLECTION_PATHS = {
   siteIdentity: '/api/globals/site-identity?depth=2',
 } as const
 
-function cacheKey(path: string): Request {
-  return new Request(`${CACHE_ORIGIN}${path}`)
-}
-
-function isEdgeRuntime(): boolean {
-  return typeof caches !== 'undefined' && typeof caches.default !== 'undefined'
-}
-
-async function readCollection<T>(path: string): Promise<T[]> {
+async function readCollection<T>(path: string, cacheTtl: number = TTL.STANDARD): Promise<T[]> {
   if (!cmsBaseUrl) return []
 
-  if (isEdgeRuntime()) {
-    const key = cacheKey(path)
-    const cached = await caches.default.match(key)
-    if (cached) return (await cached.json()) as T[]
-  }
-
   try {
-    const response = await fetch(`${cmsBaseUrl}${path}`)
+    const response = await fetch(`${cmsBaseUrl}${path}`, {
+      cf: { cacheTtl },
+    } as RequestInit)
     if (!response.ok) return []
     const data = (await response.json()) as CollectionResponse<T>
-    const docs = Array.isArray(data.docs) ? data.docs : []
-
-    if (isEdgeRuntime()) {
-      const cacheResponse = new Response(JSON.stringify(docs), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': `s-maxage=${CACHE_TTL}`,
-        },
-      })
-      await caches.default.put(cacheKey(path), cacheResponse)
-    }
-
-    return docs
+    return Array.isArray(data.docs) ? data.docs : []
   } catch {
     return []
   }
 }
 
-async function readGlobal<T>(path: string): Promise<T | null> {
+async function readGlobal<T>(path: string, cacheTtl: number = TTL.LONG): Promise<T | null> {
   if (!cmsBaseUrl) return null
 
-  if (isEdgeRuntime()) {
-    const key = cacheKey(path)
-    const cached = await caches.default.match(key)
-    if (cached) return (await cached.json()) as T
-  }
-
   try {
-    const response = await fetch(`${cmsBaseUrl}${path}`)
+    const response = await fetch(`${cmsBaseUrl}${path}`, {
+      cf: { cacheTtl },
+    } as RequestInit)
     if (!response.ok) return null
-    const data = (await response.json()) as T
-
-    if (isEdgeRuntime()) {
-      const cacheResponse = new Response(JSON.stringify(data), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': `s-maxage=${CACHE_TTL}`,
-        },
-      })
-      await caches.default.put(cacheKey(path), cacheResponse)
-    }
-
-    return data
+    return (await response.json()) as T
   } catch {
     return null
   }
 }
 
-// ─── Cache purge ────────────────────────────────────────────────────────────
-
-export async function purgeCache(slugs?: string[]): Promise<number> {
-  if (!isEdgeRuntime()) return 0
-
-  const cache = caches.default
-  let purged = 0
-
-  for (const path of Object.values(COLLECTION_PATHS)) {
-    if (await cache.delete(cacheKey(path))) purged++
-  }
-
-  if (slugs) {
-    for (const slug of slugs) {
-      const path = `/api/posts?depth=2&limit=1&where[slug][equals]=${encodeURIComponent(slug)}&where[_status][equals]=published`
-      if (await cache.delete(cacheKey(path))) purged++
-    }
-  }
-
-  return purged
-}
-
 // ─── Public API ─────────────────────────────────────────────────────────────
 
 export async function getSiteIdentity(): Promise<CmsSiteIdentity | null> {
-  return readGlobal<CmsSiteIdentity>(COLLECTION_PATHS.siteIdentity)
+  return readGlobal<CmsSiteIdentity>(COLLECTION_PATHS.siteIdentity, TTL.LONG)
 }
 
 export async function getPosts(): Promise<CmsPost[]> {
-  return readCollection<CmsPost>(COLLECTION_PATHS.posts)
+  return readCollection<CmsPost>(COLLECTION_PATHS.posts, TTL.SHORT)
 }
 
 export async function getPostBySlug(slug: string): Promise<CmsPost | null> {
   const posts = await readCollection<CmsPost>(
     `/api/posts?depth=2&limit=1&where[slug][equals]=${encodeURIComponent(slug)}&where[_status][equals]=published`,
+    TTL.STANDARD,
   )
   return posts.find((post) => post.slug === slug) ?? null
 }
 
 export async function getProjects(): Promise<CmsProject[]> {
-  const projects = await readCollection<CmsProject>(COLLECTION_PATHS.projects)
+  const projects = await readCollection<CmsProject>(COLLECTION_PATHS.projects, TTL.STANDARD)
   return projects.map((project) => ({
     ...project,
     stack: project.stack.map((item) => (typeof item === 'string' ? item : item.label)),
@@ -296,31 +236,31 @@ export async function getProjects(): Promise<CmsProject[]> {
 }
 
 export async function getLinks(): Promise<CmsLink[]> {
-  return readCollection<CmsLink>(COLLECTION_PATHS.links)
+  return readCollection<CmsLink>(COLLECTION_PATHS.links, TTL.LONG)
 }
 
 export async function getCategories(): Promise<CmsCategory[]> {
-  return readCollection<CmsCategory>(COLLECTION_PATHS.categories)
+  return readCollection<CmsCategory>(COLLECTION_PATHS.categories, TTL.LONG)
 }
 
 export async function getFavouriteMedia(): Promise<CmsFavMedia[]> {
-  return readCollection<CmsFavMedia>(COLLECTION_PATHS.favouriteMedia)
+  return readCollection<CmsFavMedia>(COLLECTION_PATHS.favouriteMedia, TTL.STANDARD)
 }
 
 export async function getNotes(): Promise<CmsNote[]> {
-  return readCollection<CmsNote>(COLLECTION_PATHS.notes)
+  return readCollection<CmsNote>(COLLECTION_PATHS.notes, TTL.MEDIUM)
 }
 
 export async function getMediaTypes(): Promise<CmsMediaType[]> {
-  return readCollection<CmsMediaType>(COLLECTION_PATHS.mediaTypes)
+  return readCollection<CmsMediaType>(COLLECTION_PATHS.mediaTypes, TTL.LONG)
 }
 
 export async function getMediaStatuses(): Promise<CmsMediaStatus[]> {
-  return readCollection<CmsMediaStatus>(COLLECTION_PATHS.mediaStatuses)
+  return readCollection<CmsMediaStatus>(COLLECTION_PATHS.mediaStatuses, TTL.LONG)
 }
 
 export async function getProjectStatuses(): Promise<CmsProjectStatus[]> {
-  return readCollection<CmsProjectStatus>(COLLECTION_PATHS.projectStatuses)
+  return readCollection<CmsProjectStatus>(COLLECTION_PATHS.projectStatuses, TTL.LONG)
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

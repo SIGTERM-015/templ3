@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { slugField } from '../fields/slug'
-import { createPurgeHook } from '../hooks/purgeCache'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -10,9 +9,6 @@ export const Posts: CollectionConfig = {
       if (user) return true
       return { _status: { equals: 'published' } }
     },
-  },
-  hooks: {
-    afterChange: [createPurgeHook({ sendSlugs: true })],
   },
   admin: {
     defaultColumns: ['title', '_status', 'publishedAt', 'updatedAt'],
