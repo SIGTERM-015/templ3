@@ -19,6 +19,7 @@
 		"@react-three/postprocessing": "^3.0.4",
 		"astro": "^5.17.1",
 		"marked": "^17.0.4",
+		"monaco-editor": "^0.55.1",
 		"postprocessing": "^6.38.3",
 		"react": "19.2.1",
 		"react-dom": "19.2.1",
