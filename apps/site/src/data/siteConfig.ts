@@ -90,6 +90,7 @@ export const navGuide = {
     '  armory     → Projects / Arsenal',
     '  media      → Media Log',
     '  comms      → Links / Contact',
+    '  guestbook  → Sign the guestbook',
     '  terminal   → Command line',
     '',
     'Open terminal with Ctrl+` at any time.',
@@ -126,6 +127,7 @@ export const desktopApps: DesktopApp[] = [
     defaultPos: { x: 19, y: 7 },
     svgIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h3.5l2 2H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`,
   },
+  { id: 'guestbook', route: '/guestbook', glyph: '✎', label: 'guestbook', windowTitle: 'GUESTBOOK', defaultSize: { w: 75, h: 85 }, defaultPos: { x: 12, y: 5 } },
   { id: 'readme', route: '', glyph: '[]', label: 'readme', windowTitle: 'README', defaultSize: { w: 42, h: 55 }, defaultPos: { x: 52, y: 12 } },
   { id: 'settings', route: '', glyph: '::', label: 'settings', windowTitle: 'SETTINGS', defaultSize: { w: 58, h: 72 }, defaultPos: { x: 20, y: 10 } },
 ]

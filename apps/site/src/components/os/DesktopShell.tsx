@@ -16,6 +16,8 @@ import { SettingsApp } from './apps/SettingsApp'
 import { NotesApp } from './apps/NotesApp'
 import { NoteViewerApp } from './apps/NoteViewerApp'
 import { BrowserApp } from './apps/BrowserApp'
+import { GuestbookApp } from './apps/GuestbookApp'
+import { GuestbookEditorApp } from './apps/GuestbookEditorApp'
 import {
   buildCustomThemeVariables,
   DEFAULT_CUSTOM_THEME,
@@ -33,6 +35,8 @@ export type StaticAppId =
   | 'armory'
   | 'media'
   | 'comms'
+  | 'guestbook'
+  | 'guestbook-editor'
   | 'readme'
   | 'terminal'
   | 'settings'
@@ -105,6 +109,7 @@ function reducer(state: WindowState[], action: Action): WindowState[] {
 const EXTRA_APPS: Record<string, { title: string; icon: string; w: number; h: number; x: number; y: number }> = {
   terminal: { title: 'terminal', icon: '>_', w: 65, h: 70, x: 18, y: 10 },
   'note-viewer': { title: 'note', icon: '//', w: 55, h: 72, x: 22, y: 8 },
+  'guestbook-editor': { title: 'SIGN GUESTBOOK', icon: '✎', w: 70, h: 82, x: 15, y: 6 },
 }
 
 function createWindow(appId: AppId, zIndex: number, maximized = false, meta?: Record<string, unknown>): WindowState {
@@ -147,7 +152,7 @@ function createWindow(appId: AppId, zIndex: number, maximized = false, meta?: Re
   }
 }
 
-const FULL_BLEED_APPS = new Set<string>(['gazette', 'terminal', 'notes', 'note-viewer'])
+const FULL_BLEED_APPS = new Set<string>(['gazette', 'terminal', 'notes', 'note-viewer', 'guestbook', 'guestbook-editor'])
 
 // Helper to check if an app should be full-bleed (includes all webapp-* apps)
 function isFullBleedApp(appId: string): boolean {
@@ -423,6 +428,15 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
         if (!note) return null
         return <NoteViewerApp note={note} />
       }
+      case 'guestbook':
+        return (
+          <GuestbookApp
+            serverData={merged}
+            onOpenEditor={() => openWindow('guestbook-editor')}
+          />
+        )
+      case 'guestbook-editor':
+        return <GuestbookEditorApp />
       case 'settings':
         return (
           <SettingsApp

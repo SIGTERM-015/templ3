@@ -86,6 +86,7 @@ export const HELP_TABLE = `Available commands:
   open <app>      Open an application by name
   ./<app>         Run an application (e.g. ./gazette)
   goto <route>    Navigate to a page (e.g. goto /dossier)
+  guestbook       Open the guestbook application
   cat sigterm.txt Read operator bio
   whoami          Display operator info
   neofetch        System info with ASCII art

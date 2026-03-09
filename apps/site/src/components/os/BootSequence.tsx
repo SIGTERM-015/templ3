@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 const BOOT_LINES = [
-  'TEMPL3 BIOS v6.6.6',
+  'TEMPL3',
   'Copyright (C) Sigterm Industries',
   '',
   'Checking memory... 640K OK',
@@ -10,11 +10,11 @@ const BOOT_LINES = [
   '  GPU: AMBER-CRT Phosphor Adapter',
   '  NET: Ghost Protocol v3.14',
   '',
-  'Loading TEMPL3 OS kernel...',
+  'Loading TEMPL3 kernel...',
   'Mounting /dev/sanctum...',
   'Initializing sigterm daemon...',
   '',
-  '[  OK  ] Started Soviet Cyberpunk Sanctum',
+  '[  OK  ] Started filsistem',
   '[  OK  ] Reached target: Desktop',
   '',
   'Welcome, Operator.',

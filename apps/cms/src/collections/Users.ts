@@ -5,7 +5,9 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
-  auth: true,
+  auth: {
+    useAPIKey: true,
+  },
   fields: [
     {
       name: 'displayName',
@@ -36,6 +38,10 @@ export const Users: CollectionConfig = {
         {
           label: 'Editor',
           value: 'editor',
+        },
+        {
+          label: 'API',
+          value: 'api',
         },
       ],
       required: true,

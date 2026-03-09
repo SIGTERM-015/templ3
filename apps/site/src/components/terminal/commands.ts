@@ -20,7 +20,7 @@ export type TerminalConfig = {
 const COMMANDS = [
   'help', 'whoami', 'neofetch', 'ls', 'cd', 'cat', 'secret', 'hack',
   'sudo', 'ping', 'nmap', 'clear', 'exit', 'echo', 'pwd', 'date', 'uname',
-  'open', 'apps', 'goto',
+  'open', 'apps', 'goto', 'guestbook',
 ]
 
 const HOME_FILES = [
@@ -71,7 +71,7 @@ export function getCompletions(input: string, config?: TerminalConfig): string[]
     }
 
     case 'goto': {
-      const routes = ['/', '/dossier', '/gazette', '/armory', '/media', '/comms', '/notes', '/readme']
+      const routes = ['/', '/dossier', '/gazette', '/armory', '/media', '/comms', '/notes', '/guestbook', '/readme']
       return routes.filter(r => r.startsWith(lastArg))
     }
 
@@ -272,6 +272,9 @@ Codename:  ${siteName}`
 
     case 'nmap':
       return { output: NMAP_OUTPUT }
+
+    case 'guestbook':
+      return { output: 'Opening guestbook...', action: 'open_app', appId: 'guestbook' }
 
     case 'clear':
       return { output: '', action: 'clear' }

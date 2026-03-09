@@ -4,7 +4,7 @@ import { slugField } from '../fields/slug'
 export const WebApps: CollectionConfig = {
   slug: 'web-apps',
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => Boolean(user),
   },
   admin: {
     defaultColumns: ['title', 'slug', 'url', 'enabled'],

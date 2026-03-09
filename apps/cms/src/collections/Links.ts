@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const Links: CollectionConfig = {
   slug: 'links',
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => Boolean(user),
   },
   admin: {
     defaultColumns: ['label', 'platform', 'featured'],

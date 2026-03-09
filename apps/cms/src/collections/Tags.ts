@@ -5,7 +5,7 @@ import { slugField } from '../fields/slug'
 export const Tags: CollectionConfig = {
   slug: 'tags',
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => Boolean(user),
   },
   admin: {
     useAsTitle: 'name',

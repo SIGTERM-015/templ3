@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const ProjectStatuses: CollectionConfig = {
   slug: 'project-statuses',
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => Boolean(user),
   },
   admin: {
     group: 'Config',

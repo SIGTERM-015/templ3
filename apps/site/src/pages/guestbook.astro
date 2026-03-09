@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { getGuestbookEntries, getSiteIdentity, getWebApps } from '../lib/cms'
+
+export const prerender = false
+
+const [guestbookEntries, siteIdentity, webApps] = await Promise.all([
+  getGuestbookEntries(),
+  getSiteIdentity(),
+  getWebApps(),
+])
+---
+
+<Layout
+  title={siteIdentity?.siteName ? `Guestbook | ${siteIdentity.siteName}` : 'Guestbook | Templ3'}
+  description="Sign the guestbook — leave a drawing, message, or embed."
+  initialApp="guestbook"
+  serverData={JSON.stringify({ guestbookEntries, siteIdentity, webApps })}
+/>

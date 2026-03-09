@@ -780,6 +780,7 @@ watch -n 1 'ps aux | grep nginx'
         { line: '  media      → Favourite Media' },
         { line: '  comms      → Links / Contact' },
         { line: '  notes      → Markdown notes folder' },
+        { line: '  guestbook  → Sign the guestbook' },
         { line: '  terminal   → Command line' },
         { line: '' },
         { line: 'Open terminal with Ctrl+` at any time.' },

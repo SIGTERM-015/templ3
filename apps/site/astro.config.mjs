@@ -1,12 +1,13 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
+import clerk from '@clerk/astro';
 
 import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react()],
+  integrations: [clerk(), react()],
   adapter: cloudflare({
     platformProxy: {
       enabled: true
