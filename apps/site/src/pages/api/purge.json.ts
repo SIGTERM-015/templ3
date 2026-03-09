@@ -8,6 +8,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const secret = runtime?.env?.PURGE_SECRET || import.meta.env.PURGE_SECRET
   const auth = request.headers.get('Authorization')
 
+  console.log('Purge request received', { 
+    hasSecret: !!secret, 
+    authMatch: auth === `Bearer ${secret}`,
+    hasCaches: typeof caches !== 'undefined',
+    hasDefault: typeof caches !== 'undefined' && typeof caches.default !== 'undefined'
+  })
+
   if (!secret || auth !== `Bearer ${secret}`) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
