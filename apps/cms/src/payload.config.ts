@@ -65,6 +65,24 @@ const cloudflare =
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true })
 
+const resolveEnv = async (key: string) => {
+  // @ts-expect-error - cloudflare context is not fully typed yet
+  const value = cloudflare?.env?.[key]
+  if (value && typeof value === 'object' && 'get' in value) {
+    return await value.get()
+  }
+  return (value as string) || process.env[key]
+}
+
+const payloadSecret = process.env.PAYLOAD_SECRET || await resolveEnv('PAYLOAD_SECRET') || ''
+const databaseUrl = process.env.DATABASE_URL || await resolveEnv('DATABASE_URL') || ''
+const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || await resolveEnv('NEXT_PUBLIC_SERVER_URL') || undefined
+const smtpHost = process.env.SMTP_HOST || await resolveEnv('SMTP_HOST') || undefined
+const smtpPort = process.env.SMTP_PORT || await resolveEnv('SMTP_PORT') || 587
+const smtpUser = process.env.SMTP_USER || await resolveEnv('SMTP_USER') || undefined
+const smtpPass = process.env.SMTP_PASS || await resolveEnv('SMTP_PASS') || undefined
+const smtpFrom = process.env.SMTP_FROM || await resolveEnv('SMTP_FROM') || 'cms@sigterm.vodka'
+
 export default buildConfig({
   admin: {
     meta: {
@@ -99,23 +117,23 @@ export default buildConfig({
   ],
   globals: [SiteIdentity],
   editor: lexicalEditor(),
-  serverURL: process.env.NEXT_PUBLIC_SERVER_URL,
-  secret: process.env.PAYLOAD_SECRET || '',
+  serverURL: serverUrl,
+  secret: payloadSecret,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   logger: isProduction ? cloudflareLogger : undefined,
-  email: process.env.SMTP_HOST
+  email: smtpHost
     ? nodemailerAdapter({
-        defaultFromAddress: process.env.SMTP_FROM || 'cms@sigterm.vodka',
+        defaultFromAddress: smtpFrom,
         defaultFromName: 'Templ3 CMS',
         transportOptions: {
-          host: process.env.SMTP_HOST,
-          port: Number(process.env.SMTP_PORT) || 587,
-          auth: process.env.SMTP_USER
+          host: smtpHost,
+          port: Number(smtpPort) || 587,
+          auth: smtpUser
             ? {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
+                user: smtpUser,
+                pass: smtpPass,
               }
             : undefined,
         },
@@ -124,7 +142,7 @@ export default buildConfig({
   db: postgresAdapter({
     push: process.env.NODE_ENV !== 'production',
     pool: {
-      connectionString: process.env.DATABASE_URL || '',
+      connectionString: databaseUrl,
       maxUses: process.env.NODE_ENV === 'production' ? 1 : undefined,
     },
   }),
