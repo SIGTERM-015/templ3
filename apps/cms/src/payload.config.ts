@@ -62,8 +62,21 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
     .catch(() => ({ env: {} as CloudflareContext['env'] } as CloudflareContext))
 }
 
-const cloudflare =
-  isCLI || !isProduction ? await getCloudflareContextFromWrangler() : await getCloudflareContext({ async: true })
+const getCloudflare = async (): Promise<CloudflareContext> => {
+  if (isCLI) return { env: {} as CloudflareContext['env'] } as CloudflareContext
+  try {
+    if (!isProduction) {
+      return await getCloudflareContextFromWrangler()
+    }
+    return await getCloudflareContext({ async: true })
+  } catch (_err) {
+    // This is expected during build when miniflare tries to load deleted_classes without the class present
+    console.warn('Skipping Cloudflare context (expected during build)')
+    return { env: {} as CloudflareContext['env'] } as CloudflareContext
+  }
+}
+
+const cloudflare = await getCloudflare()
 
 export default buildConfig({
   admin: {
