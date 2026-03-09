@@ -11,7 +11,10 @@
     "deploy:site": "pnpm --dir apps/site run deploy",
     "deploy:cms": "pnpm --dir apps/cms run cf:deploy",
     "preview:cms": "pnpm --dir apps/cms run preview:deploy",
-    "generate:cms-types": "pnpm --dir apps/cms run generate:types"
+    "generate:cms-types": "pnpm --dir apps/cms run generate:types",
+    "cf:build:cms": "pnpm build:cms && pnpm --dir apps/cms exec opennextjs-cloudflare build --skipNextBuild",
+    "cf:deploy:cms": "pnpm --dir apps/cms exec wrangler deploy",
+    "cf:upload:cms": "pnpm --dir apps/cms exec wrangler versions upload"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

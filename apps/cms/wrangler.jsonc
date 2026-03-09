@@ -32,28 +32,7 @@
     "R2_REGION": "auto",
     "R2_ENDPOINT": "https://5a8a68f51a16d9f4168b0ef57fc22ac4.eu.r2.cloudflarestorage.com",
     "SMTP_HOST": "smtp.protonmail.ch",
-    "SMTP_PORT": "587"
-  },
-  "secrets_store_secrets": [
-    {
-      "binding": "DATABASE_URL",
-      "store_id": "9bbd052d61d14736b8b75c325de3c23e",
-      "secret_name": "templ3-cms-neon-connection-string"
-    },
-    {
-      "binding": "PAYLOAD_SECRET",
-      "store_id": "9bbd052d61d14736b8b75c325de3c23e",
-      "secret_name": "templ3-cms-payload-secret"
-    },
-    {
-      "binding": "SMTP_USER",
-      "store_id": "9bbd052d61d14736b8b75c325de3c23e",
-      "secret_name": "templ3-cms-smtp-user"
-    },
-    {
-      "binding": "SMTP_PASS",
-      "store_id": "9bbd052d61d14736b8b75c325de3c23e",
-      "secret_name": "templ3-cms-smtp-password"
-    }
-  ]
+    "SMTP_PORT": "587",
+    "SMTP_USER": "cms@sigterm.vodka"
+  }
 }

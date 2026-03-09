@@ -65,23 +65,14 @@ const cloudflare =
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true })
 
-const resolveEnv = async (key: string) => {
-  // @ts-expect-error - cloudflare context is not fully typed yet
-  const value = cloudflare?.env?.[key]
-  if (value && typeof value === 'object' && 'get' in value) {
-    return await value.get()
-  }
-  return (value as string) || process.env[key]
-}
-
-const payloadSecret = process.env.PAYLOAD_SECRET || await resolveEnv('PAYLOAD_SECRET') || ''
-const databaseUrl = process.env.DATABASE_URL || await resolveEnv('DATABASE_URL') || ''
-const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || await resolveEnv('NEXT_PUBLIC_SERVER_URL') || undefined
-const smtpHost = process.env.SMTP_HOST || await resolveEnv('SMTP_HOST') || undefined
-const smtpPort = process.env.SMTP_PORT || await resolveEnv('SMTP_PORT') || 587
-const smtpUser = process.env.SMTP_USER || await resolveEnv('SMTP_USER') || undefined
-const smtpPass = process.env.SMTP_PASS || await resolveEnv('SMTP_PASS') || undefined
-const smtpFrom = process.env.SMTP_FROM || await resolveEnv('SMTP_FROM') || 'cms@sigterm.vodka'
+const payloadSecret = process.env.PAYLOAD_SECRET || ''
+const databaseUrl = process.env.DATABASE_URL || ''
+const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || undefined
+const smtpHost = process.env.SMTP_HOST || undefined
+const smtpPort = process.env.SMTP_PORT || 587
+const smtpUser = process.env.SMTP_USER || undefined
+const smtpPass = process.env.SMTP_PASS || undefined
+const smtpFrom = process.env.SMTP_FROM || 'cms@sigterm.vodka'
 
 export default buildConfig({
   admin: {
