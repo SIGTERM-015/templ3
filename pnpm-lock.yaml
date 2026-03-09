@@ -16,12 +16,15 @@ importers:
       '@cloudflare/containers':
         specifier: ^0.1.1
         version: 0.1.1
+      '@neondatabase/serverless':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@opennextjs/cloudflare':
         specifier: 1.11.0
         version: 1.11.0(wrangler@4.71.0(@cloudflare/workers-types@4.20260307.1))
       '@payloadcms/db-postgres':
         specifier: 3.79.0
-        version: 3.79.0(@cloudflare/workers-types@4.20260307.1)(payload@3.79.0(graphql@16.13.1)(typescript@5.7.3))
+        version: 3.79.0(@cloudflare/workers-types@4.20260307.1)(@neondatabase/serverless@1.0.2)(payload@3.79.0(graphql@16.13.1)(typescript@5.7.3))
       '@payloadcms/email-nodemailer':
         specifier: ^3.79.0
         version: 3.79.0(payload@3.79.0(graphql@16.13.1)(typescript@5.7.3))
@@ -2021,6 +2024,10 @@ packages:
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
+
+  '@neondatabase/serverless@1.0.2':
+    resolution: {integrity: sha512-I5sbpSIAHiB+b6UttofhrN/UJXII+4tZPAq1qugzwCwLIL8EZLV7F/JyHUrEIiGgQpEXzpnjlJ+zwcEhheGvCw==}
+    engines: {node: '>=19.0.0'}
 
   '@next/env@15.4.11':
     resolution: {integrity: sha512-mIYp/091eYfPFezKX7ZPTWqrmSXq+ih6+LcUyKvLmeLQGhlPtot33kuEOd4U+xAA7sFfj21+OtCpIZx0g5SpvQ==}
@@ -9526,6 +9533,11 @@ snapshots:
       '@tybys/wasm-util': 0.10.1
     optional: true
 
+  '@neondatabase/serverless@1.0.2':
+    dependencies:
+      '@types/node': 22.19.9
+      '@types/pg': 8.18.0
+
   '@next/env@15.4.11': {}
 
   '@next/env@15.5.12': {}
@@ -9639,13 +9651,13 @@ snapshots:
 
   '@oslojs/encoding@1.1.0': {}
 
-  '@payloadcms/db-postgres@3.79.0(@cloudflare/workers-types@4.20260307.1)(payload@3.79.0(graphql@16.13.1)(typescript@5.7.3))':
+  '@payloadcms/db-postgres@3.79.0(@cloudflare/workers-types@4.20260307.1)(@neondatabase/serverless@1.0.2)(payload@3.79.0(graphql@16.13.1)(typescript@5.7.3))':
     dependencies:
-      '@payloadcms/drizzle': 3.79.0(@cloudflare/workers-types@4.20260307.1)(@types/pg@8.10.2)(payload@3.79.0(graphql@16.13.1)(typescript@5.7.3))(pg@8.16.3)
+      '@payloadcms/drizzle': 3.79.0(@cloudflare/workers-types@4.20260307.1)(@neondatabase/serverless@1.0.2)(@types/pg@8.10.2)(payload@3.79.0(graphql@16.13.1)(typescript@5.7.3))(pg@8.16.3)
       '@types/pg': 8.10.2
       console-table-printer: 2.12.1
       drizzle-kit: 0.31.7
-      drizzle-orm: 0.44.7(@cloudflare/workers-types@4.20260307.1)(@types/pg@8.10.2)(pg@8.16.3)
+      drizzle-orm: 0.44.7(@cloudflare/workers-types@4.20260307.1)(@neondatabase/serverless@1.0.2)(@types/pg@8.10.2)(pg@8.16.3)
       payload: 3.79.0(graphql@16.13.1)(typescript@5.7.3)
       pg: 8.16.3
       prompts: 2.4.2
@@ -9682,11 +9694,11 @@ snapshots:
       - sqlite3
       - supports-color
 
-  '@payloadcms/drizzle@3.79.0(@cloudflare/workers-types@4.20260307.1)(@types/pg@8.10.2)(payload@3.79.0(graphql@16.13.1)(typescript@5.7.3))(pg@8.16.3)':
+  '@payloadcms/drizzle@3.79.0(@cloudflare/workers-types@4.20260307.1)(@neondatabase/serverless@1.0.2)(@types/pg@8.10.2)(payload@3.79.0(graphql@16.13.1)(typescript@5.7.3))(pg@8.16.3)':
     dependencies:
       console-table-printer: 2.12.1
       dequal: 2.0.3
-      drizzle-orm: 0.44.7(@cloudflare/workers-types@4.20260307.1)(@types/pg@8.10.2)(pg@8.16.3)
+      drizzle-orm: 0.44.7(@cloudflare/workers-types@4.20260307.1)(@neondatabase/serverless@1.0.2)(@types/pg@8.10.2)(pg@8.16.3)
       payload: 3.79.0(graphql@16.13.1)(typescript@5.7.3)
       prompts: 2.4.2
       to-snake-case: 1.0.0
@@ -11824,9 +11836,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.7(@cloudflare/workers-types@4.20260307.1)(@types/pg@8.10.2)(pg@8.16.3):
+  drizzle-orm@0.44.7(@cloudflare/workers-types@4.20260307.1)(@neondatabase/serverless@1.0.2)(@types/pg@8.10.2)(pg@8.16.3):
     optionalDependencies:
       '@cloudflare/workers-types': 4.20260307.1
+      '@neondatabase/serverless': 1.0.2
       '@types/pg': 8.10.2
       pg: 8.16.3
 

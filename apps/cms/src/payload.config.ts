@@ -66,7 +66,10 @@ const cloudflare =
     : await getCloudflareContext({ async: true })
 
 const payloadSecret = process.env.PAYLOAD_SECRET || ''
-const databaseUrl = process.env.DATABASE_URL || ''
+// In production, use Hyperdrive connectionString; in dev, use DATABASE_URL from env
+const databaseUrl = (isProduction && cloudflare?.env?.HYPERDRIVE?.connectionString)
+  ? cloudflare.env.HYPERDRIVE.connectionString
+  : process.env.DATABASE_URL || ''
 const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || undefined
 const smtpHost = process.env.SMTP_HOST || undefined
 const smtpPort = process.env.SMTP_PORT || 587
@@ -132,10 +135,7 @@ export default buildConfig({
     : undefined,
   db: postgresAdapter({
     push: process.env.NODE_ENV !== 'production',
-    pool: {
-      connectionString: databaseUrl,
-      maxUses: process.env.NODE_ENV === 'production' ? 1 : undefined,
-    },
+    pool: { connectionString: databaseUrl },
   }),
   plugins: [
     r2Storage({

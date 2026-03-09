@@ -26,6 +26,12 @@
       "bucket_name": "templ3-media"
     }
   ],
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "1e343f3a5a2a4cf4bf9936e0469fb564"
+    }
+  ],
   "vars": {
     "NEXT_PUBLIC_SERVER_URL": "https://cms.sigterm.vodka",
     "SITE_URL": "https://sigterm.vodka",
