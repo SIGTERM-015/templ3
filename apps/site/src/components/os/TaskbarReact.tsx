@@ -13,9 +13,10 @@ type Props = {
   focusedId?: string
   onFocusWindow: (id: string) => void
   onOpenTerminal: () => void
+  onToggleMenu?: () => void
 }
 
-export function TaskbarReact({ windows, focusedId, onFocusWindow, onOpenTerminal }: Props) {
+export function TaskbarReact({ windows, focusedId, onFocusWindow, onOpenTerminal, onToggleMenu }: Props) {
   const [clock, setClock] = useState('')
 
   useEffect(() => {
@@ -33,10 +34,10 @@ export function TaskbarReact({ windows, focusedId, onFocusWindow, onOpenTerminal
   return (
     <div className="taskbar">
       <div className="taskbar-start">
-        <span className="taskbar-start-btn">
+        <button className="taskbar-start-btn" onClick={onToggleMenu} type="button">
           <img src="/sigterm-logo.svg" alt="" className="taskbar-logo" />
           {site.name}
-        </span>
+        </button>
       </div>
       <div className="taskbar-apps">
         {windows.map(w => (

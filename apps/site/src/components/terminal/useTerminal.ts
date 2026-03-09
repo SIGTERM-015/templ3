@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
-import { executeCommand, type CommandResult, type TerminalConfig } from './commands'
-import { SIGTERM_SKULL } from './ascii'
+import { executeCommand, getCompletions, type CommandResult, type TerminalConfig } from './commands'
+import { SIGTERM_SKULL, SIGTERM_SKULL_MOBILE } from './ascii'
 
 export type TerminalLine = {
   id: number
@@ -8,10 +8,21 @@ export type TerminalLine = {
   content: string
 }
 
+export type TabCompleteResult = {
+  completed: string
+  suggestions: string[]
+}
+
+function isMobile(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.innerWidth < 768
+}
+
 function buildInitialLines(bootMessage: string): TerminalLine[] {
   const lines: TerminalLine[] = []
   let id = 0
-  for (const line of SIGTERM_SKULL.split('\n')) {
+  const skull = isMobile() ? SIGTERM_SKULL_MOBILE : SIGTERM_SKULL
+  for (const line of skull.split('\n')) {
     lines.push({ id: id++, type: 'output', content: line })
   }
   lines.push({ id: id++, type: 'output', content: bootMessage })
@@ -40,7 +51,9 @@ export function useTerminal(config?: TerminalConfig) {
     (value: string): CommandResult => {
       addLine('input', `${prompt} ${value}`)
 
-      const result = executeCommand(value, config)
+      // Merge isMobile into config for command execution
+      const fullConfig = { ...config, isMobile: isMobile() }
+      const result = executeCommand(value, fullConfig)
 
       if (result.action === 'clear') {
         setLines([])
@@ -84,12 +97,54 @@ export function useTerminal(config?: TerminalConfig) {
     [history, historyIndex]
   )
 
+  const tabComplete = useCallback(
+    (currentInput: string): TabCompleteResult => {
+      const suggestions = getCompletions(currentInput, config)
+
+      if (suggestions.length === 0) {
+        return { completed: currentInput, suggestions: [] }
+      }
+
+      if (suggestions.length === 1) {
+        // Single match - complete it fully
+        const parts = currentInput.trim().split(/\s+/)
+        if (parts.length <= 1) {
+          // Completing a command or ./app
+          return { completed: suggestions[0] + ' ', suggestions: [] }
+        } else {
+          // Completing an argument
+          parts[parts.length - 1] = suggestions[0]
+          return { completed: parts.join(' ') + ' ', suggestions: [] }
+        }
+      }
+
+      // Multiple matches - find common prefix and show suggestions
+      const commonPrefix = suggestions.reduce((prefix, suggestion) => {
+        while (!suggestion.startsWith(prefix)) {
+          prefix = prefix.slice(0, -1)
+        }
+        return prefix
+      }, suggestions[0])
+
+      const parts = currentInput.trim().split(/\s+/)
+      if (parts.length <= 1) {
+        return { completed: commonPrefix, suggestions }
+      } else {
+        parts[parts.length - 1] = commonPrefix
+        return { completed: parts.join(' '), suggestions }
+      }
+    },
+    [config]
+  )
+
   return {
     lines,
     input,
     setInput,
     submit,
     navigateHistory,
+    tabComplete,
     prompt,
+    addLine,
   }
 }

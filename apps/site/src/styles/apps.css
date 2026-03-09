@@ -854,6 +854,13 @@
   color: var(--amber);
 }
 
+.mediapp-filter__icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(67%) sepia(89%) saturate(433%) hue-rotate(2deg) brightness(103%) contrast(103%);
+}
+
 .mediapp-loading {
   padding: var(--space-lg);
   text-align: center;
@@ -907,8 +914,15 @@
 }
 
 .mediapp-card__placeholder {
-  font-size: 28px;
-  opacity: 0.3;
+    font-size: var(--text-xl);
+    color: var(--faded);
+  }
+
+.mediapp-card__type-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(67%) sepia(89%) saturate(433%) hue-rotate(2deg) brightness(103%) contrast(103%);
 }
 
 .mediapp-card__info {
@@ -979,6 +993,12 @@
   font-weight: 700;
   line-height: 1.2;
   margin: 0;
+}
+
+.mediapp-detail__creator {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--muted);
 }
 
 .mediapp-detail__tags {
@@ -1272,19 +1292,40 @@
   position: relative;
 }
 
+/* Shared ASCII font settings - strictly monospace with all ligatures disabled */
+.term-line--input,
+.term-line--output,
+.term-prompt,
+.term-input,
+.term-bsod__text,
+.term-bsod__hint {
+  font-family: var(--font-ascii);
+  /* Disable ALL ligatures and contextual alternates for true monospace */
+  font-variant-ligatures: none;
+  font-feature-settings: 'liga' 0, 'clig' 0, 'dlig' 0, 'hlig' 0, 'calt' 0;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent any letter-spacing adjustments */
+  letter-spacing: 0;
+  /* Prevent text scaling/adjustment */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 .term-line--input {
-  font-family: var(--font-mono);
   font-size: var(--text-sm);
   color: var(--terminal);
-  line-height: 1.6;
+  line-height: 1.4;
 }
 
 .term-line--output {
-  font-family: var(--font-mono);
   font-size: var(--text-sm);
   color: var(--terminal-dim);
-  line-height: 1.6;
-  white-space: pre-wrap;
+  line-height: 1.2;
+  white-space: pre;
+  overflow-x: hidden;
 }
 
 .term-input-row {
@@ -1297,7 +1338,6 @@
 }
 
 .term-prompt {
-  font-family: var(--font-mono);
   font-size: var(--text-sm);
   color: var(--terminal);
   white-space: nowrap;
@@ -1305,7 +1345,6 @@
 
 .term-input {
   flex: 1;
-  font-family: var(--font-mono);
   font-size: var(--text-sm);
   color: var(--terminal);
   background: transparent;
@@ -1331,7 +1370,6 @@
 }
 
 .term-bsod__text {
-  font-family: var(--font-mono);
   font-size: 13px;
   color: var(--text-bright);
   white-space: pre;
@@ -1339,7 +1377,6 @@
 }
 
 .term-bsod__hint {
-  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-dim);
   margin-top: var(--space-lg);
@@ -1601,5 +1638,44 @@
 
   .settings-app__swatch-letter {
     font-size: 11px;
+  }
+
+  /* Terminal mobile improvements */
+  .term-output {
+    padding: var(--space-sm);
+  }
+
+  .term-line--input,
+  .term-line--output {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .term-input-row {
+    padding: var(--space-sm);
+  }
+
+  .term-prompt {
+    font-size: 11px;
+    max-width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .term-input {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+    min-height: 44px; /* Touch target size */
+  }
+
+  .term-bsod__text {
+    font-size: 8px;
+    padding: 0 var(--space-sm);
+    overflow-x: auto;
+    max-width: 100%;
+    line-height: 1.1;
+  }
+
+  .term-bsod__hint {
+    font-size: 10px;
   }
 }

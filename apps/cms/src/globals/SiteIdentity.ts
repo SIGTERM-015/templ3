@@ -165,14 +165,20 @@ export const SiteIdentity: GlobalConfig = {
       type: 'textarea',
       defaultValue:
         'Handle:    Sigterm / Sigterm015\nRole:      DevSecOps → Red Team\nStatus:    ACTIVE\nSpecialty: Pentesting, Bug Bounty, Automation\nDomain:    sigterm.vodka\nCodename:  Templ3',
-      admin: { description: 'Full text block output of the `whoami` terminal command' },
+      admin: {
+        description: 'Full text block output of the `whoami` terminal command',
+        style: {
+          fontFamily: 'Consolas, "SF Mono", "Liberation Mono", monospace',
+        },
+      },
     },
     {
       name: 'neofetchOutput',
-      type: 'textarea',
+      type: 'code',
       admin: {
+        language: 'plaintext',
         description:
-          'Full neofetch-style output string. Leave empty to use the hardcoded default in code.',
+          'Full neofetch-style ASCII art output. Leave empty to use the default. Use a strict monospace font for proper alignment.',
       },
     },
   ],

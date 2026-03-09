@@ -1,17 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CmsSiteIdentity } from '../../../lib/cms'
+import type { CmsSiteIdentity, CmsWebApp } from '../../../lib/cms'
 import { useTerminal, type TerminalLine } from '../../terminal/useTerminal'
-import { BSOD } from '../../terminal/ascii'
+import { BSOD, BSOD_MOBILE } from '../../terminal/ascii'
+
+function isMobile(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.innerWidth < 768
+}
 
 type Props = {
   onNavigate: (route: string) => void
   onOpenApp?: (appId: string) => void
   siteIdentity?: CmsSiteIdentity
+  webApps?: CmsWebApp[]
 }
 
-export function TerminalApp({ onNavigate, onOpenApp, siteIdentity }: Props) {
-  const config = { siteIdentity }
-  const { lines, input, setInput, submit, navigateHistory, prompt } = useTerminal(config)
+export function TerminalApp({ onNavigate, onOpenApp, siteIdentity, webApps }: Props) {
+  const config = {
+    siteIdentity,
+    webApps: webApps?.map(w => ({ slug: w.slug, name: w.name })) ?? null,
+  }
+  const { lines, input, setInput, submit, navigateHistory, tabComplete, prompt, addLine } = useTerminal(config)
   const [showBsod, setShowBsod] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
@@ -55,6 +64,18 @@ export function TerminalApp({ onNavigate, onOpenApp, siteIdentity }: Props) {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowUp') { e.preventDefault(); navigateHistory('up') }
     if (e.key === 'ArrowDown') { e.preventDefault(); navigateHistory('down') }
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      const result = tabComplete(input)
+      if (result.suggestions.length > 1) {
+        // Show suggestions as output
+        addLine('input', `${prompt} ${input}`)
+        addLine('output', result.suggestions.join('  '))
+      }
+      if (result.completed !== input) {
+        setInput(result.completed)
+      }
+    }
   }
 
   return (
@@ -88,7 +109,7 @@ export function TerminalApp({ onNavigate, onOpenApp, siteIdentity }: Props) {
 
       {showBsod && (
         <div className="term-bsod" onClick={() => setShowBsod(false)} role="button" tabIndex={0}>
-          <pre className="term-bsod__text">{BSOD}</pre>
+          <pre className="term-bsod__text">{isMobile() ? BSOD_MOBILE : BSOD}</pre>
           <span className="term-bsod__hint">Press anywhere to reboot sanctum...</span>
         </div>
       )}

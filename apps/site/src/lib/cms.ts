@@ -74,6 +74,7 @@ export type CmsFavMedia = {
   id: string
   title: string
   slug: string
+  creator?: string
   /** Now a relationship to media-statuses (populated object or string ID) */
   mediaType: CmsMediaType | string
   /** Now a relationship to media-statuses (populated object or string ID) */
@@ -81,8 +82,12 @@ export type CmsFavMedia = {
   rating?: number
   review?: string
   coverImage?: CmsMedia | string | null
+  /** Cover image URL from external API (fallback if no coverImage) */
+  externalCoverUrl?: string
   blogPost?: CmsPost | string | null
   externalReviewUrl?: string
+  /** Link to the item on the external site (IGDB, TMDB, AniList, etc.) */
+  externalUrl?: string
   completedAt?: string
   featured?: boolean
 }
@@ -119,6 +124,24 @@ export type CmsNote = {
   content: string
   publishedAt?: string
   order: number
+}
+
+export type CmsWebApp = {
+  id: string
+  title: string
+  slug: string
+  url: string
+  icon?: string
+  description?: string
+  defaultSize?: {
+    width?: number
+    height?: number
+  }
+  showAddressBar?: boolean
+  showInDesktop?: boolean
+  showInMenu?: boolean
+  enabled?: boolean
+  sortOrder?: number
 }
 
 // ─── Global: SiteIdentity ───────────────────────────────────────────────────
@@ -174,6 +197,7 @@ const COLLECTION_PATHS = {
   categories: '/api/categories?depth=1&limit=50&sort=name',
   favouriteMedia: '/api/favourite-media?depth=2&limit=50&where[_status][equals]=published&sort=-completedAt',
   notes: '/api/notes?depth=0&limit=100&where[_status][equals]=published&sort=order',
+  webApps: '/api/web-apps?depth=0&limit=50&where[enabled][equals]=true&sort=sortOrder',
   mediaTypes: '/api/media-types?depth=1&limit=50&sort=order',
   mediaStatuses: '/api/media-statuses?depth=1&limit=50&sort=order',
   projectStatuses: '/api/project-statuses?depth=1&limit=50&sort=order',
@@ -261,6 +285,10 @@ export async function getMediaStatuses(): Promise<CmsMediaStatus[]> {
 
 export async function getProjectStatuses(): Promise<CmsProjectStatus[]> {
   return readCollection<CmsProjectStatus>(COLLECTION_PATHS.projectStatuses, TTL.LONG)
+}
+
+export async function getWebApps(): Promise<CmsWebApp[]> {
+  return readCollection<CmsWebApp>(COLLECTION_PATHS.webApps, TTL.STANDARD)
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
