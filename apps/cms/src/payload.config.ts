@@ -135,7 +135,12 @@ export default buildConfig({
     : undefined,
   db: postgresAdapter({
     push: process.env.NODE_ENV !== 'production',
-    pool: { connectionString: databaseUrl },
+    pool: {
+      connectionString: databaseUrl,
+      // In Cloudflare Workers, connections cannot be reused across requests
+      // maxUses: 1 ensures each connection is used only once then discarded
+      ...(isProduction && { maxUses: 1 }),
+    },
   }),
   plugins: [
     r2Storage({
