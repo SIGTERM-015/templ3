@@ -10,6 +10,7 @@
     "build:cms": "pnpm --dir apps/cms run build",
     "deploy:site": "pnpm --dir apps/site run deploy",
     "deploy:cms": "pnpm --dir apps/cms run cf:deploy",
+    "preview:cms": "pnpm --dir apps/cms run preview:deploy",
     "generate:cms-types": "pnpm --dir apps/cms run generate:types"
   },
   "pnpm": {
