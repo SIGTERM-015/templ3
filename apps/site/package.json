@@ -15,6 +15,7 @@
 		"@astrojs/react": "^4.4.2",
 		"@clerk/astro": "^3.0.1",
 		"@excalidraw/excalidraw": "^0.18.0",
+		"@nanostores/react": "^1.0.0",
 		"@payloadcms/richtext-lexical": "3.79.0",
 		"@react-three/drei": "^10.7.7",
 		"@react-three/fiber": "^9.5.0",
