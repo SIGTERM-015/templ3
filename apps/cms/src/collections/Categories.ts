@@ -5,7 +5,7 @@ import { slugField } from '../fields/slug'
 export const Categories: CollectionConfig = {
   slug: 'categories',
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => Boolean(user),
   },
   admin: {
     useAsTitle: 'name',

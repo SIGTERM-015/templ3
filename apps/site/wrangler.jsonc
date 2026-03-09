@@ -25,7 +25,6 @@
 		}
 	],
 	"vars": {
-		"PUBLIC_CMS_URL": "https://cms.sigterm.vodka"
 	},
 	"secrets_store_secrets": [
 		{

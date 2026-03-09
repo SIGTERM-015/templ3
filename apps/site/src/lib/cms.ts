@@ -126,6 +126,21 @@ export type CmsNote = {
   order: number
 }
 
+export type CmsGuestbookEntry = {
+  id: string
+  authorName: string
+  authorAvatar?: string
+  authorDiscordId?: string
+  clerkUserId?: string
+  image: CmsMedia | string
+  message?: string
+  embedUrl?: string
+  embedType?: 'none' | 'spotify' | 'youtube'
+  status: 'pending' | 'approved' | 'rejected'
+  createdAt: string
+  updatedAt: string
+}
+
 export type CmsWebApp = {
   id: string
   title: string
@@ -182,6 +197,7 @@ type CollectionResponse<T> = {
 }
 
 const cmsBaseUrl = import.meta.env.PUBLIC_CMS_URL?.replace(/\/$/, '')
+const apiKey = import.meta.env.PAYLOAD_API_KEY
 
 const TTL = {
   SHORT: 300,    
@@ -198,6 +214,7 @@ const COLLECTION_PATHS = {
   favouriteMedia: '/api/favourite-media?depth=2&limit=50&where[_status][equals]=published&sort=-completedAt',
   notes: '/api/notes?depth=0&limit=100&where[_status][equals]=published&sort=order',
   webApps: '/api/web-apps?depth=0&limit=50&where[enabled][equals]=true&sort=sortOrder',
+  guestbookEntries: '/api/guestbook-entries?depth=1&limit=100&where[status][equals]=approved&sort=-createdAt',
   mediaTypes: '/api/media-types?depth=1&limit=50&sort=order',
   mediaStatuses: '/api/media-statuses?depth=1&limit=50&sort=order',
   projectStatuses: '/api/project-statuses?depth=1&limit=50&sort=order',
@@ -208,7 +225,11 @@ async function readCollection<T>(path: string, cacheTtl: number = TTL.STANDARD):
   if (!cmsBaseUrl) return []
 
   try {
+    const headers: HeadersInit = {}
+    if (apiKey) headers['Authorization'] = `users API-Key ${apiKey}`
+
     const response = await fetch(`${cmsBaseUrl}${path}`, {
+      headers,
       cf: { cacheTtl },
     } as RequestInit)
     if (!response.ok) return []
@@ -223,7 +244,11 @@ async function readGlobal<T>(path: string, cacheTtl: number = TTL.LONG): Promise
   if (!cmsBaseUrl) return null
 
   try {
+    const headers: HeadersInit = {}
+    if (apiKey) headers['Authorization'] = `users API-Key ${apiKey}`
+
     const response = await fetch(`${cmsBaseUrl}${path}`, {
+      headers,
       cf: { cacheTtl },
     } as RequestInit)
     if (!response.ok) return null
@@ -289,6 +314,10 @@ export async function getProjectStatuses(): Promise<CmsProjectStatus[]> {
 
 export async function getWebApps(): Promise<CmsWebApp[]> {
   return readCollection<CmsWebApp>(COLLECTION_PATHS.webApps, TTL.STANDARD)
+}
+
+export async function getGuestbookEntries(): Promise<CmsGuestbookEntry[]> {
+  return readCollection<CmsGuestbookEntry>(COLLECTION_PATHS.guestbookEntries, TTL.SHORT)
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

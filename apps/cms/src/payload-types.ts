@@ -77,6 +77,7 @@ export interface Config {
     'favourite-media': FavouriteMedia;
     notes: Note;
     'web-apps': WebApp;
+    'guestbook-entries': GuestbookEntry;
     'media-types': MediaType;
     'media-statuses': MediaStatus;
     'project-statuses': ProjectStatus;
@@ -97,6 +98,7 @@ export interface Config {
     'favourite-media': FavouriteMediaSelect<false> | FavouriteMediaSelect<true>;
     notes: NotesSelect<false> | NotesSelect<true>;
     'web-apps': WebAppsSelect<false> | WebAppsSelect<true>;
+    'guestbook-entries': GuestbookEntriesSelect<false> | GuestbookEntriesSelect<true>;
     'media-types': MediaTypesSelect<false> | MediaTypesSelect<true>;
     'media-statuses': MediaStatusesSelect<false> | MediaStatusesSelect<true>;
     'project-statuses': ProjectStatusesSelect<false> | ProjectStatusesSelect<true>;
@@ -155,11 +157,14 @@ export interface User {
    */
   avatar?: (number | null) | Media;
   handle?: string | null;
-  role: 'admin' | 'editor';
+  role: 'admin' | 'editor' | 'api';
   totpSecret?: string | null;
   hasTotp?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -613,6 +618,53 @@ export interface WebApp {
   createdAt: string;
 }
 /**
+ * Guestbook entries submitted by visitors. Approve to display on the site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guestbook-entries".
+ */
+export interface GuestbookEntry {
+  id: number;
+  /**
+   * Title of the entry
+   */
+  message: string;
+  /**
+   * Display name from Discord
+   */
+  authorName: string;
+  /**
+   * Avatar URL from Discord
+   */
+  authorAvatar?: string | null;
+  /**
+   * Discord user ID (for deduplication/banning)
+   */
+  authorDiscordId?: string | null;
+  /**
+   * Clerk user ID
+   */
+  clerkUserId?: string | null;
+  /**
+   * The canvas image (exported PNG from Excalidraw)
+   */
+  image: number | Media;
+  /**
+   * Optional Spotify or YouTube URL to embed alongside the entry
+   */
+  embedUrl?: string | null;
+  /**
+   * Auto-detected from embedUrl, or set manually
+   */
+  embedType?: ('none' | 'spotify' | 'youtube') | null;
+  /**
+   * Only approved entries are visible on the site
+   */
+  status: 'pending' | 'approved' | 'rejected';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -675,6 +727,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'web-apps';
         value: number | WebApp;
+      } | null)
+    | ({
+        relationTo: 'guestbook-entries';
+        value: number | GuestbookEntry;
       } | null)
     | ({
         relationTo: 'media-types';
@@ -743,6 +799,9 @@ export interface UsersSelect<T extends boolean = true> {
   hasTotp?: T;
   updatedAt?: T;
   createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
@@ -954,6 +1013,23 @@ export interface WebAppsSelect<T extends boolean = true> {
   showInMenu?: T;
   enabled?: T;
   sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guestbook-entries_select".
+ */
+export interface GuestbookEntriesSelect<T extends boolean = true> {
+  message?: T;
+  authorName?: T;
+  authorAvatar?: T;
+  authorDiscordId?: T;
+  clerkUserId?: T;
+  image?: T;
+  embedUrl?: T;
+  embedType?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

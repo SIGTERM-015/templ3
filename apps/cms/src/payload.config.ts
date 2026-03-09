@@ -40,6 +40,7 @@ import { Posts } from './collections/Posts'
 import { Projects } from './collections/Projects'
 import { Tags } from './collections/Tags'
 import { WebApps } from './collections/WebApps'
+import { GuestbookEntries } from './collections/GuestbookEntries'
 import { SiteIdentity } from './globals/SiteIdentity'
 import { mediaLookupEndpoint } from './endpoints/media-lookup'
 
@@ -126,6 +127,7 @@ export default buildConfig({
     FavouriteMedia,
     Notes,
     WebApps,
+    GuestbookEntries,
     MediaTypes,
     MediaStatuses,
     ProjectStatuses,

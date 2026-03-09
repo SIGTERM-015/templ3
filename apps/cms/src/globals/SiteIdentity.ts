@@ -3,7 +3,7 @@ import type { GlobalConfig } from 'payload'
 export const SiteIdentity: GlobalConfig = {
   slug: 'site-identity',
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => Boolean(user),
   },
   admin: {
     group: 'Site',
