@@ -3,8 +3,9 @@ import { purgeCache } from '../../lib/cms'
 
 export const prerender = false
 
-export const POST: APIRoute = async ({ request }) => {
-  const secret = import.meta.env.PURGE_SECRET
+export const POST: APIRoute = async ({ request, locals }) => {
+  const runtime = locals.runtime as { env?: { PURGE_SECRET?: string } } | undefined
+  const secret = runtime?.env?.PURGE_SECRET || import.meta.env.PURGE_SECRET
   const auth = request.headers.get('Authorization')
 
   if (!secret || auth !== `Bearer ${secret}`) {
