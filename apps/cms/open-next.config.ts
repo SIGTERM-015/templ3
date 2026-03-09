@@ -23,6 +23,9 @@ export default {
   },
   build: {
     esbuildOptions: (options: any) => {
+      // Add 'workerd' condition for pg-cloudflare to resolve correctly
+      // This fixes: "CloudflareSocket is not a constructor" error
+      options.conditions = ['workerd', ...(options.conditions || [])];
       options.logOverride = {
         ...options.logOverride,
         'direct-eval': 'silent',
