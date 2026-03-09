@@ -43,8 +43,7 @@
     "payload-totp": "^3.0.0",
     "pg": "^8.20.0",
     "react": "19.2.1",
-    "react-dom": "19.2.1",
-    "sharp": "0.34.2"
+    "react-dom": "19.2.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260307.1",

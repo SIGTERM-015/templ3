@@ -7,7 +7,6 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import { payloadTotp } from 'payload-totp'
-import sharp from 'sharp'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 
 import { Categories } from './collections/Categories'
@@ -129,7 +128,6 @@ export default buildConfig({
       maxUses: process.env.NODE_ENV === 'production' ? 1 : undefined,
     },
   }),
-  sharp: sharp as unknown as NonNullable<import('payload').Config['sharp']>,
   plugins: [
     r2Storage({
       enabled: Boolean(cloudflare?.env?.R2),
