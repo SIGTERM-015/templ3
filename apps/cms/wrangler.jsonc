@@ -46,21 +46,6 @@
       "secret_name": "templ3-cms-payload-secret"
     },
     {
-      "binding": "R2_ACCESS_KEY_ID",
-      "store_id": "9bbd052d61d14736b8b75c325de3c23e",
-      "secret_name": "templ3-cms-r2-access-key-id"
-    },
-    {
-      "binding": "R2_BUCKET",
-      "store_id": "9bbd052d61d14736b8b75c325de3c23e",
-      "secret_name": "templ3-cms-r2-bucket"
-    },
-    {
-      "binding": "R2_SECRET_ACCESS_KEY",
-      "store_id": "9bbd052d61d14736b8b75c325de3c23e",
-      "secret_name": "templ3-cms-r2-secret-access-key"
-    },
-    {
       "binding": "SMTP_USER",
       "store_id": "9bbd052d61d14736b8b75c325de3c23e",
       "secret_name": "templ3-cms-smtp-user"
