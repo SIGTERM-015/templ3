@@ -26,12 +26,13 @@
 		"postprocessing": "^6.38.3",
 		"react": "19.2.1",
 		"react-dom": "19.2.1",
-		"three": "^0.183.2"
+		"three": "^0.183.2",
+		"workers-og": "^0.0.27"
 	},
 	"devDependencies": {
+		"@types/node": "^25.3.5",
 		"@types/react": "^19.2.9",
 		"@types/react-dom": "^19.2.3",
-		"@types/node": "^25.3.5",
 		"wrangler": "^4.71.0"
 	}
 }
