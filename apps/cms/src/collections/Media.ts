@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
-    read: ({ req: { user } }) => Boolean(user),
+    read: () => true, // Public so the site can serve images to users directly
     create: ({ req: { user } }) => Boolean(user), // Let api, admin, editor create
     update: ({ req: { user } }) => user?.role === 'admin' || user?.role === 'editor',
     delete: ({ req: { user } }) => user?.role === 'admin' || user?.role === 'editor',
