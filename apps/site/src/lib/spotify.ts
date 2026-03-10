@@ -79,7 +79,8 @@ export async function getNowPlaying(
   try {
     const res = await fetch(NOW_PLAYING_URL, {
       headers: { Authorization: `Bearer ${accessToken}` },
-    })
+      cf: { cacheTtl: 120 },
+    } as RequestInit)
 
     if (res.status === 204 || res.status > 400) return null
 
@@ -102,7 +103,8 @@ export async function getRecentlyPlayed(
   try {
     const res = await fetch(RECENTLY_PLAYED_URL, {
       headers: { Authorization: `Bearer ${accessToken}` },
-    })
+      cf: { cacheTtl: 120 },
+    } as RequestInit)
 
     if (!res.ok) return null
 
