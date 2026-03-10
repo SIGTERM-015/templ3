@@ -1796,12 +1796,130 @@
 }
 
 .gb-card__embed-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   padding: 2px var(--space-sm) var(--space-xs);
   font-family: var(--font-mono);
   font-size: 9px;
   color: var(--magenta-bright);
   text-align: center;
   opacity: 0.7;
+}
+
+/* Embed type icon (Spotify / YouTube) */
+.gb-card__embed-type {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.gb-card__embed-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.gb-card__embed-icon--spotify {
+  color: oklch(70% 0.18 145);
+}
+
+.gb-card__embed-icon--youtube {
+  color: oklch(63% 0.25 27);
+}
+
+.gb-card__embed-hint .gb-card__embed-icon {
+  width: 10px;
+  height: 10px;
+}
+
+/* Image clickable state when expanded */
+.gb-card__image-wrap--clickable {
+  cursor: zoom-in;
+  position: relative;
+}
+
+.gb-card__image-zoom {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  background: oklch(0% 0 0 / 0.55);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease-out-quart);
+  pointer-events: none;
+}
+
+.gb-card__image-zoom svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-bright);
+}
+
+.gb-card__image-wrap--clickable:hover .gb-card__image-zoom {
+  opacity: 1;
+}
+
+/* ── Image Lightbox ── */
+.gb-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: oklch(0% 0 0 / 0.85);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  animation: gb-lightbox-fade-in 0.2s var(--ease-out-quart);
+}
+
+@keyframes gb-lightbox-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.gb-lightbox__close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  background: none;
+  border: 1px solid oklch(100% 0 0 / 0.2);
+  color: var(--text-bright);
+  font-size: 28px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+  transition: border-color 0.2s;
+}
+
+.gb-lightbox__close:hover {
+  border-color: oklch(100% 0 0 / 0.5);
+}
+
+.gb-lightbox__image {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  cursor: default;
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow-lg);
+  animation: gb-lightbox-scale-in 0.25s var(--ease-out-quart);
+}
+
+@keyframes gb-lightbox-scale-in {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 /* ── Guestbook Editor ── */
