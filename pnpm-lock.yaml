@@ -189,6 +189,12 @@ importers:
       '@types/node':
         specifier: ^25.3.5
         version: 25.3.5
+      '@types/react':
+        specifier: ^19.2.9
+        version: 19.2.9
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.9)
       wrangler:
         specifier: ^4.71.0
         version: 4.71.0(@cloudflare/workers-types@4.20260307.1)

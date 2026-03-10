@@ -29,6 +29,8 @@
 		"three": "^0.183.2"
 	},
 	"devDependencies": {
+		"@types/react": "^19.2.9",
+		"@types/react-dom": "^19.2.3",
 		"@types/node": "^25.3.5",
 		"wrangler": "^4.71.0"
 	}
