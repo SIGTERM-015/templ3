@@ -19,13 +19,20 @@ const GRID_SVG =
 
 const GRID_BG = `url('data:image/svg+xml;base64,${btoa(GRID_SVG)}')`
 
-const LOGO_DATA_URI = (() => {
+const LOGO_PATH_D = logoSvgRaw.match(/<path[^>]*\sd="([^"]+)"/)?.[1] ?? ''
+
+function logoDataUri(color: string): string {
   try {
-    return `data:image/svg+xml;base64,${btoa(logoSvgRaw)}`
+    if (!LOGO_PATH_D) return ''
+    const svg =
+      `<svg width="1024" height="1024" viewBox="0 0 1024 1024" ` +
+      `xmlns="http://www.w3.org/2000/svg"><path d="${LOGO_PATH_D}" ` +
+      `fill="${color}" stroke="${color}" /></svg>`
+    return `data:image/svg+xml;base64,${btoa(svg)}`
   } catch {
     return ''
   }
-})()
+}
 
 const FONT_URL =
   'https://cdn.jsdelivr.net/fontsource/fonts/monaspace-neon@latest/latin-400-normal.ttf'
@@ -141,14 +148,15 @@ type LogoOpts = {
 }
 
 function logoDiv(opts: LogoOpts): string {
-  const filter = opts.invert ? 'filter: invert(1);' : ''
-  const bg = LOGO_DATA_URI
-    ? `background-image: url('${LOGO_DATA_URI}'); background-size: contain; background-repeat: no-repeat;`
+  const logo = logoDataUri(opts.invert ? '#ffffff' : '#ff00ff')
+  const image = logo
+    ? `<img src="${logo}" width="${opts.width}" height="${opts.height}" ` +
+      `style="width: ${opts.width}px; height: ${opts.height}px; object-fit: contain;" />`
     : ''
   return (
     `<div style="display: flex; position: absolute; bottom: 60px; right: 60px; ` +
-    `width: ${opts.width}px; height: ${opts.height}px; z-index: 20; ${bg} ${filter} ` +
-    `opacity: ${opts.opacity};"></div>`
+    `width: ${opts.width}px; height: ${opts.height}px; z-index: 20; ` +
+    `opacity: ${opts.opacity};">${image}</div>`
   )
 }
 
@@ -161,11 +169,11 @@ export function dossierHtml(opts: {
   return (
     `<div style="display: flex; flex-direction: column; width: 1200px; height: 630px; ` +
     `background-color: #0d0d0d; background-image: ${GRID_BG}; color: #ffb800; ` +
-    `padding: 60px; position: relative;">` +
+    `position: relative;">` +
     `<div style="display: flex; width: 24px; height: 100%; background-color: #ff00ff; ` +
     `position: absolute; top: 0; left: 0;"></div>` +
     `<div style="display: flex; flex-direction: column; justify-content: center; ` +
-    `height: 100%; margin-left: 40px;">` +
+    `width: 100%; height: 100%; padding: 60px 60px 60px 100px;">` +
     `<span style="font-size: 24px; color: #ff00ff; margin-bottom: 10px;">` +
     `// OPERATOR PROFILE</span>` +
     `<h1 style="font-size: 110px; margin: 0; letter-spacing: -4px; line-height: 1;">` +
@@ -173,7 +181,7 @@ export function dossierHtml(opts: {
     `<p style="font-size: 32px; color: #888; margin-top: 30px; ` +
     `max-width: 800px; line-height: 1.4;">${escapeText(opts.description)}</p>` +
     `</div>` +
-    logoDiv({ width: 120, height: 120, opacity: 0.15 }) +
+    logoDiv({ width: 120, height: 120, opacity: 0.25 }) +
     `</div>`
   )
 }
@@ -187,11 +195,11 @@ export function arsenalHtml(opts: {
   return (
     `<div style="display: flex; flex-direction: column; width: 1200px; height: 630px; ` +
     `background-color: #0d0d0d; background-image: ${GRID_BG}; color: #ffb800; ` +
-    `padding: 60px; position: relative;">` +
+    `position: relative;">` +
     `<div style="display: flex; width: 24px; height: 100%; background-color: #00ffcc; ` +
     `position: absolute; top: 0; left: 0;"></div>` +
     `<div style="display: flex; flex-direction: column; justify-content: center; ` +
-    `height: 100%; margin-left: 40px;">` +
+    `width: 100%; height: 100%; padding: 60px 60px 60px 100px;">` +
     `<h1 style="font-size: 90px; margin: 0; letter-spacing: -2px; ` +
     `color: #00ffcc;">${escapeText(opts.title)}</h1>` +
     `<p style="font-size: 30px; color: #888; margin-top: 20px;">` +
@@ -205,7 +213,7 @@ export function arsenalHtml(opts: {
     `font-size: 24px;">Services</div>` +
     `</div>` +
     `</div>` +
-    logoDiv({ width: 120, height: 120, opacity: 0.15 }) +
+    logoDiv({ width: 120, height: 120, opacity: 0.25 }) +
     `</div>`
   )
 }
@@ -219,13 +227,12 @@ export function mediaHtml(opts: {
   return (
     `<div style="display: flex; flex-direction: column; width: 1200px; height: 630px; ` +
     `background-color: #0d0d0d; background-image: ${GRID_BG}; color: #ffb800; ` +
-    `padding: 60px; position: relative;">` +
+    `position: relative;">` +
     `<div style="display: flex; width: 24px; height: 100%; background-color: #ffb800; ` +
     `position: absolute; top: 0; left: 0;"></div>` +
     `<div style="display: flex; flex-direction: row; justify-content: space-between; ` +
-    `align-items: center; height: 100%;">` +
-    `<div style="display: flex; flex-direction: column; max-width: 600px; ` +
-    `margin-left: 40px;">` +
+    `align-items: center; width: 100%; height: 100%; padding: 60px 60px 60px 100px;">` +
+    `<div style="display: flex; flex-direction: column; max-width: 600px;">` +
     `<h1 style="font-size: 90px; margin: 0; letter-spacing: -2px; ` +
     `color: #ffb800;">${escapeText(opts.title)}</h1>` +
     `<p style="font-size: 30px; color: #888; margin-top: 20px;">` +
@@ -238,7 +245,7 @@ export function mediaHtml(opts: {
     `border: 1px solid #444; transform: translateY(40px);"></div>` +
     `</div>` +
     `</div>` +
-    logoDiv({ width: 80, height: 80, opacity: 0.15 }) +
+    logoDiv({ width: 80, height: 80, opacity: 0.25 }) +
     `</div>`
   )
 }
@@ -315,11 +322,13 @@ export function mediaItemHtml(opts: {
   return (
     `<div style="display: flex; flex-direction: row; width: 1200px; height: 630px; ` +
     `background-color: #0d0d0d; background-image: ${GRID_BG}; color: #ffb800; ` +
-    `padding: 60px; position: relative;">` +
+    `position: relative;">` +
     `<div style="display: flex; width: 24px; height: 100%; background-color: #ffb800; ` +
     `position: absolute; top: 0; left: 0;"></div>` +
+    `<div style="display: flex; flex-direction: row; justify-content: space-between; ` +
+    `align-items: center; width: 100%; height: 100%; padding: 35px 60px 35px 100px;">` +
     `<div style="display: flex; flex-direction: column; justify-content: center; ` +
-    `flex: 1; margin-left: 40px; max-width: 600px;">` +
+    `flex: 1; max-width: 600px;">` +
     `<span style="font-size: 24px; color: #ffb800; margin-bottom: 10px;">` +
     `// MEDIA</span>` +
     `<h1 style="font-size: 70px; margin: 0; color: #ffb800; line-height: 1.1;">` +
@@ -335,7 +344,8 @@ export function mediaItemHtml(opts: {
     `<div style="display: flex; width: 400px; height: 560px; overflow: hidden; ` +
     `background-color: #222; border: 1px solid #444;">${coverImage}</div>` +
     `</div>` +
-    logoDiv({ width: 80, height: 80, opacity: 0.15 }) +
+    `</div>` +
+    logoDiv({ width: 80, height: 80, opacity: 0.25 }) +
     `</div>`
   )
 }
