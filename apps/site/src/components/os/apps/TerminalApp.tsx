@@ -18,7 +18,7 @@ type Props = {
 export function TerminalApp({ onNavigate, onOpenApp, siteIdentity, webApps }: Props) {
   const config = {
     siteIdentity,
-    webApps: webApps?.map(w => ({ slug: w.slug, name: w.name })) ?? null,
+    webApps: webApps?.map(w => ({ slug: w.slug, name: w.title })) ?? null,
   }
   const { lines, input, setInput, submit, navigateHistory, tabComplete, prompt, addLine } = useTerminal(config)
   const [showBsod, setShowBsod] = useState(false)
