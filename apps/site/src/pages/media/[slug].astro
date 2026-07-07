@@ -1,0 +1,36 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import {
+  getFavouriteMedia,
+  getFavouriteMediaBySlug,
+  getMediaStatuses,
+  getMediaTypes,
+  getSiteIdentity,
+  getWebApps,
+} from '../../lib/cms'
+
+export const prerender = false
+
+const { slug } = Astro.params
+const [mediaItem, media, mediaTypes, mediaStatuses, siteIdentity, webApps] = await Promise.all([
+  slug ? getFavouriteMediaBySlug(slug) : null,
+  getFavouriteMedia(),
+  getMediaTypes(),
+  getMediaStatuses(),
+  getSiteIdentity(),
+  getWebApps(),
+])
+
+if (!mediaItem) {
+  return Astro.redirect('/media')
+}
+---
+
+<Layout
+  title={`${mediaItem.title} | ${siteIdentity?.siteName ?? 'Templ3'}`}
+  description={mediaItem.review || `${mediaItem.title} on ${siteIdentity?.siteName ?? 'Templ3'} Media.`}
+  ogImage={`/api/og/media/${slug}.png`}
+  initialApp="media"
+  serverData={JSON.stringify({ media, mediaItem, mediaTypes, mediaStatuses, siteIdentity, webApps })}
+  maximized={Astro.url.searchParams.has('maximized')}
+/>

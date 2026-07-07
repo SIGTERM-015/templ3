@@ -77,12 +77,14 @@ type NowGroup = {
 type Props = {
   serverData?: Record<string, unknown>
   onOpenApp?: (appId: string) => void
+  onUpdateRoute?: (route: string) => void
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function MediaApp({ serverData, onOpenApp }: Props) {
+export function MediaApp({ serverData, onOpenApp, onUpdateRoute }: Props) {
   const initialMedia = (serverData?.media as CmsFavMedia[]) ?? []
+  const initialMediaItem = (serverData?.mediaItem as CmsFavMedia) ?? null
   const initialMediaTypes = (serverData?.mediaTypes as CmsMediaType[]) ?? []
   const initialMediaStatuses = (serverData?.mediaStatuses as CmsMediaStatus[]) ?? []
 
@@ -91,7 +93,14 @@ export function MediaApp({ serverData, onOpenApp }: Props) {
   const [mediaStatuses, setMediaStatuses] = useState<CmsMediaStatus[]>(initialMediaStatuses)
   const [loading, setLoading] = useState(!initialMedia.length)
   const [filter, setFilter] = useState<string>('all')
-  const [selected, setSelected] = useState<CmsFavMedia | null>(null)
+  const [selected, setSelected] = useState<CmsFavMedia | null>(initialMediaItem)
+
+  // Sync window route with the deep-linked item on initial load
+  useEffect(() => {
+    if (initialMediaItem) {
+      onUpdateRoute?.(`/media/${initialMediaItem.slug}`)
+    }
+  }, [])
 
   // Fetch missing data client-side
   useEffect(() => {
@@ -221,7 +230,15 @@ export function MediaApp({ serverData, onOpenApp }: Props) {
   const ratingStars = (n: number) =>
     '★'.repeat(Math.round(n / 2)) + '☆'.repeat(5 - Math.round(n / 2))
 
-  const goBack = useCallback(() => setSelected(null), [])
+  const selectItem = useCallback((item: CmsFavMedia) => {
+    setSelected(item)
+    onUpdateRoute?.(`/media/${item.slug}`)
+  }, [onUpdateRoute])
+
+  const goBack = useCallback(() => {
+    setSelected(null)
+    onUpdateRoute?.('/media')
+  }, [onUpdateRoute])
 
   // ── Derived data ──────────────────────────────────────────────────────────
 
@@ -283,7 +300,7 @@ export function MediaApp({ serverData, onOpenApp }: Props) {
                     cover={cover}
                     title={item.title}
                     subtitle={item.creator}
-                    onClick={() => setSelected(item)}
+                    onClick={() => selectItem(item)}
                   />
                 </div>
               )
@@ -337,7 +354,7 @@ export function MediaApp({ serverData, onOpenApp }: Props) {
               <button
                 key={item.id}
                 className="mediapp-card"
-                onClick={() => setSelected(item)}
+                onClick={() => selectItem(item)}
               >
                 <div
                   className="mediapp-card__cover"

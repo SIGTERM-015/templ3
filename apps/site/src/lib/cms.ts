@@ -296,6 +296,14 @@ export async function getFavouriteMedia(): Promise<CmsFavMedia[]> {
   return readCollection<CmsFavMedia>(COLLECTION_PATHS.favouriteMedia, TTL.STANDARD)
 }
 
+export async function getFavouriteMediaBySlug(slug: string): Promise<CmsFavMedia | null> {
+  const media = await readCollection<CmsFavMedia>(
+    `/api/favourite-media?depth=2&limit=1&where[slug][equals]=${encodeURIComponent(slug)}&where[_status][equals]=published`,
+    TTL.STANDARD,
+  )
+  return media.find((item) => item.slug === slug) ?? null
+}
+
 export async function getNotes(): Promise<CmsNote[]> {
   return readCollection<CmsNote>(COLLECTION_PATHS.notes, TTL.MEDIUM)
 }
