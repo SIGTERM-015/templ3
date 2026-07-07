@@ -21,6 +21,9 @@
       "esbuild",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "patchedDependencies": {
+      "workers-og@0.0.27": "patches/workers-og@0.0.27.patch"
+    }
   }
 }

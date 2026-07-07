@@ -15,6 +15,12 @@ type Props = {
   /** Overrides from CMS SiteIdentity — passed by pages that pre-fetch it */
   siteName?: string
   siteDescription?: string
+  /**
+   * Root-relative path to the Open Graph image (e.g. '/api/og/home.png').
+   * When provided, emits og:image, og:image:width, og:image:height, twitter:image,
+   * and og:url meta tags. Defaults to '/api/og/home.png' when omitted.
+   */
+  ogImage?: string
 }
 
 const {
@@ -25,12 +31,17 @@ const {
   maximized,
   siteName,
   siteDescription,
+  ogImage = '/api/og/home.png',
 } = Astro.props
 
 // CMS values take priority, then explicit props, then siteConfig fallback
 const resolvedSiteName = siteName ?? site.name
 const resolvedDescription = siteDescription ?? description ?? site.description
 const resolvedTitle = title ?? `${resolvedSiteName} | Sigterm`
+
+// Build absolute OG image URL from the request origin
+const ogImageUrl = new URL(ogImage, Astro.url.origin).href
+const canonicalUrl = Astro.url.origin + Astro.url.pathname
 ---
 
 <!doctype html>
@@ -45,7 +56,12 @@ const resolvedTitle = title ?? `${resolvedSiteName} | Sigterm`
     <meta content={resolvedTitle} property="og:title" />
     <meta content={resolvedDescription} property="og:description" />
     <meta content="website" property="og:type" />
+    <meta content={ogImageUrl} property="og:image" />
+    <meta content="1200" property="og:image:width" />
+    <meta content="630" property="og:image:height" />
+    <meta content={canonicalUrl} property="og:url" />
     <meta content="summary_large_image" name="twitter:card" />
+    <meta content={ogImageUrl} name="twitter:image" />
     <title>{resolvedTitle}</title>
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />

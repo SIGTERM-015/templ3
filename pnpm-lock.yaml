@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  workers-og@0.0.27:
+    hash: fe281864c066e57941803fa0c12669981c5b90852d95e4bf226bd0e70d7c4ec4
+    path: patches/workers-og@0.0.27.patch
+
 importers:
 
   .: {}
@@ -187,7 +192,7 @@ importers:
         version: 0.183.2
       workers-og:
         specifier: ^0.0.27
-        version: 0.0.27
+        version: 0.0.27(patch_hash=fe281864c066e57941803fa0c12669981c5b90852d95e4bf226bd0e70d7c4ec4)
     devDependencies:
       '@types/node':
         specifier: ^25.3.5
@@ -17638,7 +17643,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260301.1
       '@cloudflare/workerd-windows-64': 1.20260301.1
 
-  workers-og@0.0.27:
+  workers-og@0.0.27(patch_hash=fe281864c066e57941803fa0c12669981c5b90852d95e4bf226bd0e70d7c4ec4):
     dependencies:
       '@resvg/resvg-wasm': 2.4.0
       just-camel-case: 6.2.0

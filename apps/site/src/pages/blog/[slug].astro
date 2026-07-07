@@ -23,4 +23,5 @@ if (!post) {
   initialApp="gazette"
   serverData={JSON.stringify({ posts, post, siteIdentity, webApps })}
   maximized={Astro.url.searchParams.has('maximized')}
+  ogImage={`/api/og/blog/${post.slug}.png`}
 />

@@ -18,4 +18,5 @@ const [projects, projectStatuses, siteIdentity, webApps] = await Promise.all([
   initialApp="armory"
   serverData={JSON.stringify({ projects, projectStatuses, siteIdentity, webApps })}
   maximized={Astro.url.searchParams.has('maximized')}
+  ogImage="/api/og/arsenal.png"
 />
