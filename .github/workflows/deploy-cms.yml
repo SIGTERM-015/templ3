@@ -56,6 +56,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+          CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: ${{ secrets.DATABASE_URL_PROD }}
 
       - name: Deploy
         run: pnpm --dir apps/cms exec wrangler deploy
