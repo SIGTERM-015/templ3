@@ -96,6 +96,54 @@ async function renderOgResponse(html: string, font: ArrayBuffer): Promise<Uint8A
   }
 }
 
+// ─── Image pre-fetch ─────────────────────────────────────────────────────────
+
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024 // 4 MB
+const FETCH_TIMEOUT_MS = 5_000
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer)
+  const chunkSize = 8192
+  let binary = ''
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize)
+    binary += String.fromCharCode(...chunk)
+  }
+  return btoa(binary)
+}
+
+export async function fetchImageAsDataUri(
+  url: string | undefined,
+): Promise<string | undefined> {
+  if (!url) return undefined
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (compatible; Templ3Bot/1.0; +https://sigterm.vodka)',
+        Accept: 'image/*',
+      },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    })
+    if (!res.ok) return undefined
+
+    const contentLength = res.headers.get('content-length')
+    if (contentLength && parseInt(contentLength, 10) > MAX_IMAGE_BYTES) {
+      return undefined
+    }
+
+    const buf = await res.arrayBuffer()
+    if (buf.byteLength === 0 || buf.byteLength > MAX_IMAGE_BYTES) {
+      return undefined
+    }
+
+    const mime = res.headers.get('content-type')?.split(';')[0]?.trim() || 'image/jpeg'
+    return `data:${mime};base64,${arrayBufferToBase64(buf)}`
+  } catch {
+    return undefined
+  }
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function escapeText(text: string): string {
@@ -300,9 +348,15 @@ export function mediaItemHtml(opts: {
   mediaType: string
   coverUrl?: string
 }): string {
-  const coverImage = opts.coverUrl
-    ? `<img src="${escapeAttribute(opts.coverUrl)}" width="400" height="560" ` +
-      `style="width: 400px; height: 560px; object-fit: cover; object-position: center;" />`
+  const hasCover = !!opts.coverUrl
+  const coverColumn = hasCover
+    ? `<div style="display: flex; flex-direction: column; justify-content: center; ` +
+      `width: 400px;">` +
+      `<div style="display: flex; width: 400px; height: 560px; overflow: hidden; ` +
+      `background-color: #222; border: 1px solid #444;">` +
+      `<img src="${escapeAttribute(opts.coverUrl!)}" width="400" height="560" ` +
+      `style="width: 400px; height: 560px; object-fit: cover; object-position: center;" />` +
+      `</div></div>`
     : ''
   const ratingHtml = opts.rating
     ? `<span style="font-size: 36px; color: #ffb800; font-weight: 700;">` +
@@ -318,6 +372,7 @@ export function mediaItemHtml(opts: {
       mediaTypeHtml +
       `</div>`
     : ''
+  const textMaxWidth = hasCover ? '600px' : '1000px'
 
   return (
     `<div style="display: flex; flex-direction: row; width: 1200px; height: 630px; ` +
@@ -328,7 +383,7 @@ export function mediaItemHtml(opts: {
     `<div style="display: flex; flex-direction: row; justify-content: space-between; ` +
     `align-items: center; width: 100%; height: 100%; padding: 35px 60px 35px 100px;">` +
     `<div style="display: flex; flex-direction: column; justify-content: center; ` +
-    `flex: 1; max-width: 600px;">` +
+    `flex: 1; max-width: ${textMaxWidth};">` +
     `<span style="font-size: 24px; color: #ffb800; margin-bottom: 10px;">` +
     `// MEDIA</span>` +
     `<h1 style="font-size: 70px; margin: 0; color: #ffb800; line-height: 1.1;">` +
@@ -339,11 +394,7 @@ export function mediaItemHtml(opts: {
       : '') +
     metaHtml +
     `</div>` +
-    `<div style="display: flex; flex-direction: column; justify-content: center; ` +
-    `width: 400px;">` +
-    `<div style="display: flex; width: 400px; height: 560px; overflow: hidden; ` +
-    `background-color: #222; border: 1px solid #444;">${coverImage}</div>` +
-    `</div>` +
+    coverColumn +
     `</div>` +
     logoDiv({ width: 80, height: 80, opacity: 0.25 }) +
     `</div>`

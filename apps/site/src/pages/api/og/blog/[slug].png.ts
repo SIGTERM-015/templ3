@@ -3,6 +3,7 @@ import { getPostBySlug } from '../../../../lib/cms'
 import {
   blogPostHtml,
   createOgResponse,
+  fetchImageAsDataUri,
   formatDate,
   notFoundResponse,
   resolvePostCoverUrl,
@@ -23,10 +24,12 @@ export const GET: APIRoute = async ({ params }) => {
 
   if (!post) return notFoundResponse()
 
+  const coverUrl = await fetchImageAsDataUri(resolvePostCoverUrl(post))
+
   const html = blogPostHtml({
     title: post.title,
     dateLabel: formatDate(post.publishedAt),
-    coverUrl: resolvePostCoverUrl(post),
+    coverUrl,
   })
 
   return createOgResponse(html)
