@@ -40,8 +40,11 @@ jobs:
       - name: Typecheck
         run: pnpm --dir apps/cms exec tsc --noEmit
 
+      # --forceAcceptWarning: the prod DB has a dev-mode marker row in
+      # payload_migrations (from a past `payload dev` push). Without this flag
+      # `payload migrate` prompts interactively, which hangs in CI (no TTY).
       - name: Run database migrations
-        run: pnpm --dir apps/cms run payload migrate
+        run: pnpm --dir apps/cms run payload migrate --forceAcceptWarning
         env:
           NODE_ENV: production
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
