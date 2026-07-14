@@ -109,7 +109,8 @@ export function GuestbookEditorApp({ onSubmitted }: Props) {
 
       // Gather Discord info from Clerk user
       const discordAccount = user.externalAccounts?.find(
-        (acc) => acc.provider === 'discord' || acc.provider === 'oauth_discord'
+        (acc: { provider?: string; username?: string; providerUserId?: string }) =>
+          acc.provider === 'discord' || acc.provider === 'oauth_discord'
       )
 
       const authorName = user.username

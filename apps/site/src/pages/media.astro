@@ -19,4 +19,5 @@ const [media, mediaTypes, mediaStatuses, siteIdentity, webApps] = await Promise.
   initialApp="media"
   serverData={JSON.stringify({ media, mediaTypes, mediaStatuses, siteIdentity, webApps })}
   maximized={Astro.url.searchParams.has('maximized')}
+  ogImage="/api/og/media.png"
 />

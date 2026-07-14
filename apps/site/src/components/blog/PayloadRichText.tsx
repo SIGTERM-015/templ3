@@ -17,34 +17,42 @@ type Props = {
   data: unknown
 }
 
+type BlockNode = {
+  fields: unknown
+}
+
 const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
   ...defaultConverters,
   blocks: {
-    youtube: ({ node }) => <YouTubeEmbed {...(node.fields as { url: string; caption?: string })} />,
-    spotify: ({ node }) => (
+    youtube: ({ node }: { node: BlockNode }) => (
+      <YouTubeEmbed {...(node.fields as { url: string; caption?: string })} />
+    ),
+    spotify: ({ node }: { node: BlockNode }) => (
       <SpotifyEmbed {...(node.fields as { url: string; height?: 'compact' | 'large' })} />
     ),
-    twitter: ({ node }) => <TwitterEmbed {...(node.fields as { url: string })} />,
-    'github-gist': ({ node }) => <GitHubGistEmbed {...(node.fields as { url: string })} />,
-    codepen: ({ node }) => (
+    twitter: ({ node }: { node: BlockNode }) => <TwitterEmbed {...(node.fields as { url: string })} />,
+    'github-gist': ({ node }: { node: BlockNode }) => (
+      <GitHubGistEmbed {...(node.fields as { url: string })} />
+    ),
+    codepen: ({ node }: { node: BlockNode }) => (
       <CodePenEmbed
         {...(node.fields as { url: string; height?: number; defaultTab?: 'result' | 'html' | 'css' | 'js' })}
       />
     ),
-    video: ({ node }) => (
+    video: ({ node }: { node: BlockNode }) => (
       <VideoEmbed
         {...(node.fields as { url: string; caption?: string; autoplay?: boolean; loop?: boolean; muted?: boolean })}
       />
     ),
-    callout: ({ node }) => (
+    callout: ({ node }: { node: BlockNode }) => (
       <CalloutBlock
         {...(node.fields as { type: 'info' | 'warning' | 'error' | 'success' | 'tip'; title?: string; content: string })}
       />
     ),
-    divider: ({ node }) => (
+    divider: ({ node }: { node: BlockNode }) => (
       <DividerBlock {...(node.fields as { style?: 'line' | 'dots' | 'stars' | 'space' })} />
     ),
-    bookmark: ({ node }) => (
+    bookmark: ({ node }: { node: BlockNode }) => (
       <BookmarkCard
         {...(node.fields as { url: string; title?: string; description?: string; thumbnail?: { url?: string } | string | null })}
       />

@@ -72,8 +72,6 @@ export const THEME_PRESETS: ThemePreset[] = [
       '--terminal': '#9ece6a',
       '--terminal-bg': '#16161e',
       '--terminal-border': '#2f334d',
-      '--bezel-brand': '#7f8cb2',
-      '--metal': '#2a2f45',
     },
   },
   {
@@ -105,8 +103,6 @@ export const THEME_PRESETS: ThemePreset[] = [
       '--terminal': '#50fa7b',
       '--terminal-bg': '#1f202b',
       '--terminal-border': '#44475a',
-      '--bezel-brand': '#9094aa',
-      '--metal': '#343746',
     },
   },
 ]

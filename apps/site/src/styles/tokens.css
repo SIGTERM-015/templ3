@@ -57,23 +57,16 @@
   --terminal-border: oklch(20% 0.03 145);
 
   /* ── Surfaces ── */
-  --metal:      oklch(26% 0.015 55);
   --aged-paper: oklch(76% 0.05 75);
   --rust:       oklch(30% 0.06 45);
   --bsod:       oklch(25% 0.15 260);
-
-  /* ── Monitor frame ── */
-  --bezel-inner:      oklch(20% 0.01 55);
-  --bezel-kbd:        oklch(22% 0.012 55);
-  --bezel-kbd-border: oklch(28% 0.015 55);
-  --bezel-brand:      oklch(40% 0.02 55);
+  --bezel-kbd:  oklch(22% 0.012 55);
 
   /* ── Overlays (pure black, various opacity) ── */
   --overlay-subtle: oklch(0% 0 0 / 0.04);
   --overlay-light:  oklch(0% 0 0 / 0.06);
   --overlay-medium: oklch(0% 0 0 / 0.35);
   --overlay-dark:   oklch(0% 0 0 / 0.7);
-  --overlay-inset:  oklch(0% 0 0 / 0.4);
 
   /* ── Spacing — 4pt base ── */
   --space-xs:   4px;

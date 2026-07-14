@@ -1,0 +1,61 @@
+name: Deploy Site
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'apps/site/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'patches/**'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-site-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
+
+jobs:
+  deploy:
+    name: Build & Deploy Site
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        # reads packageManager from package.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --dir apps/site exec tsc --noEmit
+
+      - name: Build
+        run: pnpm build:site
+        env:
+          PUBLIC_CMS_URL: ${{ vars.PUBLIC_CMS_URL }}
+          PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.PUBLIC_CLERK_PUBLISHABLE_KEY }}
+
+      - name: Deploy (production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm --dir apps/site exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Upload preview
+        if: github.ref != 'refs/heads/main'
+        run: pnpm --dir apps/site exec wrangler versions upload
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}

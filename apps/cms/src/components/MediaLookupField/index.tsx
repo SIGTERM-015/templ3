@@ -31,6 +31,74 @@ const SOURCE_LABELS: Record<string, string> = {
   musicbrainz: 'MusicBrainz',
 }
 
+/** Max file size we'll attempt to persist (8 MB). */
+const MAX_COVER_BYTES = 8 * 1024 * 1024
+
+/**
+ * Extract a file extension from a URL path, defaulting to '.jpg'.
+ * Strips query strings and fragments before parsing.
+ */
+function extensionFromUrl(url: string): string {
+  try {
+    const { pathname } = new URL(url)
+    const dot = pathname.lastIndexOf('.')
+    if (dot !== -1) {
+      const ext = pathname.slice(dot).toLowerCase()
+      // Only keep common image extensions
+      if (['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif'].includes(ext)) {
+        return ext
+      }
+    }
+  } catch {
+    // malformed URL — fall through
+  }
+  return '.jpg'
+}
+
+/**
+ * Download a cover image from the browser and upload it to the CMS media
+ * collection. Returns the created media document ID on success, or null on
+ * any failure (CORS block, network error, oversized file, upload rejection).
+ */
+async function persistCoverImage(
+  coverUrl: string,
+  source: string,
+  externalId: string,
+  title: string,
+): Promise<string | null> {
+  // 1. Fetch the image from the browser (not blocked by ASN rules)
+  const imgRes = await fetch(coverUrl)
+  if (!imgRes.ok) return null
+
+  const blob = await imgRes.blob()
+
+  // 2. Guard against oversized files
+  if (blob.size > MAX_COVER_BYTES) return null
+
+  // 3. Build a reasonable filename
+  const ext = extensionFromUrl(coverUrl)
+  const safeName = `${source}-${externalId}${ext}`.replace(/[^a-zA-Z0-9._-]/g, '-')
+
+  // 4. Upload to Payload REST API — the admin session cookie authenticates
+  const formData = new FormData()
+  formData.append('file', blob, safeName)
+  formData.append(
+    '_payload',
+    JSON.stringify({ alt: `Cover for ${title}` }),
+  )
+
+  const uploadRes = await fetch('/api/media', {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  })
+
+  if (!uploadRes.ok) return null
+
+  const uploadData = (await uploadRes.json()) as { doc?: { id: string } }
+  return uploadData.doc?.id ?? null
+}
+
 function MediaLookupField() {
   const { value: mediaTypeId } = useField<string>({ path: 'mediaType' })
   const [_fields, dispatchFields] = useAllFormFields()
@@ -42,6 +110,8 @@ function MediaLookupField() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const [coverWarning, setCoverWarning] = useState<string | null>(null)
 
   // Fetch media type to get lookupSource
   useEffect(() => {
@@ -89,7 +159,9 @@ function MediaLookupField() {
   }, [lookupSource, query])
 
   const handleSelect = useCallback(
-    (result: MediaLookupResult) => {
+    async (result: MediaLookupResult) => {
+      setCoverWarning(null)
+
       // Update title
       dispatchFields({
         type: 'UPDATE',
@@ -106,7 +178,7 @@ function MediaLookupField() {
         })
       }
 
-      // Update external cover URL if present
+      // Update external cover URL if present (always set as fallback)
       if (result.coverUrl) {
         dispatchFields({
           type: 'UPDATE',
@@ -142,6 +214,32 @@ function MediaLookupField() {
       setIsOpen(false)
       setQuery('')
       setResults([])
+
+      // Persist cover image to CMS media collection (browser-side download)
+      if (result.coverUrl) {
+        setUploadingCover(true)
+        try {
+          const mediaId = await persistCoverImage(
+            result.coverUrl,
+            result.source,
+            result.externalId,
+            result.title,
+          )
+          if (mediaId) {
+            dispatchFields({
+              type: 'UPDATE',
+              path: 'coverImage',
+              value: mediaId,
+            })
+          } else {
+            setCoverWarning('Cover image could not be saved — using external URL as fallback.')
+          }
+        } catch {
+          setCoverWarning('Cover image could not be saved — using external URL as fallback.')
+        } finally {
+          setUploadingCover(false)
+        }
+      }
     },
     [dispatchFields],
   )
@@ -195,6 +293,14 @@ function MediaLookupField() {
       </div>
 
       {error && <p className="media-lookup-field__error">{error}</p>}
+
+      {uploadingCover && (
+        <p className="media-lookup-field__uploading">Saving cover image…</p>
+      )}
+
+      {coverWarning && !uploadingCover && (
+        <p className="media-lookup-field__warning">{coverWarning}</p>
+      )}
 
       {isOpen && results.length > 0 && (
         <div className="media-lookup-field__results">

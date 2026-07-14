@@ -43,7 +43,7 @@ export function NowCard({ cover, title, subtitle, href, onClick, isPlaying }: No
 
 export function NowPlaying() {
   const [data, setData] = useState<NowPlayingData | null>(null)
-  const timerRef = useRef<ReturnType<typeof setInterval>>()
+  const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
 
   useEffect(() => {
     let cancelled = false

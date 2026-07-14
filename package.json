@@ -12,6 +12,8 @@
     "deploy:cms": "pnpm --dir apps/cms run cf:deploy",
     "preview:cms": "pnpm --dir apps/cms run preview:deploy",
     "generate:cms-types": "pnpm --dir apps/cms run generate:types",
+    "cf:build:site": "pnpm build:site",
+    "cf:upload:site": "pnpm --dir apps/site exec wrangler versions upload",
     "cf:build:cms": "pnpm build:cms && pnpm --dir apps/cms exec opennextjs-cloudflare build --skipNextBuild",
     "cf:deploy:cms": "pnpm --dir apps/cms exec wrangler deploy",
     "cf:upload:cms": "pnpm --dir apps/cms exec wrangler versions upload"
@@ -21,6 +23,9 @@
       "esbuild",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "patchedDependencies": {
+      "workers-og@0.0.27": "patches/workers-og@0.0.27.patch"
+    }
   }
 }

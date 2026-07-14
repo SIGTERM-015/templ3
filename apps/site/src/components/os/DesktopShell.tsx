@@ -404,7 +404,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
       case 'armory':
         return <ArmoryApp serverData={merged} />
       case 'media':
-        return <MediaApp serverData={merged} onOpenApp={(id) => openWindow(id)} />
+        return <MediaApp serverData={merged} onOpenApp={(id) => openWindow(id)} onUpdateRoute={(r) => updateRoute(win.id, r)} />
       case 'comms':
         return <CommsApp serverData={merged} />
       case 'readme':
