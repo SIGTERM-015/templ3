@@ -16,6 +16,7 @@ Two workflows deploy the monorepo to Cloudflare Workers.
 
 | Variable | Used by | Description |
 |---|---|---|
+| `CLOUDFLARE_ACCOUNT_ID` | Both | CF account ID — required so wrangler skips the `/memberships` lookup that account-owned API tokens cannot call |
 | `PUBLIC_CMS_URL` | Site | CMS base URL consumed at build time via `import.meta.env` (e.g. `https://cms.sigterm.vodka`) |
 | `PUBLIC_CLERK_PUBLISHABLE_KEY` | Site | Clerk publishable key consumed at build time |
 
