@@ -2,7 +2,6 @@
 import { BootSequence } from '../components/os/BootSequence'
 import CRTOverlay from '../components/os/CRTOverlay.astro'
 import { DesktopShell } from '../components/os/DesktopShell'
-import MonitorFrame from '../components/os/MonitorFrame.astro'
 import { site } from '../data/siteConfig'
 import '../styles/global.css'
 
@@ -88,14 +87,12 @@ const canonicalUrl = Astro.url.origin + Astro.url.pathname
   </head>
   <body>
     <BootSequence client:load />
-    <MonitorFrame>
-      <DesktopShell
-        client:load
-        initialApp={initialApp}
-        serverData={serverData}
-        maximized={maximized}
-      />
-      <CRTOverlay />
-    </MonitorFrame>
+    <DesktopShell
+      client:load
+      initialApp={initialApp}
+      serverData={serverData}
+      maximized={maximized}
+    />
+    <CRTOverlay />
   </body>
 </html>

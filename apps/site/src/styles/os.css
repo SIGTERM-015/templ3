@@ -1,99 +1,7 @@
-/* ── Monitor Frame ── */
-
-.monitor {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  background: var(--metal);
-  padding: clamp(10px, 1.8vw, 36px);
-  overflow: hidden;
-}
-
-.monitor-bezel {
-  position: relative;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow:
-    inset 0 0 0 2px var(--bezel-inner),
-    inset 0 0 80px var(--overlay-inset),
-    0 0 40px var(--amber-a3);
-}
-
-.monitor-screen {
-  position: relative;
-  display: grid;
-  grid-template-rows: 1fr;
-  background: var(--bg);
-  overflow: hidden;
-}
-
-/* ── Power LED ── */
-
-.monitor-led {
-  position: absolute;
-  bottom: -24px;
-  right: 32px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--magenta);
-  box-shadow: 0 0 8px var(--magenta), 0 0 16px var(--magenta-bright);
-  animation: pulse-led 3s ease-in-out infinite;
-  z-index: 10;
-}
-
-/* ── Keyboard decorative area ── */
-
-.monitor-keyboard {
-  height: clamp(28px, 4vh, 48px);
-  background: var(--bezel-kbd);
-  border-top: 1px solid var(--bezel-kbd-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 6px 20%;
-  overflow: hidden;
-}
-
-.monitor-keyboard::before {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 60%;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      var(--metal) 0px, var(--metal) 14px,
-      var(--bezel-inner) 14px, var(--bezel-inner) 16px
-    );
-  border-radius: 2px;
-  opacity: 0.6;
-}
-
-/* ── Brand strip on monitor bottom ── */
-
-.monitor-brand {
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--bezel-brand);
-  z-index: 10;
-}
-
 /* ── CRT Overlay Effects ── */
 
 .crt-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: var(--z-overlay);
@@ -136,8 +44,8 @@
 /* ── Desktop ── */
 
 .desktop {
-  position: relative;
-  flex: 1;
+  position: fixed;
+  inset: 0;
   display: grid;
   grid-template-rows: 1fr auto;
   overflow: hidden;
@@ -630,25 +538,6 @@
 /* ── Responsive ── */
 
 @media (max-width: 768px) {
-  .monitor {
-    padding: clamp(4px, 1vw, 8px);
-  }
-
-  .monitor-keyboard {
-    display: none;
-  }
-
-  .monitor-brand {
-    display: none;
-  }
-
-  .monitor-led {
-    bottom: 4px;
-    right: 12px;
-    width: 6px;
-    height: 6px;
-  }
-
   .desktop-icons {
     inset: 0;
   }
@@ -837,9 +726,5 @@
   .app-window {
     animation: none;
     transition: none;
-  }
-
-  .monitor-led {
-    animation: none;
   }
 }
