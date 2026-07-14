@@ -36,6 +36,12 @@ Because `wrangler.jsonc` declares a Hyperdrive binding without a
 `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` to the same direct
 Postgres URL used for migrations — wrangler uses it to emulate the binding.
 
+## Migration `--forceAcceptWarning`
+
+The migrate step passes `--forceAcceptWarning` because the prod DB contains a
+`dev|-1` marker row (from a past `payload dev` push-mode run). Without the flag,
+`payload migrate` prompts interactively, which hangs in CI with no TTY.
+
 ## Runtime Secrets
 
 Secrets used at runtime by the Workers (Spotify credentials, Clerk secret key,
