@@ -71,6 +71,19 @@
   color: var(--theme-error-500);
 }
 
+.media-lookup-field__uploading {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: var(--theme-elevation-600);
+  font-style: italic;
+}
+
+.media-lookup-field__warning {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: var(--theme-elevation-600);
+}
+
 .media-lookup-field__empty {
   margin: 0.75rem 0 0;
   font-size: 0.8125rem;
