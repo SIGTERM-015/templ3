@@ -30,11 +30,11 @@ The `account_id` is already set in each app's `wrangler.jsonc`.
 
 ## Hyperdrive in CI
 
-The CMS payload config always calls wrangler's `getPlatformProxy()` in CLI mode.
-Because `wrangler.jsonc` declares a Hyperdrive binding without a
-`localConnectionString`, the proxy would crash. CI works around this by setting
-`CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` to the same direct
-Postgres URL used for migrations — wrangler uses it to emulate the binding.
+Wrangler evaluates the Hyperdrive binding in `wrangler.jsonc` during migrate,
+build, **and** deploy. Because the binding has no `localConnectionString`,
+every step that touches wrangler would crash. All three CMS steps set
+`CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` to the direct
+Postgres URL so wrangler can emulate the binding outside Workers.
 
 ## Migration `--forceAcceptWarning`
 
