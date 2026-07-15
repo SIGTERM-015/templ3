@@ -10,6 +10,7 @@ Two workflows deploy the monorepo to Cloudflare Workers.
 |---|---|---|
 | `CLOUDFLARE_API_TOKEN` | Both | CF API token with **Workers Scripts:Edit** permission on the account |
 | `DATABASE_URL_PROD` | CMS | Direct Postgres connection string (not Hyperdrive — migrations run outside Workers) |
+| `PAYLOAD_API_KEY` | Site | Baked at build time into the site bundle for authenticated CMS reads (guestbook, media types) |
 | `PAYLOAD_SECRET` | CMS | Payload CMS encryption secret (same value as the Worker secret) |
 
 ### Repository Variables
