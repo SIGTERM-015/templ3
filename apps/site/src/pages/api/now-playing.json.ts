@@ -1,59 +1,57 @@
 import type { APIRoute } from 'astro'
-import { getAccessToken, getNowPlaying, getRecentlyPlayed } from '../../lib/spotify'
+import { getNowPlaying, getRecentTracks } from '../../lib/lastfm'
 
 export const prerender = false
 
-export const GET: APIRoute = async (context) => {
-  const env = (context.locals as any)?.runtime?.env || {}
-  
-  const resolveSecret = async (binding: any): Promise<string | undefined> => {
-    if (!binding) return undefined
-    if (typeof binding === 'string') return binding
-    if (typeof binding.get === 'function') {
-      try {
-        return await binding.get()
-      } catch {
-        // Secrets Store bindings are unavailable in local dev — fall through to import.meta.env
-        return undefined
-      }
+async function resolveSecret(binding: unknown): Promise<string | undefined> {
+  if (!binding) return undefined
+  if (typeof binding === 'string') return binding
+  if (typeof binding === 'object' && binding !== null && 'get' in binding && typeof (binding as { get: Function }).get === 'function') {
+    try {
+      return await (binding as { get: () => Promise<string> }).get()
+    } catch {
+      return undefined
     }
-    return String(binding)
   }
+  return String(binding)
+}
 
-  const clientIdPromise = resolveSecret(env.SPOTIFY_CLIENT_ID).then(v => v || import.meta.env.SPOTIFY_CLIENT_ID)
-  const clientSecretPromise = resolveSecret(env.SPOTIFY_CLIENT_SECRET).then(v => v || import.meta.env.SPOTIFY_CLIENT_SECRET)
-  const refreshTokenPromise = resolveSecret(env.SPOTIFY_REFRESH_TOKEN).then(v => v || import.meta.env.SPOTIFY_REFRESH_TOKEN)
+export const GET: APIRoute = async (context) => {
+  const env = ((context.locals as unknown as { runtime?: { env?: Record<string, unknown> } }).runtime)?.env ?? {}
 
-  const [rawClientId, rawClientSecret, rawRefreshToken] = await Promise.all([
-    clientIdPromise,
-    clientSecretPromise,
-    refreshTokenPromise
+  const [rawApiKey, rawUsername] = await Promise.all([
+    resolveSecret(env.LASTFM_API_KEY).then(v => v || import.meta.env.LASTFM_API_KEY),
+    resolveSecret(env.LASTFM_USERNAME).then(v => v || import.meta.env.LASTFM_USERNAME),
   ])
 
-  const clientId = String(rawClientId || '').trim()
-  const clientSecret = String(rawClientSecret || '').trim()
-  const refreshToken = String(rawRefreshToken || '').trim()
+  const apiKey = String(rawApiKey || '').trim()
+  const username = String(rawUsername || '').trim()
 
-  if (!clientId || !clientSecret || !refreshToken) {
-    return Response.json({
-      isPlaying: false,
-      error: 'Missing Spotify credentials in env',
-    }, { status: 500 })
+  if (!apiKey || !username) {
+    return new Response(JSON.stringify({ isPlaying: false }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'private, max-age=25',
+      },
+    })
   }
 
-  const accessTokenOrError = await getAccessToken(clientId, clientSecret, refreshToken)
-  if (typeof accessTokenOrError === 'object' && 'error' in accessTokenOrError) {
-    return Response.json({
-      isPlaying: false,
-      error: 'Failed to authenticate with Spotify',
-    }, { status: 500 })
+  const nowPlaying = await getNowPlaying(apiKey, username)
+
+  if (nowPlaying?.isPlaying) {
+    return new Response(JSON.stringify(nowPlaying), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'private, max-age=25',
+      },
+    })
   }
-  
-  const accessToken = accessTokenOrError as string
 
-  const data = await getNowPlaying(accessToken) ?? await getRecentlyPlayed(accessToken) ?? { isPlaying: false }
+  // Not currently playing — return most recent track
+  const recent = await getRecentTracks(apiKey, username, 1)
+  const lastTrack = recent[0]
 
-  return Response.json(data, {
+  return new Response(JSON.stringify(lastTrack ?? { isPlaying: false }), {
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'private, max-age=25',

@@ -57,7 +57,10 @@ export function CommsApp({ serverData }: Props) {
                 >
                   <div className="comms-contact__avatar">
                     {img
-                      ? <img src={img} alt="" />
+                      ? <span
+                          className="comms-icon-mask"
+                          style={{ maskImage: `url(${img})`, WebkitMaskImage: `url(${img})` }}
+                        />
                       : <span className="comms-contact__icon">{link.icon || link.label.charAt(0)}</span>
                     }
                   </div>

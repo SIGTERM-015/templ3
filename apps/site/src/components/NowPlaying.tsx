@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import type { SpotifyTrack } from '../lib/spotify'
+import type { NowPlayingTrack } from '../lib/lastfm'
 
-type NowPlayingData = SpotifyTrack | { isPlaying: false }
+type NowPlayingData = NowPlayingTrack | { isPlaying: false }
 
 const POLL_INTERVAL = 30_000
 
@@ -69,7 +69,7 @@ export function NowPlaying() {
 
   if (!data || !('title' in data)) return null
 
-  const track = data as SpotifyTrack
+  const track = data as NowPlayingTrack
 
   return (
     <NowCard

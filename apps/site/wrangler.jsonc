@@ -29,19 +29,14 @@
 	},
 	"secrets_store_secrets": [
 		{
-			"binding": "SPOTIFY_CLIENT_ID",
+			"binding": "LASTFM_API_KEY",
 			"store_id": "9bbd052d61d14736b8b75c325de3c23e",
-			"secret_name": "templ3-spotify-client-id"
+			"secret_name": "templ3-lastfm-api-key"
 		},
 		{
-			"binding": "SPOTIFY_CLIENT_SECRET",
+			"binding": "LASTFM_USERNAME",
 			"store_id": "9bbd052d61d14736b8b75c325de3c23e",
-			"secret_name": "templ3-spotify-client-secret"
-		},
-		{
-			"binding": "SPOTIFY_REFRESH_TOKEN",
-			"store_id": "9bbd052d61d14736b8b75c325de3c23e",
-			"secret_name": "templ3-spotify-refresh-token"
+			"secret_name": "templ3-lastfm-username"
 		}
 	]
 }

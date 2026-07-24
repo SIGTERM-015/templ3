@@ -28,7 +28,8 @@ export function BootSequence() {
   useEffect(() => {
     const hasBooted = sessionStorage.getItem('templ3-booted')
     const isMaximized = window.location.search.includes('maximized')
-    if (hasBooted || isMaximized) {
+    const isDeepLink = window.location.pathname !== '/'
+    if (hasBooted || isMaximized || isDeepLink) {
       sessionStorage.setItem('templ3-booted', '1')
       setDone(true)
       return

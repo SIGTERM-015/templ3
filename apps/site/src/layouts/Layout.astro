@@ -11,6 +11,7 @@ type Props = {
   initialApp?: string
   serverData?: string
   maximized?: boolean
+  errorMessage?: string
   /** Overrides from CMS SiteIdentity — passed by pages that pre-fetch it */
   siteName?: string
   siteDescription?: string
@@ -28,6 +29,7 @@ const {
   initialApp,
   serverData,
   maximized,
+  errorMessage,
   siteName,
   siteDescription,
   ogImage = '/api/og/home.png',
@@ -94,6 +96,7 @@ const canonicalUrl = Astro.url.origin + Astro.url.pathname
       initialApp={initialApp}
       serverData={serverData}
       maximized={maximized}
+      errorMessage={errorMessage}
     />
     <CRTOverlay />
   </body>

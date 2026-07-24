@@ -130,6 +130,7 @@ export const desktopApps: DesktopApp[] = [
   { id: 'guestbook', route: '/guestbook', glyph: '✎', label: 'guestbook', windowTitle: 'GUESTBOOK', defaultSize: { w: 75, h: 85 }, defaultPos: { x: 12, y: 5 } },
   { id: 'readme', route: '', glyph: '[]', label: 'readme', windowTitle: 'README', defaultSize: { w: 42, h: 55 }, defaultPos: { x: 52, y: 12 } },
   { id: 'settings', route: '', glyph: '::', label: 'settings', windowTitle: 'SETTINGS', defaultSize: { w: 58, h: 72 }, defaultPos: { x: 20, y: 10 } },
+  { id: 'error', route: '', glyph: '⚠', label: 'error', windowTitle: 'ERROR', defaultSize: { w: 35, h: 25 }, defaultPos: { x: 30, y: 30 } },
 ]
 
 export const statusColors: Record<string, string> = {

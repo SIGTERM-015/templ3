@@ -44,6 +44,7 @@ export type StaticAppId =
   | 'settings'
   | 'notes'
   | 'note-viewer'
+  | 'error'
 
 // AppId can be a static app or a dynamic webapp
 export type AppId = StaticAppId | `webapp-${string}`
@@ -165,6 +166,7 @@ type Props = {
   initialApp?: string
   serverData?: string
   maximized?: boolean
+  errorMessage?: string
 }
 
 type PersonalizationState = {
@@ -222,7 +224,7 @@ const AppLoading = () => (
   </div>
 )
 
-export function DesktopShell({ initialApp, serverData, maximized: initialMaximized }: Props) {
+export function DesktopShell({ initialApp, serverData, maximized: initialMaximized, errorMessage }: Props) {
   const [windows, dispatch] = useReducer(reducer, []) as [WindowState[], (action: Action) => void]
   const [ready, setReady] = useState(false)
   const [themeId, setThemeId] = useState<ThemePresetId | 'custom'>('default')
@@ -291,7 +293,21 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
       }
     }
 
-    if (!sessionStorage.getItem('templ3-readme-shown')) {
+    // Show error window if errorMessage prop is provided
+    if (errorMessage) {
+      if (!initial.find(w => w.appId === 'error')) {
+        const errorWin = createWindow('error', maxZ++)
+        errorWin.w = 35
+        errorWin.h = 25
+        errorWin.x = 30
+        errorWin.y = 30
+        errorWin.meta = { errorMessage }
+        initial.push(errorWin)
+      }
+    }
+
+    const isDeepLink = initialApp && initialApp !== 'dossier'
+    if (!isDeepLink && !sessionStorage.getItem('templ3-readme-shown')) {
       if (!initial.find(w => w.appId === 'readme') && !shouldMaximize) {
         initial.push(createWindow('readme', maxZ++))
       }
@@ -489,6 +505,33 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
             onWallpaperChange={setWallpaper}
             defaultWallpaper={defaultWallpaper}
           />
+        )
+      case 'error':
+        return (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            gap: '16px',
+            padding: '24px',
+            textAlign: 'center',
+            fontFamily: 'var(--font-mono)',
+          }}>
+            <div style={{ fontSize: '48px' }}>⚠</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--amber)' }}>
+              ERROR 404
+            </div>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              {typeof win.meta?.errorMessage === 'string'
+                ? win.meta.errorMessage
+                : 'The requested resource was not found.'}
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '8px' }}>
+              The page you are looking for does not exist or has been moved.
+            </div>
+          </div>
         )
       default:
         // Handle dynamic webapp-{slug} apps

@@ -652,6 +652,19 @@
   filter: brightness(0.7);
 }
 
+.comms-contact__avatar .comms-icon-mask {
+  width: 24px;
+  height: 24px;
+  background-color: var(--amber);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  display: inline-block;
+}
+
 .comms-contact__icon {
   font-family: var(--font-mono);
   font-size: 14px;
