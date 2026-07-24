@@ -27,16 +27,8 @@
 	"vars": {
 		"PUBLIC_CMS_URL": "https://cms.sigterm.vodka"
 	},
-	"secrets_store_secrets": [
-		{
-			"binding": "LASTFM_API_KEY",
-			"store_id": "9bbd052d61d14736b8b75c325de3c23e",
-			"secret_name": "templ3-lastfm-api-key"
-		},
-		{
-			"binding": "LASTFM_USERNAME",
-			"store_id": "9bbd052d61d14736b8b75c325de3c23e",
-			"secret_name": "templ3-lastfm-username"
-		}
-	]
+	// Last.fm now-playing is opt-in: add LASTFM_API_KEY and LASTFM_USERNAME
+	// as secrets (wrangler secret put) or Secrets Store bindings when ready.
+	// The feature gracefully degrades — widget simply hidden without credentials.
+	"secrets_store_secrets": []
 }
