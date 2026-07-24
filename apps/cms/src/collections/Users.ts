@@ -48,6 +48,10 @@ export const Users: CollectionConfig = {
           label: 'Editor',
           value: 'editor',
         },
+        {
+          label: 'API',
+          value: 'api',
+        },
       ],
       required: true,
       access: {
