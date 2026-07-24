@@ -231,6 +231,12 @@ export default buildConfig({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bucket: (cloudflare?.env?.R2 || null) as any,
     }),
-    payloadTotp({ collection: 'users' }),
+    payloadTotp({
+      collection: 'users',
+      disableAccessWrapper: true, // Required: the TOTP access wrapper blocks ALL unauthenticated
+      // requests to the Users collection (including API-key auth resolution),
+      // which cascades into 403s on other collections. Users.role field-level
+      // access + collection-level access already enforce proper authorization.
+    }),
   ],
 })
