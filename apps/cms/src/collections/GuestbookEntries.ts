@@ -22,12 +22,26 @@ export const GuestbookEntries: CollectionConfig = {
     description: 'Guestbook entries submitted by visitors. Approve to display on the site.',
   },
   defaultSort: '-createdAt',
+  hooks: {
+    beforeChange: [
+      ({ data, req, operation }) => {
+        if (operation === 'create') {
+          const user = req.user
+          if (!user || (user.role !== 'admin' && user.role !== 'editor')) {
+            data.status = 'pending'
+          }
+        }
+        return data
+      },
+    ],
+  },
   fields: [
     {
       name: 'message',
       label: 'Title',
       type: 'text', // Using text instead of textarea is usually better for titles, but since it's already created as textarea I'll keep it, or change it? The user picture shows a textarea but if it's a title, maybe text is better. The image shows a textarea (multiline). I'll keep textarea but change label.
       required: true,
+      maxLength: 200,
       admin: {
         description: 'Title of the entry',
       },
@@ -37,6 +51,7 @@ export const GuestbookEntries: CollectionConfig = {
       name: 'authorName',
       type: 'text',
       required: true,
+      maxLength: 100,
       admin: {
         description: 'Display name from Discord',
       },
@@ -44,6 +59,7 @@ export const GuestbookEntries: CollectionConfig = {
     {
       name: 'authorAvatar',
       type: 'text',
+      maxLength: 500,
       admin: {
         description: 'Avatar URL from Discord',
       },
@@ -51,6 +67,7 @@ export const GuestbookEntries: CollectionConfig = {
     {
       name: 'authorDiscordId',
       type: 'text',
+      maxLength: 64,
       admin: {
         description: 'Discord user ID (for deduplication/banning)',
         position: 'sidebar',
@@ -60,6 +77,7 @@ export const GuestbookEntries: CollectionConfig = {
     {
       name: 'clerkUserId',
       type: 'text',
+      maxLength: 64,
       admin: {
         description: 'Clerk user ID',
         position: 'sidebar',
@@ -82,6 +100,7 @@ export const GuestbookEntries: CollectionConfig = {
     {
       name: 'embedUrl',
       type: 'text',
+      maxLength: 500,
       admin: {
         description: 'Optional Spotify or YouTube URL to embed alongside the entry',
       },
@@ -112,6 +131,10 @@ export const GuestbookEntries: CollectionConfig = {
       ],
       defaultValue: 'pending',
       required: true,
+      access: {
+        create: ({ req: { user } }) => user?.role === 'admin' || user?.role === 'editor',
+        update: ({ req: { user } }) => user?.role === 'admin' || user?.role === 'editor',
+      },
       admin: {
         position: 'sidebar',
         description: 'Only approved entries are visible on the site',

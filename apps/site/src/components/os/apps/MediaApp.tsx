@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CmsFavMedia, CmsMedia, CmsMediaStatus, CmsMediaType, CmsPost } from '../../../lib/cms'
+import { useCmsResource } from '../../../hooks/useCmsResource'
 import { NowPlaying, NowCard } from '../../NowPlaying'
+import { formatDate } from '../../../lib/formatDate'
 
 // ─── Fallback static data (used when CMS config not available) ──────────────
 
@@ -88,10 +90,20 @@ export function MediaApp({ serverData, onOpenApp, onUpdateRoute }: Props) {
   const initialMediaTypes = (serverData?.mediaTypes as CmsMediaType[]) ?? []
   const initialMediaStatuses = (serverData?.mediaStatuses as CmsMediaStatus[]) ?? []
 
-  const [items, setItems] = useState<CmsFavMedia[]>(initialMedia)
-  const [mediaTypes, setMediaTypes] = useState<CmsMediaType[]>(initialMediaTypes)
-  const [mediaStatuses, setMediaStatuses] = useState<CmsMediaStatus[]>(initialMediaStatuses)
-  const [loading, setLoading] = useState(!initialMedia.length)
+  const { data: items, loading: itemsLoading } = useCmsResource<CmsFavMedia[]>(
+    initialMedia,
+    initialMedia.length ? null : '/api/favourite-media.json',
+  )
+  const { data: mediaTypes, loading: typesLoading } = useCmsResource<CmsMediaType[]>(
+    initialMediaTypes,
+    initialMediaTypes.length ? null : '/api/media-types.json',
+  )
+  const { data: mediaStatuses, loading: statusesLoading } = useCmsResource<CmsMediaStatus[]>(
+    initialMediaStatuses,
+    initialMediaStatuses.length ? null : '/api/media-statuses.json',
+  )
+  const loading = itemsLoading || typesLoading || statusesLoading
+
   const [filter, setFilter] = useState<string>('all')
   const [selected, setSelected] = useState<CmsFavMedia | null>(initialMediaItem)
 
@@ -99,44 +111,6 @@ export function MediaApp({ serverData, onOpenApp, onUpdateRoute }: Props) {
   useEffect(() => {
     if (initialMediaItem) {
       onUpdateRoute?.(`/media/${initialMediaItem.slug}`)
-    }
-  }, [])
-
-  // Fetch missing data client-side
-  useEffect(() => {
-    const fetches: Promise<void>[] = []
-
-    if (initialMedia.length === 0) {
-      fetches.push(
-        fetch('/api/favourite-media.json')
-          .then(r => r.json() as Promise<CmsFavMedia[]>)
-          .then((data) => setItems(data))
-          .catch(() => {}),
-      )
-    }
-
-    if (initialMediaTypes.length === 0) {
-      fetches.push(
-        fetch('/api/media-types.json')
-          .then(r => r.json() as Promise<CmsMediaType[]>)
-          .then((data) => setMediaTypes(data))
-          .catch(() => {}),
-      )
-    }
-
-    if (initialMediaStatuses.length === 0) {
-      fetches.push(
-        fetch('/api/media-statuses.json')
-          .then(r => r.json() as Promise<CmsMediaStatus[]>)
-          .then((data) => setMediaStatuses(data))
-          .catch(() => {}),
-      )
-    }
-
-    if (fetches.length > 0) {
-      Promise.all(fetches).finally(() => setLoading(false))
-    } else {
-      setLoading(false)
     }
   }, [])
 
@@ -402,7 +376,7 @@ export function MediaApp({ serverData, onOpenApp, onUpdateRoute }: Props) {
           <button className="gazette-back" onClick={goBack}>← Back</button>
           <div className="mediapp-detail__header">
             {coverUrl(selected) && (
-              <img className="mediapp-detail__cover" src={coverUrl(selected)} alt={selected.title} />
+              <img className="mediapp-detail__cover" src={coverUrl(selected)} alt={selected.title} loading="lazy" decoding="async" />
             )}
             <div className="mediapp-detail__meta">
               <h2 className="mediapp-detail__title">{selected.title}</h2>
@@ -446,11 +420,7 @@ export function MediaApp({ serverData, onOpenApp, onUpdateRoute }: Props) {
               )}
               {selected.completedAt && (
                 <span className="mediapp-detail__date">
-                  {new Date(selected.completedAt).toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
+                  {formatDate(selected.completedAt)}
                 </span>
               )}
             </div>

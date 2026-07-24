@@ -4,6 +4,8 @@ import { getSiteIdentity, getWebApps } from '../lib/cms'
 
 export const prerender = false
 
+Astro.response.status = 404
+
 const [siteIdentity, webApps] = await Promise.all([
   getSiteIdentity(),
   getWebApps(),

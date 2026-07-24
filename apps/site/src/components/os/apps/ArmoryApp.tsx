@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { CmsMedia, CmsProject, CmsProjectStatus } from '../../../lib/cms'
+import { useCmsResource } from '../../../hooks/useCmsResource'
 import { statusColors } from '../../../data/siteConfig'
 
 // Fallback colors if CMS has no project statuses configured
@@ -43,37 +44,15 @@ export function ArmoryApp({ serverData }: Props) {
   const initialProjects = (serverData?.projects as CmsProject[]) ?? []
   const initialStatuses = (serverData?.projectStatuses as CmsProjectStatus[]) ?? []
 
-  const [projects, setProjects] = useState<CmsProject[]>(initialProjects)
-  const [projectStatuses, setProjectStatuses] = useState<CmsProjectStatus[]>(initialStatuses)
-  const [loading, setLoading] = useState(!initialProjects.length)
-
-  useEffect(() => {
-    const fetches: Promise<void>[] = []
-
-    if (initialProjects.length === 0) {
-      fetches.push(
-        fetch('/api/projects.json')
-          .then(r => r.json() as Promise<CmsProject[]>)
-          .then((data) => setProjects(data))
-          .catch(() => {}),
-      )
-    }
-
-    if (initialStatuses.length === 0) {
-      fetches.push(
-        fetch('/api/project-statuses.json')
-          .then(r => r.json() as Promise<CmsProjectStatus[]>)
-          .then((data) => setProjectStatuses(data))
-          .catch(() => {}),
-      )
-    }
-
-    if (fetches.length > 0) {
-      Promise.all(fetches).finally(() => setLoading(false))
-    } else {
-      setLoading(false)
-    }
-  }, [])
+  const { data: projects, loading: projectsLoading } = useCmsResource<CmsProject[]>(
+    initialProjects,
+    initialProjects.length ? null : '/api/projects.json',
+  )
+  const { data: projectStatuses, loading: statusesLoading } = useCmsResource<CmsProjectStatus[]>(
+    initialStatuses,
+    initialStatuses.length ? null : '/api/project-statuses.json',
+  )
+  const loading = projectsLoading || statusesLoading
 
   const statusMap = useMemo(() => {
     const map = new Map<string, CmsProjectStatus>()
@@ -92,7 +71,9 @@ export function ArmoryApp({ serverData }: Props) {
 
       <div className="armory-grid">
         {projects.map((project: CmsProject) => {
-          const stack = project.stack as string[]
+          const stack = (project.stack ?? []).map((s: string | { label: string }) =>
+            typeof s === 'string' ? s : s.label
+          )
           const ps = project.projectStatus
           const statusValue = resolveProjectStatusValue(ps)
           const statusLabel = resolveProjectStatusLabel(ps)
@@ -108,6 +89,7 @@ export function ArmoryApp({ serverData }: Props) {
                     alt={statusLabel}
                     className="armory-card__status-icon"
                     title={statusLabel}
+                    decoding="async"
                   />
                 )}
                 <div className="armory-card__title-row">

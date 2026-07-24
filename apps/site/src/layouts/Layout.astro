@@ -47,7 +47,7 @@ const canonicalUrl = Astro.url.origin + Astro.url.pathname
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <link href="/sigterm-logo.svg" rel="icon" type="image/svg+xml" />
     <meta content={Astro.generator} name="generator" />
     <meta content={resolvedDescription} name="description" />
@@ -61,6 +61,7 @@ const canonicalUrl = Astro.url.origin + Astro.url.pathname
     <meta content={canonicalUrl} property="og:url" />
     <meta content="summary_large_image" name="twitter:card" />
     <meta content={ogImageUrl} name="twitter:image" />
+    <link rel="canonical" href={canonicalUrl} />
     <title>{resolvedTitle}</title>
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
@@ -79,14 +80,15 @@ const canonicalUrl = Astro.url.origin + Astro.url.pathname
       href="https://cdn.jsdelivr.net/fontsource/fonts/monaspace-argon@latest/latin-400-normal.woff2"
     />
     <script is:inline>
-      if (sessionStorage.getItem('templ3-booted') || window.location.search.includes('maximized')) {
-        document.documentElement.classList.add('has-booted')
-        sessionStorage.setItem('templ3-booted', '1')
-      }
+      try {
+        if (sessionStorage.getItem('templ3-booted')) {
+          document.documentElement.classList.add('skip-boot')
+        }
+      } catch {}
     </script>
   </head>
   <body>
-    <BootSequence client:load />
+    <BootSequence client:idle />
     <DesktopShell
       client:load
       initialApp={initialApp}

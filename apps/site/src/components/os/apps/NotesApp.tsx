@@ -1,22 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { CmsNote } from '../../../lib/cms'
+import { useCmsResource } from '../../../hooks/useCmsResource'
+import { formatDate } from '../../../lib/formatDate'
 
 type Props = {
   serverData?: Record<string, unknown>
   onOpenNote?: (note: CmsNote) => void
-}
-
-function formatDate(dateStr: string | undefined): string {
-  if (!dateStr) return ''
-  try {
-    return new Date(dateStr).toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  } catch {
-    return ''
-  }
 }
 
 function formatSize(content: string | undefined): string {
@@ -28,18 +17,20 @@ function formatSize(content: string | undefined): string {
 
 export function NotesApp({ serverData, onOpenNote }: Props) {
   const initialNotes = (serverData?.notes as CmsNote[]) ?? []
-  const [notes, setNotes] = useState<CmsNote[]>(initialNotes)
-  const [loading, setLoading] = useState(!initialNotes.length)
+  const { data: notes, loading } = useCmsResource<CmsNote[]>(
+    initialNotes,
+    initialNotes.length ? null : '/api/notes.json',
+  )
   const [selected, setSelected] = useState<CmsNote | null>(null)
 
-  useEffect(() => {
-    if (initialNotes.length > 0) return
-    fetch('/api/notes.json')
-      .then(r => r.json() as Promise<CmsNote[]>)
-      .then(data => setNotes(data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+  const notesWithSize = useMemo(
+    () =>
+      notes.map((note: CmsNote) => ({
+        ...note,
+        formattedSize: formatSize(note.content),
+      })),
+    [notes],
+  )
 
   const handleSingleClick = (note: CmsNote) => {
     setSelected(note)
@@ -84,7 +75,7 @@ export function NotesApp({ serverData, onOpenNote }: Props) {
           <div className="notes-explorer__empty">No files found</div>
         )}
 
-        {notes.map((note: CmsNote) => {
+        {notesWithSize.map((note: CmsNote & { formattedSize: string }) => {
           const filename = note.filename || `${note.slug}.md`
           const isSelected = selected?.id === note.id
           return (
@@ -110,7 +101,7 @@ export function NotesApp({ serverData, onOpenNote }: Props) {
               </span>
               <span className="notes-explorer__item-name" title={filename}>{filename}</span>
               <span className="notes-explorer__item-date">{formatDate(note.publishedAt)}</span>
-              <span className="notes-explorer__item-size">{formatSize(note.content)}</span>
+              <span className="notes-explorer__item-size">{note.formattedSize}</span>
             </div>
           )
         })}

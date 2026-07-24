@@ -7,5 +7,6 @@ dist
 .env
 .env.*
 .next
-.payloadapps/cms/.open-next
+.payload
+apps/cms/.open-next
 nul

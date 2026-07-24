@@ -35,31 +35,17 @@ export const GET: APIRoute = async (context) => {
   const refreshToken = String(rawRefreshToken || '').trim()
 
   if (!clientId || !clientSecret || !refreshToken) {
-    return Response.json({ 
-      isPlaying: false, 
+    return Response.json({
+      isPlaying: false,
       error: 'Missing Spotify credentials in env',
-      debug: {
-        hasClientIdMeta: !!import.meta.env.SPOTIFY_CLIENT_ID,
-        hasClientIdLocals: !!env.SPOTIFY_CLIENT_ID,
-        hasSecretMeta: !!import.meta.env.SPOTIFY_CLIENT_SECRET,
-        hasSecretLocals: !!env.SPOTIFY_CLIENT_SECRET,
-      }
     }, { status: 500 })
   }
 
   const accessTokenOrError = await getAccessToken(clientId, clientSecret, refreshToken)
   if (typeof accessTokenOrError === 'object' && 'error' in accessTokenOrError) {
-    return Response.json({ 
-      isPlaying: false, 
-      error: accessTokenOrError.error,
-      debug: {
-        clientIdLength: String(clientId).length,
-        clientSecretLength: String(clientSecret).length,
-        refreshTokenLength: String(refreshToken).length,
-        clientIdType: typeof clientId,
-        clientIdPrefix: String(clientId).substring(0, 16),
-        clientIdJson: JSON.stringify(clientId)
-      }
+    return Response.json({
+      isPlaying: false,
+      error: 'Failed to authenticate with Spotify',
     }, { status: 500 })
   }
   
@@ -70,6 +56,7 @@ export const GET: APIRoute = async (context) => {
   return Response.json(data, {
     headers: {
       'Content-Type': 'application/json',
+      'Cache-Control': 'private, max-age=25',
     },
   })
 }

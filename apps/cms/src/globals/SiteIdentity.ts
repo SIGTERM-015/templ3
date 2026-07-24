@@ -31,6 +31,7 @@ export const SiteIdentity: GlobalConfig = {
       name: 'siteDescription',
       type: 'textarea',
       defaultValue: "Sigterm's personal web: DevSecOps, hacking, hardware, AI, and a retro cyberpunk aesthetic.",
+      maxLength: 300,
       admin: { description: 'Default meta description for the site' },
     },
     {

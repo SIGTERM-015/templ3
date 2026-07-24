@@ -49,6 +49,7 @@ export function NowPlaying() {
     let cancelled = false
 
     const poll = async () => {
+      if (document.hidden) return
       try {
         const res = await fetch('/api/now-playing.json')
         if (!res.ok) return

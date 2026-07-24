@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import type { CmsGuestbookEntry, CmsMedia } from '../../../lib/cms'
+import { formatDate } from '../../../lib/formatDate'
 
 type Props = {
   serverData?: Record<string, unknown>
@@ -68,18 +69,6 @@ function youtubeEmbedUrl(url: string): string | null {
   return null
 }
 
-function formatDate(dateStr: string): string {
-  try {
-    return new Date(dateStr).toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  } catch {
-    return ''
-  }
-}
-
 /** Spotify logo SVG icon */
 function SpotifyIcon() {
   return (
@@ -141,7 +130,7 @@ type CardProps = {
   onExpand: (id: string | null) => void
 }
 
-function GuestbookCard({ entry, index, total, expanded, onExpand }: CardProps) {
+function GuestbookCardInner({ entry, index, total, expanded, onExpand }: CardProps) {
   const imgUrl = entryImageUrl(entry.image)
   const { x, y, rotation } = cardTransform(entry.id, index, total)
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -287,6 +276,8 @@ function GuestbookCard({ entry, index, total, expanded, onExpand }: CardProps) {
     </>
   )
 }
+
+const GuestbookCard = memo(GuestbookCardInner)
 
 export function GuestbookApp({ serverData, onOpenEditor }: Props) {
   const initialEntries = (serverData?.guestbookEntries as CmsGuestbookEntry[]) ?? []

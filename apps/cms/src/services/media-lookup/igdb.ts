@@ -24,7 +24,7 @@ async function getAccessToken(clientId: string, clientSecret: string): Promise<s
     })
 
     if (!res.ok) {
-      console.error('Twitch OAuth error:', res.status)
+      console.warn('Twitch OAuth error:', res.status)
       return null
     }
 
@@ -36,7 +36,7 @@ async function getAccessToken(clientId: string, clientSecret: string): Promise<s
 
     return cachedToken.token
   } catch (err) {
-    console.error('Twitch OAuth error:', err)
+    console.warn('Twitch OAuth error:', err)
     return null
   }
 }
@@ -58,7 +58,7 @@ export function createIgdbProvider(clientId: string, clientSecret: string): Medi
   return {
     async search(query: string): Promise<MediaLookupResult[]> {
       if (!clientId || !clientSecret) {
-        console.error('IGDB credentials not configured')
+        console.warn('IGDB credentials not configured')
         return []
       }
 
@@ -74,14 +74,14 @@ export function createIgdbProvider(clientId: string, clientSecret: string): Medi
             'Content-Type': 'text/plain',
           },
           body: `
-            search "${query.replace(/"/g, '\\"')}";
+            search "${query.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}";
             fields name, cover.url, first_release_date, summary, involved_companies.developer, involved_companies.company.name, url;
             limit 10;
           `,
         })
 
         if (!res.ok) {
-          console.error('IGDB API error:', res.status)
+          console.warn('IGDB API error:', res.status)
           return []
         }
 
@@ -118,7 +118,7 @@ export function createIgdbProvider(clientId: string, clientSecret: string): Medi
           }
         })
       } catch (err) {
-        console.error('IGDB search error:', err)
+        console.warn('IGDB search error:', err)
         return []
       }
     },

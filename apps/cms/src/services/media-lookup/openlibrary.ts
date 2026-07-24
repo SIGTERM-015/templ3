@@ -17,7 +17,7 @@ export const openLibraryProvider: MediaLookupProvider = {
 
       const res = await fetch(url)
       if (!res.ok) {
-        console.error('Open Library API error:', res.status)
+        console.warn('Open Library API error:', res.status)
         return []
       }
 
@@ -36,7 +36,7 @@ export const openLibraryProvider: MediaLookupProvider = {
         year: doc.first_publish_year,
       }))
     } catch (err) {
-      console.error('Open Library search error:', err)
+      console.warn('Open Library search error:', err)
       return []
     }
   },

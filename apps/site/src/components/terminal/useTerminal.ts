@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { executeCommand, getCompletions, type CommandResult, type TerminalConfig } from './commands'
 import { SIGTERM_SKULL, SIGTERM_SKULL_MOBILE } from './ascii'
 
@@ -37,12 +37,17 @@ export function useTerminal(config?: TerminalConfig) {
   const [history, setHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [input, setInput] = useState('')
+  const idCounter = useRef(lines.length)
 
   const prompt = config?.siteIdentity?.terminalPrompt ?? 'sigterm@templ3:~$'
 
   const addLine = useCallback(
     (type: 'input' | 'output', content: string) => {
-      setLines((prev: TerminalLine[]) => [...prev, { id: prev.length, type, content }])
+      const id = idCounter.current++
+      setLines((prev: TerminalLine[]) => {
+        const next = [...prev, { id, type, content }]
+        return next.length > 500 ? next.slice(-500) : next
+      })
     },
     []
   )

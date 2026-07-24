@@ -1,23 +1,25 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
 import { desktopApps, site } from '../../data/siteConfig'
 import type { CmsNote, CmsSiteIdentity, CmsWebApp } from '../../lib/cms'
 import { WindowFrame } from './WindowFrame'
 import { DesktopIcons } from './DesktopIcons'
 import { TaskbarReact } from './TaskbarReact'
 import { AppMenu } from './AppMenu'
-import { DossierApp } from './apps/DossierApp'
-import { GazetteApp } from './apps/GazetteApp'
-import { ArmoryApp } from './apps/ArmoryApp'
-import { MediaApp } from './apps/MediaApp'
-import { CommsApp } from './apps/CommsApp'
-import { ReadmeApp } from './apps/ReadmeApp'
-import { TerminalApp } from './apps/TerminalApp'
-import { SettingsApp } from './apps/SettingsApp'
-import { NotesApp } from './apps/NotesApp'
-import { NoteViewerApp } from './apps/NoteViewerApp'
-import { BrowserApp } from './apps/BrowserApp'
-import { GuestbookApp } from './apps/GuestbookApp'
-import { GuestbookEditorApp } from './apps/GuestbookEditorApp'
+
+const DossierApp = lazy(() => import('./apps/DossierApp').then(m => ({ default: m.DossierApp })))
+const GazetteApp = lazy(() => import('./apps/GazetteApp').then(m => ({ default: m.GazetteApp })))
+const ArmoryApp = lazy(() => import('./apps/ArmoryApp').then(m => ({ default: m.ArmoryApp })))
+const MediaApp = lazy(() => import('./apps/MediaApp').then(m => ({ default: m.MediaApp })))
+const CommsApp = lazy(() => import('./apps/CommsApp').then(m => ({ default: m.CommsApp })))
+const ReadmeApp = lazy(() => import('./apps/ReadmeApp').then(m => ({ default: m.ReadmeApp })))
+const TerminalApp = lazy(() => import('./apps/TerminalApp').then(m => ({ default: m.TerminalApp })))
+const SettingsApp = lazy(() => import('./apps/SettingsApp').then(m => ({ default: m.SettingsApp })))
+const NotesApp = lazy(() => import('./apps/NotesApp').then(m => ({ default: m.NotesApp })))
+const NoteViewerApp = lazy(() => import('./apps/NoteViewerApp').then(m => ({ default: m.NoteViewerApp })))
+const BrowserApp = lazy(() => import('./apps/BrowserApp').then(m => ({ default: m.BrowserApp })))
+const GuestbookApp = lazy(() => import('./apps/GuestbookApp').then(m => ({ default: m.GuestbookApp })))
+const GuestbookEditorApp = lazy(() => import('./apps/GuestbookEditorApp').then(m => ({ default: m.GuestbookEditorApp })))
+
 import {
   buildCustomThemeVariables,
   DEFAULT_CUSTOM_THEME,
@@ -200,6 +202,26 @@ function getDesktopBackground(wallpaper: string): React.CSSProperties {
   return { backgroundImage: `url(${value})`, backgroundSize: 'cover', backgroundPosition: 'center' }
 }
 
+// Module-level memoized component — stable reference, only re-renders when win or renderApp changes
+const AppContent = memo(function AppContent({ win, renderApp }: { win: WindowState; renderApp: (win: WindowState) => ReactNode }) {
+  return <>{renderApp(win)}</>
+})
+
+// Simple loading fallback shown while lazy app components are loading
+const AppLoading = () => (
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100%',
+      color: 'var(--text-muted)',
+    }}
+  >
+    Loading...
+  </div>
+)
+
 export function DesktopShell({ initialApp, serverData, maximized: initialMaximized }: Props) {
   const [windows, dispatch] = useReducer(reducer, []) as [WindowState[], (action: Action) => void]
   const [ready, setReady] = useState(false)
@@ -208,10 +230,10 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
   const [appMenuOpen, setAppMenuOpen] = useState(false)
 
   // Parse siteIdentity and webApps from serverData once at mount
-  const parsedServerData = (() => {
+  const parsedServerData = useMemo(() => {
     if (!serverData) return undefined
     try { return JSON.parse(serverData) as Record<string, unknown> } catch { return undefined }
-  })()
+  }, [serverData])
   const siteIdentity = parsedServerData?.siteIdentity as CmsSiteIdentity | undefined
   const webApps = (parsedServerData?.webApps as CmsWebApp[] | undefined) ?? []
 
@@ -222,10 +244,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
   const nextZ = useCallback(() => ++zRef.current, [])
 
   useEffect(() => {
-    let parsedSD: Record<string, unknown> | undefined
-    if (serverData) {
-      try { parsedSD = JSON.parse(serverData) } catch {}
-    }
+    const parsedSD = parsedServerData
 
     const initial: WindowState[] = []
     let maxZ = 10
@@ -282,7 +301,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
     zRef.current = maxZ
     dispatch({ type: 'SET', windows: initial })
     setReady(true)
-  }, [])
+  }, [parsedServerData])
 
   useEffect(() => {
     try {
@@ -316,14 +335,18 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
   }, [themeId, customTheme])
 
   useEffect(() => {
-    const state: PersonalizationState = { themeId, customTheme, wallpaper }
-    localStorage.setItem(PERSONALIZATION_KEY, JSON.stringify(state))
+    try {
+      const state: PersonalizationState = { themeId, customTheme, wallpaper }
+      localStorage.setItem(PERSONALIZATION_KEY, JSON.stringify(state))
+    } catch { /* QuotaExceededError or SecurityError — ignore */ }
   }, [themeId, customTheme, wallpaper])
 
   useEffect(() => {
     if (!ready) return
-    const serializable = windows.map(({ meta, ...rest }) => rest)
-    sessionStorage.setItem('templ3-windows', JSON.stringify(serializable))
+    try {
+      const serializable = windows.map(({ meta, ...rest }) => rest)
+      sessionStorage.setItem('templ3-windows', JSON.stringify(serializable))
+    } catch { /* ignore */ }
   }, [windows, ready])
 
   useEffect(() => {
@@ -333,7 +356,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
       .sort((a, b) => b.zIndex - a.zIndex)[0]
     const target = top?.route ?? '/'
     if (window.location.pathname !== target) {
-      window.history.pushState(null, '', target)
+      window.history.replaceState(null, '', target)
     }
   }, [windows, ready])
 
@@ -385,7 +408,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
     else if (route === '/' || route === '') openWindow('dossier')
   }, [openWindow])
 
-  const renderApp = (win: WindowState) => {
+  const renderApp = useCallback((win: WindowState) => {
     const sd = win.meta?.serverData as Record<string, unknown> | undefined
     // Merge the top-level siteIdentity into each window's serverData
     // so every app can access it regardless of which page opened it
@@ -418,6 +441,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
           <TerminalApp
             onNavigate={handleNavigate}
             onOpenApp={(id) => openWindow(id)}
+            onClose={() => dispatch({ type: 'CLOSE', id: win.id })}
             siteIdentity={merged?.siteIdentity as CmsSiteIdentity | undefined}
             webApps={webApps}
           />
@@ -482,7 +506,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
         }
         return null
     }
-  }
+  }, [openWindow, updateRoute, handleNavigate, siteIdentity, webApps, windows, nextZ, dispatch, themeId, setThemeId, customTheme, setCustomTheme, wallpaper, setWallpaper, defaultWallpaper])
 
   const focusedId = [...windows]
     .filter(w => !w.minimized)
@@ -507,20 +531,23 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
         {windows.filter(w => !w.minimized).map(win => (
           <WindowFrame
             key={win.id}
+            id={win.id}
             title={win.title}
             icon={win.icon}
             x={win.x} y={win.y} w={win.w} h={win.h}
             zIndex={win.zIndex}
             maximized={win.maximized}
             noPadding={isFullBleedApp(win.appId)}
-            onFocus={() => focusWindow(win.id)}
-            onClose={() => closeWindow(win.id)}
-            onMinimize={() => minimizeWindow(win.id)}
-            onMaximize={() => maximizeWindow(win.id)}
-            onMove={(x, y) => moveWindow(win.id, x, y)}
-            onResize={(w, h) => resizeWindow(win.id, w, h)}
+            onFocus={focusWindow}
+            onClose={closeWindow}
+            onMinimize={minimizeWindow}
+            onMaximize={maximizeWindow}
+            onMove={moveWindow}
+            onResize={resizeWindow}
           >
-            {renderApp(win)}
+            <Suspense fallback={<AppLoading />}>
+              <AppContent win={win} renderApp={renderApp} />
+            </Suspense>
           </WindowFrame>
         ))}
       </div>

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CmsPost, CmsCategory, CmsMedia } from '../../../lib/cms'
+import { useCmsResource } from '../../../hooks/useCmsResource'
 import { PayloadRichText } from '../../blog/PayloadRichText'
+import { formatDate } from '../../../lib/formatDate'
 
 type Props = {
   serverData?: Record<string, unknown>
@@ -13,14 +15,20 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
   const initialPosts = (serverData?.posts as CmsPost[]) ?? []
   const initialPost = (serverData?.post as CmsPost) ?? null
 
-  const [posts, setPosts] = useState<CmsPost[]>(initialPosts)
-  const [categories, setCategories] = useState<CmsCategory[]>([])
+  const { data: posts, loading: postsLoading } = useCmsResource<CmsPost[]>(
+    initialPosts,
+    initialPosts.length ? null : '/api/posts.json',
+  )
+  const { data: categories, loading: categoriesLoading } = useCmsResource<CmsCategory[]>(
+    [],
+    '/api/categories.json',
+  )
   const [selected, setSelected] = useState<CmsPost | null>(initialPost)
-  const [loading, setLoading] = useState(!initialPosts.length && !initialPost)
   const [loadingPost, setLoadingPost] = useState(false)
   const [copied, setCopied] = useState(false)
   const [search, setSearch] = useState('')
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set(['all']))
+  const loading = postsLoading || categoriesLoading
 
   const selectPost = useCallback((post: CmsPost) => {
     if (post.content) {
@@ -39,19 +47,6 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
       .finally(() => setLoadingPost(false))
   }, [onUpdateRoute])
 
-  useEffect(() => {
-    if (initialPosts.length === 0) {
-      fetch('/api/posts.json')
-        .then(r => r.json() as Promise<CmsPost[]>)
-        .then((data) => setPosts(data))
-        .catch(() => {})
-        .finally(() => setLoading(false))
-    }
-    fetch('/api/categories.json')
-      .then(r => r.json() as Promise<CmsCategory[]>)
-      .then((data) => setCategories(data))
-      .catch(() => {})
-  }, [])
 
   useEffect(() => {
     if (selected || posts.length === 0) return
@@ -67,11 +62,6 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
     if (!post.heroImage) return undefined
     if (typeof post.heroImage === 'string') return post.heroImage
     return post.heroImage.url
-  }
-
-  const formatDate = (d?: string) => {
-    if (!d) return '—'
-    return new Date(d).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })
   }
 
   const sharePost = useCallback((slug: string) => {
@@ -144,7 +134,7 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
         onClick={() => selectPost(post)}
         style={hero ? { backgroundImage: `linear-gradient(oklch(0% 0 0 / 0.7), oklch(0% 0 0 / 0.85)), url(${hero})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
       >
-        <span className="gazette-card__date">{formatDate(post.publishedAt)}</span>
+        <span className="gazette-card__date">{post.publishedAt ? formatDate(post.publishedAt) : '—'}</span>
         <span className="gazette-card__title">{post.title}</span>
         {post.tags && post.tags.length > 0 && (
           <span className="gazette-card__tags">
@@ -186,7 +176,7 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
                       {openFolders.has(slug) ? '▾' : '▸'}
                     </span>
                     {category?.icon && typeof category.icon === 'object' && (category.icon as CmsMedia).url
-                      ? <img className="gazette-folder__img" src={(category.icon as CmsMedia).url} alt="" />
+                      ? <img className="gazette-folder__img" src={(category.icon as CmsMedia).url} alt="" loading="lazy" />
                       : <span className="gazette-folder__emoji">📁</span>}
                     <span className="gazette-folder__name">{category?.name || slug}</span>
                     <span className="gazette-folder__count">{catPosts.length}</span>
@@ -245,11 +235,11 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
               </button>
             </div>
             {heroUrl(selected) && (
-              <img className="gazette-hero" src={heroUrl(selected)} alt={selected.title} />
+              <img className="gazette-hero" src={heroUrl(selected)} alt={selected.title} loading="lazy" decoding="async" />
             )}
             <h1>{selected.title}</h1>
             <div className="article-meta">
-              {formatDate(selected.publishedAt)}
+              {selected.publishedAt ? formatDate(selected.publishedAt) : '—'}
               {selected.tags && ` · ${selected.tags.map((t: { name: string }) => t.name).join(', ')}`}
             </div>
             <div className="article-content">

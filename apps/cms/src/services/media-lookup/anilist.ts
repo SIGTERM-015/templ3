@@ -54,7 +54,7 @@ async function searchAniList(
   })
 
   if (!response.ok) {
-    console.error('AniList API error:', response.status)
+    console.warn('AniList API error:', response.status)
     return []
   }
 

@@ -140,29 +140,6 @@ img, svg {
   background: var(--amber-a6);
 }
 
-.button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-}
-
-/* ── Grids (used inside window content) ── */
-
-.grid-2, .grid-3 {
-  display: grid;
-  gap: var(--space-md);
-}
-
-.grid-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-3 { grid-template-columns: repeat(3, 1fr); }
-
-.article-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: var(--space-md);
-}
-
 /* ── Panel & Card (inside windows) ── */
 
 .panel, .card {
@@ -302,6 +279,4 @@ img, svg {
 
 /* ── Responsive ── */
 
-@media (max-width: 768px) {
-  .grid-2, .grid-3 { grid-template-columns: 1fr; }
-}
+

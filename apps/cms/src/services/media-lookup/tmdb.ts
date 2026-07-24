@@ -24,7 +24,9 @@ type TmdbTvDetails = {
 
 async function getMovieDirector(movieId: number, apiKey: string): Promise<string | undefined> {
   try {
-    const res = await fetch(`${TMDB_API_BASE}/movie/${movieId}/credits?api_key=${apiKey}`)
+    const res = await fetch(`${TMDB_API_BASE}/movie/${movieId}/credits`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    })
     if (!res.ok) return undefined
     const data = (await res.json()) as TmdbMovieCredits
     const director = data.crew?.find((c) => c.job === 'Director')
@@ -36,7 +38,9 @@ async function getMovieDirector(movieId: number, apiKey: string): Promise<string
 
 async function getTvCreator(tvId: number, apiKey: string): Promise<string | undefined> {
   try {
-    const res = await fetch(`${TMDB_API_BASE}/tv/${tvId}?api_key=${apiKey}`)
+    const res = await fetch(`${TMDB_API_BASE}/tv/${tvId}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    })
     if (!res.ok) return undefined
     const data = (await res.json()) as TmdbTvDetails
     return data.created_by?.[0]?.name
@@ -49,16 +53,18 @@ export function createTmdbProvider(apiKey: string): MediaLookupProvider {
   return {
     async search(query: string): Promise<MediaLookupResult[]> {
       if (!apiKey) {
-        console.error('TMDB API key not configured')
+        console.warn('TMDB API key not configured')
         return []
       }
 
-      const url = `${TMDB_API_BASE}/search/multi?api_key=${apiKey}&query=${encodeURIComponent(query)}&include_adult=false`
+      const url = `${TMDB_API_BASE}/search/multi?query=${encodeURIComponent(query)}&include_adult=false`
 
       try {
-        const res = await fetch(url)
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${apiKey}` },
+        })
         if (!res.ok) {
-          console.error('TMDB API error:', res.status)
+          console.warn('TMDB API error:', res.status)
           return []
         }
 
@@ -99,7 +105,7 @@ export function createTmdbProvider(apiKey: string): MediaLookupProvider {
 
         return withCreators
       } catch (err) {
-        console.error('TMDB search error:', err)
+        console.warn('TMDB search error:', err)
         return []
       }
     },

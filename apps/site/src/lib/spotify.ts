@@ -2,6 +2,8 @@ const TOKEN_URL = 'https://accounts.spotify.com/api/token'
 const NOW_PLAYING_URL = 'https://api.spotify.com/v1/me/player/currently-playing'
 const RECENTLY_PLAYED_URL = 'https://api.spotify.com/v1/me/player/recently-played?limit=1'
 
+let cachedToken: { token: string; expiresAt: number } | null = null
+
 export type SpotifyTrack = {
   isPlaying: boolean
   title: string
@@ -22,6 +24,10 @@ export async function getAccessToken(
   clientSecret: string,
   refreshToken: string,
 ): Promise<string | { error: string }> {
+  if (cachedToken && Date.now() < cachedToken.expiresAt) {
+    return cachedToken.token
+  }
+
   const cleanClientId = String(clientId).trim()
   const cleanClientSecret = String(clientSecret).trim()
   const cleanRefreshToken = String(refreshToken).trim()
@@ -45,10 +51,15 @@ export async function getAccessToken(
       return { error: `Spotify token error [${res.status}]: ${err}` }
     }
 
-    const data = (await res.json()) as { access_token: string }
+    const data = (await res.json()) as { access_token: string; expires_in?: number }
+    cachedToken = {
+      token: data.access_token,
+      expiresAt: Date.now() + ((data.expires_in ?? 3600) - 60) * 1000,
+    }
     return data.access_token
-  } catch (e: any) {
-    return { error: `Fetch error: ${e.message}` }
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e)
+    return { error: `Fetch error: ${message}` }
   }
 }
 

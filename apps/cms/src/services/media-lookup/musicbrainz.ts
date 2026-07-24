@@ -29,7 +29,7 @@ export const musicBrainzProvider: MediaLookupProvider = {
       })
 
       if (!res.ok) {
-        console.error('MusicBrainz API error:', res.status)
+        console.warn('MusicBrainz API error:', res.status)
         return []
       }
 
@@ -56,7 +56,7 @@ export const musicBrainzProvider: MediaLookupProvider = {
         }
       })
     } catch (err) {
-      console.error('MusicBrainz search error:', err)
+      console.warn('MusicBrainz search error:', err)
       return []
     }
   },

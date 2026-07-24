@@ -667,7 +667,7 @@
     padding: 14px 16px;
     background: transparent;
     border: none;
-    color: var(--fg);
+    color: var(--text);
     text-align: left;
     cursor: pointer;
     transition: background 120ms ease;
@@ -699,7 +699,7 @@
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--fg);
+    color: var(--text);
   }
 
   @keyframes slideUp {

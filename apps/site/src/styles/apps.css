@@ -1423,7 +1423,7 @@
 }
 
 .notes-explorer__path-seg {
-  color: var(--fg);
+  color: var(--text);
 }
 
 .notes-explorer__count {
@@ -1464,7 +1464,7 @@
   gap: var(--space-sm);
   padding: 5px var(--space-md);
   cursor: pointer;
-  color: var(--fg);
+  color: var(--text);
   border: 1px solid transparent;
   border-radius: 2px;
   margin: 1px 4px;

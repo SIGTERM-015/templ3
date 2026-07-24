@@ -6,6 +6,9 @@ export const prerender = false
 export const GET: APIRoute = async () => {
   const links = await getLinks()
   return new Response(JSON.stringify(links), {
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=300, s-maxage=3600',
+    },
   })
 }

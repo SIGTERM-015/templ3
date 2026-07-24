@@ -11,11 +11,12 @@ function isMobile(): boolean {
 type Props = {
   onNavigate: (route: string) => void
   onOpenApp?: (appId: string) => void
+  onClose?: () => void
   siteIdentity?: CmsSiteIdentity
   webApps?: CmsWebApp[]
 }
 
-export function TerminalApp({ onNavigate, onOpenApp, siteIdentity, webApps }: Props) {
+export function TerminalApp({ onNavigate, onOpenApp, onClose, siteIdentity, webApps }: Props) {
   const config = {
     siteIdentity,
     webApps: webApps?.map(w => ({ slug: w.slug, name: w.title })) ?? null,
@@ -54,6 +55,11 @@ export function TerminalApp({ onNavigate, onOpenApp, siteIdentity, webApps }: Pr
 
     if (result.action === 'open_url' && result.openUrl) {
       setTimeout(() => window.open(result.openUrl!, '_blank', 'noopener'), 400)
+    }
+
+    if (result.action === 'exit') {
+      onClose?.()
+      return
     }
 
     if (result.action === 'bsod') {

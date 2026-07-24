@@ -86,7 +86,10 @@ const cloudflare =
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true })
 
-const payloadSecret = process.env.PAYLOAD_SECRET || ''
+const payloadSecret = process.env.PAYLOAD_SECRET
+if (!payloadSecret) {
+  throw new Error('PAYLOAD_SECRET environment variable is required')
+}
 // In production, use Hyperdrive connectionString; in dev, use DATABASE_URL from env
 const databaseUrl = (isProduction && cloudflare?.env?.HYPERDRIVE?.connectionString)
   ? cloudflare.env.HYPERDRIVE.connectionString
@@ -186,6 +189,11 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   logger: isProduction ? cloudflareLogger : undefined,
+  upload: {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB
+    },
+  },
   email: smtpHost
     ? nodemailerAdapter({
         defaultFromAddress: smtpFrom,
@@ -223,6 +231,6 @@ export default buildConfig({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bucket: (cloudflare?.env?.R2 || null) as any,
     }),
-    payloadTotp({ collection: 'users', disableAccessWrapper: true }),
+    payloadTotp({ collection: 'users' }),
   ],
 })

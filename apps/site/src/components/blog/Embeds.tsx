@@ -84,7 +84,7 @@ export function TwitterEmbed({ url }: TwitterProps) {
   return (
     <figure className="embed embed--twitter">
       <blockquote className="twitter-tweet" data-theme="dark">
-        <a href={url}>{url}</a>
+        <a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
       </blockquote>
     </figure>
   )
@@ -111,6 +111,7 @@ export function GitHubGistEmbed({ url }: GistProps) {
       <iframe
         src={`https://gist.github.com/${gist.user}/${gist.id}.pibb`}
         style={{ width: '100%', border: 0, minHeight: 200 }}
+        sandbox="allow-scripts allow-same-origin"
       />
     </figure>
   )
@@ -143,6 +144,7 @@ export function CodePenEmbed({ url, height = 400, defaultTab = 'result' }: CodeP
         src={`https://codepen.io/${pen.user}/embed/${pen.id}?default-tab=${defaultTab}&theme-id=dark`}
         loading="lazy"
         allowFullScreen
+        sandbox="allow-scripts allow-same-origin"
       />
     </figure>
   )
@@ -233,12 +235,19 @@ type BookmarkProps = {
 export function BookmarkCard({ url, title, description, thumbnail }: BookmarkProps) {
   const thumbUrl = typeof thumbnail === 'object' && thumbnail?.url ? thumbnail.url : undefined
 
+  let hostname = url
+  try {
+    hostname = new URL(url).hostname
+  } catch {
+    // Keep raw url string as fallback when URL parsing fails
+  }
+
   return (
     <a href={url} className="bookmark" target="_blank" rel="noopener noreferrer">
       <div className="bookmark__content">
         <span className="bookmark__title">{title || url}</span>
         {description && <span className="bookmark__description">{description}</span>}
-        <span className="bookmark__url">{new URL(url).hostname}</span>
+        <span className="bookmark__url">{hostname}</span>
       </div>
       {thumbUrl && (
         <div className="bookmark__thumbnail">

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import type { CmsLink } from '../../../lib/cms'
+import { useCmsResource } from '../../../hooks/useCmsResource'
 
 type Props = {
   serverData?: Record<string, unknown>
@@ -13,25 +14,21 @@ function logoUrl(logo: CmsLink['logo']): string | null {
 
 export function CommsApp({ serverData }: Props) {
   const initialLinks = (serverData?.links as CmsLink[]) ?? []
-  const [links, setLinks] = useState<CmsLink[]>(initialLinks)
-  const [loading, setLoading] = useState(!initialLinks.length)
+  const { data: links, loading } = useCmsResource<CmsLink[]>(
+    initialLinks,
+    initialLinks.length ? null : '/api/links.json',
+  )
 
-  useEffect(() => {
-    if (initialLinks.length > 0) return
-    setLoading(true)
-    fetch('/api/links.json')
-      .then(r => r.json())
-      .then((data: unknown) => setLinks(data as CmsLink[]))
-      .catch(() => setLinks([]))
-      .finally(() => setLoading(false))
-  }, [])
-
-  const grouped = links.reduce((acc: Record<string, CmsLink[]>, link: CmsLink) => {
-    const key = link.platform || 'Other'
-    if (!acc[key]) acc[key] = []
-    acc[key].push(link)
-    return acc
-  }, {})
+  const grouped = useMemo(
+    () =>
+      links.reduce((acc: Record<string, CmsLink[]>, link: CmsLink) => {
+        const key = link.platform || 'Other'
+        if (!acc[key]) acc[key] = []
+        acc[key].push(link)
+        return acc
+      }, {}),
+    [links],
+  )
 
   const empty = !loading && links.length === 0
 

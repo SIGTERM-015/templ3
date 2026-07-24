@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { marked } from 'marked'
 import type { CmsNote } from '../../../lib/cms'
+import { formatDate } from '../../../lib/formatDate'
 
 marked.setOptions({ async: false })
 
@@ -13,19 +14,6 @@ function parseMarkdown(content: string): string {
     return marked.parse(content, { async: false }) as string
   } catch {
     return content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  }
-}
-
-function formatDate(dateStr: string | undefined): string {
-  if (!dateStr) return ''
-  try {
-    return new Date(dateStr).toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  } catch {
-    return ''
   }
 }
 

@@ -30,11 +30,9 @@ export function DossierApp({ onOpenApp, siteIdentity }: Props) {
 
   const avatarUrl = resolveMediaUrl(siteIdentity?.avatar) ?? operator.avatar
 
-  const links = siteIdentity?.aliases !== undefined
-    // If CMS has siteIdentity, social links come from the CMS Links collection (CommsApp)
-    // but for the quick-link icons in Dossier we fall back to siteConfig
-    ? defaultSocialLinks
-    : defaultSocialLinks
+  // If CMS has siteIdentity, social links come from the CMS Links collection (CommsApp)
+  // but for the quick-link icons in Dossier we fall back to siteConfig
+  const links = defaultSocialLinks
 
   const inspirations = siteIdentity?.inspirations?.length
     ? siteIdentity.inspirations.map(i => i.tag)
@@ -49,7 +47,7 @@ export function DossierApp({ onOpenApp, siteIdentity }: Props) {
               <span className="dossier-stamp-line dossier-stamp-line--redacted">CLASSIFIED</span>
               <span className="dossier-stamp-line dossier-stamp-line--clear">DECLASSIFIED</span>
             </div>
-            <img src={avatarUrl} alt={handle} className="dossier-photo" />
+            <img src={avatarUrl} alt={handle} className="dossier-photo" decoding="async" />
           </div>
           <span className="dossier-status" data-status={status.toLowerCase()}>
             {status}
