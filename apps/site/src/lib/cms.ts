@@ -337,6 +337,30 @@ export function mediaUrl(value: CmsMedia | string | null | undefined): string | 
   return value.url ?? undefined
 }
 
+/**
+ * Returns a proxied/cached URL for a CMS media file.
+ * Routes through /api/img/ for Cloudflare edge caching (30 days).
+ * First request fetches from CMS, subsequent ones served from edge.
+ */
+export function cachedMediaUrl(
+  value: CmsMedia | string | null | undefined,
+): string | undefined {
+  const url = mediaUrl(value)
+  if (!url) return undefined
+
+  // Extract the filename from the CMS URL
+  // URL format: https://cms.sigterm.vodka/api/media/file/filename.png
+  try {
+    const parsed = new URL(url)
+    const match = parsed.pathname.match(/\/api\/media\/file\/(.+)$/)
+    if (!match) return url // Fallback to direct URL if pattern doesn't match
+
+    return `/api/img/${match[1]}`
+  } catch {
+    return url
+  }
+}
+
 /** Resolve a populated relationship's value field (CmsMediaType, CmsMediaStatus, CmsProjectStatus) */
 export function resolveValue<T extends { value: string }>(
   rel: T | string | null | undefined,

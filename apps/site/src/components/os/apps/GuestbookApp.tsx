@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import type { CmsGuestbookEntry, CmsMedia } from '../../../lib/cms'
+import { cachedMediaUrl } from '../../../lib/cms'
 import { formatDate } from '../../../lib/formatDate'
 
 type Props = {
@@ -7,11 +8,9 @@ type Props = {
   onOpenEditor?: () => void
 }
 
-/** Resolve a CmsMedia relationship to its URL */
+/** Resolve a CmsMedia relationship to a proxied/cached URL */
 function entryImageUrl(image: CmsMedia | string | null | undefined): string | undefined {
-  if (!image) return undefined
-  if (typeof image === 'string') return undefined
-  return image.url ?? undefined
+  return cachedMediaUrl(image)
 }
 
 /** Deterministic pseudo-random from string hash */
@@ -132,6 +131,7 @@ type CardProps = {
 
 function GuestbookCardInner({ entry, index, total, expanded, onExpand }: CardProps) {
   const imgUrl = entryImageUrl(entry.image)
+  const lightboxUrl = entryImageUrl(entry.image)
   const { x, y, rotation } = cardTransform(entry.id, index, total)
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
@@ -266,9 +266,9 @@ function GuestbookCardInner({ entry, index, total, expanded, onExpand }: CardPro
       </div>
 
       {/* Image lightbox */}
-      {lightboxOpen && imgUrl && (
+      {lightboxOpen && lightboxUrl && (
         <ImageLightbox
-          src={imgUrl}
+          src={lightboxUrl}
           alt={`Guestbook entry by ${entry.authorName}`}
           onClose={() => setLightboxOpen(false)}
         />

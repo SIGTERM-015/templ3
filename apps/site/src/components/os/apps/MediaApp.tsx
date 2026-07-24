@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CmsFavMedia, CmsMedia, CmsMediaStatus, CmsMediaType, CmsPost } from '../../../lib/cms'
+import { cachedMediaUrl } from '../../../lib/cms'
 import { useCmsResource } from '../../../hooks/useCmsResource'
 import { NowPlaying, NowCard } from '../../NowPlaying'
 import { formatDate } from '../../../lib/formatDate'
@@ -185,15 +186,15 @@ export function MediaApp({ serverData, onOpenApp, onUpdateRoute }: Props) {
     return found?.glyph || FALLBACK_STATUS_GLYPHS[value] || '?'
   }
 
-  const coverUrl = (item: CmsFavMedia): string | undefined => {
-    // Prefer uploaded cover image
-    if (item.coverImage) {
-      if (typeof item.coverImage === 'string') return item.coverImage
-      return (item.coverImage as CmsMedia).url
-    }
-    // Fall back to external cover URL from API
-    return item.externalCoverUrl
+const coverUrl = (item: CmsFavMedia): string | undefined => {
+  // Prefer uploaded cover image (proxied through edge cache)
+  if (item.coverImage) {
+    if (typeof item.coverImage === 'string') return item.coverImage
+    return cachedMediaUrl(item.coverImage)
   }
+  // Fall back to external cover URL from API
+  return item.externalCoverUrl
+}
 
   const blogSlug = (item: CmsFavMedia): string | undefined => {
     if (!item.blogPost) return undefined
