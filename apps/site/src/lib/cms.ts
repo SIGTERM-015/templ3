@@ -339,11 +339,13 @@ export function mediaUrl(value: CmsMedia | string | null | undefined): string | 
 
 /**
  * Returns a proxied/cached URL for a CMS media file.
- * Routes through /api/img/ for Cloudflare edge caching (30 days).
- * First request fetches from CMS, subsequent ones served from edge.
+ * Routes through /api/img/ for Cloudflare edge caching (30 days)
+ * and optional image resizing via Cloudflare Images (free: 5k/month).
+ * @param width - Optional width in px. Serves WebP/AVIF automatically.
  */
 export function cachedMediaUrl(
   value: CmsMedia | string | null | undefined,
+  width?: number,
 ): string | undefined {
   const url = mediaUrl(value)
   if (!url) return undefined
@@ -355,7 +357,8 @@ export function cachedMediaUrl(
     const match = parsed.pathname.match(/\/api\/media\/file\/(.+)$/)
     if (!match) return url // Fallback to direct URL if pattern doesn't match
 
-    return `/api/img/${match[1]}`
+    const params = width ? `?w=${width}` : ''
+    return `/api/img/${match[1]}${params}`
   } catch {
     return url
   }

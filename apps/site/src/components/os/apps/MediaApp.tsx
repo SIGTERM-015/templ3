@@ -186,11 +186,11 @@ export function MediaApp({ serverData, onOpenApp, onUpdateRoute }: Props) {
     return found?.glyph || FALLBACK_STATUS_GLYPHS[value] || '?'
   }
 
-const coverUrl = (item: CmsFavMedia): string | undefined => {
-  // Prefer uploaded cover image (proxied through edge cache)
+const coverUrl = (item: CmsFavMedia, width?: number): string | undefined => {
+  // Prefer uploaded cover image (proxied through edge cache + optional resize)
   if (item.coverImage) {
     if (typeof item.coverImage === 'string') return item.coverImage
-    return cachedMediaUrl(item.coverImage)
+    return cachedMediaUrl(item.coverImage, width)
   }
   // Fall back to external cover URL from API
   return item.externalCoverUrl
@@ -267,7 +267,7 @@ const coverUrl = (item: CmsFavMedia): string | undefined => {
             </div>
             {nowGroups.map((group: NowGroup) => {
               const item = group.items[0]
-              const cover = coverUrl(item)
+              const cover = coverUrl(item, 300)
               return (
                 <div key={group.key} className="mediapp-now__card">
                   <h3 className="eyebrow">{group.label}</h3>
@@ -320,7 +320,7 @@ const coverUrl = (item: CmsFavMedia): string | undefined => {
       {!selected && !loading && (
         <div className="mediapp-grid">
           {filtered.map((item: CmsFavMedia) => {
-            const cover = coverUrl(item)
+            const cover = coverUrl(item, 300)
             const typeValue = resolveMediaTypeValue(item.mediaType)
             const cmsType = typeMap.get(typeValue)
             const tIconUrl = typeIconUrl(cmsType ?? item.mediaType)
