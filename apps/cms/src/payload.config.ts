@@ -184,6 +184,11 @@ export default buildConfig({
     ],
   }),
   serverURL: serverUrl,
+  cors: [
+    'https://sigterm.vodka',
+    'https://www.sigterm.vodka',
+    ...(isProduction ? [] : ['http://localhost:4321', 'http://localhost:3000']),
+  ],
   secret: payloadSecret,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
