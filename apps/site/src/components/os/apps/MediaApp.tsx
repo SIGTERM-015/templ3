@@ -376,8 +376,14 @@ const coverUrl = (item: CmsFavMedia, width?: number): string | undefined => {
         <div className="mediapp-detail">
           <button className="gazette-back" onClick={goBack}>← Back</button>
           <div className="mediapp-detail__header">
-            {coverUrl(selected) && (
-              <img className="mediapp-detail__cover" src={coverUrl(selected)} alt={selected.title} loading="lazy" decoding="async" />
+            {coverUrl(selected, 1200) && (
+              <img
+                className="mediapp-detail__cover"
+                src={coverUrl(selected, 1200)}
+                alt={selected.title}
+                loading="lazy"
+                decoding="async"
+              />
             )}
             <div className="mediapp-detail__meta">
               <h2 className="mediapp-detail__title">{selected.title}</h2>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { CmsPost, CmsCategory, CmsMedia } from '../../../lib/cms'
+import type { CmsPost, CmsCategory } from '../../../lib/cms'
+import { cachedMediaUrl } from '../../../lib/cms'
 import { useCmsResource } from '../../../hooks/useCmsResource'
 import { PayloadRichText } from '../../blog/PayloadRichText'
 import { formatDate } from '../../../lib/formatDate'
@@ -58,10 +59,8 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
     onUpdateRoute?.('/blog')
   }, [onUpdateRoute])
 
-  const heroUrl = (post: CmsPost) => {
-    if (!post.heroImage) return undefined
-    if (typeof post.heroImage === 'string') return post.heroImage
-    return post.heroImage.url
+  const heroUrl = (post: CmsPost, width?: number) => {
+    return cachedMediaUrl(post.heroImage, width)
   }
 
   const sharePost = useCallback((slug: string) => {
@@ -125,16 +124,23 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
   const isSearching = q.length > 0
 
   const renderPostCard = (post: CmsPost) => {
-    const hero = heroUrl(post)
+    const hero = heroUrl(post, 300)
     return (
       <button
         key={post.id}
         className="gazette-card"
         data-active={selected?.id === post.id}
         onClick={() => selectPost(post)}
-        style={hero ? { backgroundImage: `linear-gradient(oklch(0% 0 0 / 0.7), oklch(0% 0 0 / 0.85)), url(${hero})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+        style={hero ? {
+          backgroundImage:
+            `linear-gradient(oklch(0% 0 0 / 0.7), oklch(0% 0 0 / 0.85)), url(${hero})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        } : undefined}
       >
-        <span className="gazette-card__date">{post.publishedAt ? formatDate(post.publishedAt) : '—'}</span>
+        <span className="gazette-card__date">
+          {post.publishedAt ? formatDate(post.publishedAt) : '—'}
+        </span>
         <span className="gazette-card__title">{post.title}</span>
         {post.tags && post.tags.length > 0 && (
           <span className="gazette-card__tags">
@@ -166,7 +172,10 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
               : filteredPosts.map(renderPostCard)
           ) : (
             <>
-              {grouped.folders.map(([slug, { category, posts: catPosts }]: [string, GroupedFolder]) => (
+              {grouped.folders.map(([slug, { category, posts: catPosts }]: [
+                string,
+                GroupedFolder,
+              ]) => (
                 <div key={slug} className="gazette-folder">
                   <button
                     className="gazette-folder__toggle"
@@ -175,9 +184,16 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
                     <span className="gazette-folder__icon">
                       {openFolders.has(slug) ? '▾' : '▸'}
                     </span>
-                    {category?.icon && typeof category.icon === 'object' && (category.icon as CmsMedia).url
-                      ? <img className="gazette-folder__img" src={(category.icon as CmsMedia).url} alt="" loading="lazy" />
-                      : <span className="gazette-folder__emoji">📁</span>}
+                    {cachedMediaUrl(category?.icon, 150) ? (
+                      <img
+                        className="gazette-folder__img"
+                        src={cachedMediaUrl(category?.icon, 150)}
+                        alt=""
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="gazette-folder__emoji">📁</span>
+                    )}
                     <span className="gazette-folder__name">{category?.name || slug}</span>
                     <span className="gazette-folder__count">{catPosts.length}</span>
                   </button>
@@ -234,13 +250,20 @@ export function GazetteApp({ serverData, onUpdateRoute }: Props) {
                 {copied ? '✓ Copied' : '↗ Share'}
               </button>
             </div>
-            {heroUrl(selected) && (
-              <img className="gazette-hero" src={heroUrl(selected)} alt={selected.title} loading="lazy" decoding="async" />
+            {heroUrl(selected, 1200) && (
+              <img
+                className="gazette-hero"
+                src={heroUrl(selected, 1200)}
+                alt={selected.title}
+                loading="lazy"
+                decoding="async"
+              />
             )}
             <h1>{selected.title}</h1>
             <div className="article-meta">
               {selected.publishedAt ? formatDate(selected.publishedAt) : '—'}
-              {selected.tags && ` · ${selected.tags.map((t: { name: string }) => t.name).join(', ')}`}
+              {selected.tags &&
+                ` · ${selected.tags.map((t: { name: string }) => t.name).join(', ')}`}
             </div>
             <div className="article-content">
               {selected.content ? (

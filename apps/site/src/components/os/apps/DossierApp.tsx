@@ -1,16 +1,15 @@
-import { operator, socialLinks as defaultSocialLinks, inspirations as defaultInspirations } from '../../../data/siteConfig'
-import type { CmsSiteIdentity, CmsMedia } from '../../../lib/cms'
+import {
+  operator,
+  socialLinks as defaultSocialLinks,
+  inspirations as defaultInspirations,
+} from '../../../data/siteConfig'
+import type { CmsSiteIdentity } from '../../../lib/cms'
+import { cachedMediaUrl } from '../../../lib/cms'
 import { NowPlaying } from '../../NowPlaying'
 
 type Props = {
   onOpenApp?: (appId: string) => void
   siteIdentity?: CmsSiteIdentity
-}
-
-function resolveMediaUrl(value: CmsMedia | string | null | undefined): string | undefined {
-  if (!value) return undefined
-  if (typeof value === 'string') return undefined
-  return value.url ?? undefined
 }
 
 export function DossierApp({ onOpenApp, siteIdentity }: Props) {
@@ -28,7 +27,7 @@ export function DossierApp({ onOpenApp, siteIdentity }: Props) {
     ? siteIdentity.bio.map(b => b.paragraph)
     : operator.bio
 
-  const avatarUrl = resolveMediaUrl(siteIdentity?.avatar) ?? operator.avatar
+  const avatarUrl = cachedMediaUrl(siteIdentity?.avatar, 300) ?? operator.avatar
 
   // If CMS has siteIdentity, social links come from the CMS Links collection (CommsApp)
   // but for the quick-link icons in Dossier we fall back to siteConfig
