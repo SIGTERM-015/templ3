@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import type { CmsMedia, CmsProject, CmsProjectStatus } from '../../../lib/cms'
+import type { CmsProject, CmsProjectStatus } from '../../../lib/cms'
+import { cachedMediaUrl } from '../../../lib/cms'
 import { useCmsResource } from '../../../hooks/useCmsResource'
 import { statusColors } from '../../../data/siteConfig'
 
@@ -31,9 +32,7 @@ function resolveProjectStatusIconUrl(
   ps: CmsProjectStatus | string,
 ): string | undefined {
   if (typeof ps === 'string') return undefined
-  if (!ps.icon) return undefined
-  if (typeof ps.icon === 'string') return undefined
-  return (ps.icon as CmsMedia).url ?? undefined
+  return cachedMediaUrl(ps.icon, 150)
 }
 
 type Props = {

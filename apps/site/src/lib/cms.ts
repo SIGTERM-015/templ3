@@ -357,8 +357,13 @@ export function cachedMediaUrl(
     const match = parsed.pathname.match(/\/api\/media\/file\/(.+)$/)
     if (!match) return url // Fallback to direct URL if pattern doesn't match
 
+    const filename = match[1]
     const params = width ? `?w=${width}` : ''
-    return `/api/img/${match[1]}${params}`
+    const encoded = encodeURIComponent(decodeURIComponent(filename))
+      .replace(/\(/g, '%28')
+      .replace(/\)/g, '%29')
+      .replace(/'/g, '%27')
+    return `/api/img/${encoded}${params}`
   } catch {
     return url
   }

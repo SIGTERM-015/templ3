@@ -9,7 +9,10 @@ type Props = {
 }
 
 /** Resolve a CmsMedia relationship to a proxied/cached URL */
-function entryImageUrl(image: CmsMedia | string | null | undefined, width?: number): string | undefined {
+function entryImageUrl(
+  image: CmsMedia | string | null | undefined,
+  width?: number,
+): string | undefined {
   return cachedMediaUrl(image, width)
 }
 
@@ -130,8 +133,8 @@ type CardProps = {
 }
 
 function GuestbookCardInner({ entry, index, total, expanded, onExpand }: CardProps) {
-  const imgUrl = entryImageUrl(entry.image, 400)
-  const lightboxUrl = entryImageUrl(entry.image)
+  const imgUrl = entryImageUrl(entry.image, 600)
+  const lightboxUrl = entryImageUrl(entry.image, 1200)
   const { x, y, rotation } = cardTransform(entry.id, index, total)
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
