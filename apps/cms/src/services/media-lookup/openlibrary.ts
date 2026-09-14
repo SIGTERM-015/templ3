@@ -1,3 +1,4 @@
+import { FETCH_TIMEOUT_MS } from './constants'
 import type { MediaLookupProvider, MediaLookupResult } from './types'
 
 const OPEN_LIBRARY_API = 'https://openlibrary.org/search.json'
@@ -15,7 +16,9 @@ export const openLibraryProvider: MediaLookupProvider = {
     try {
       const url = `${OPEN_LIBRARY_API}?q=${encodeURIComponent(query)}&limit=10&fields=key,title,author_name,cover_i,first_publish_year`
 
-      const res = await fetch(url)
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      })
       if (!res.ok) {
         console.warn('Open Library API error:', res.status)
         return []

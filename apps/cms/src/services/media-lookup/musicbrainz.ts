@@ -1,3 +1,4 @@
+import { FETCH_TIMEOUT_MS } from './constants'
 import type { MediaLookupProvider, MediaLookupResult } from './types'
 
 const MUSICBRAINZ_API = 'https://musicbrainz.org/ws/2/release'
@@ -22,6 +23,7 @@ export const musicBrainzProvider: MediaLookupProvider = {
       const url = `${MUSICBRAINZ_API}?query=${encodeURIComponent(query)}&fmt=json&limit=10`
 
       const res = await fetch(url, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
         headers: {
           'User-Agent': USER_AGENT,
           Accept: 'application/json',

@@ -1,3 +1,4 @@
+import { FETCH_TIMEOUT_MS } from './constants'
 import type { MediaLookupProvider, MediaLookupResult } from './types'
 
 const TWITCH_TOKEN_URL = 'https://id.twitch.tv/oauth2/token'
@@ -14,6 +15,7 @@ async function getAccessToken(clientId: string, clientSecret: string): Promise<s
 
   try {
     const res = await fetch(TWITCH_TOKEN_URL, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -67,6 +69,7 @@ export function createIgdbProvider(clientId: string, clientSecret: string): Medi
 
       try {
         const res = await fetch(IGDB_API_URL, {
+          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
           method: 'POST',
           headers: {
             'Client-ID': clientId,

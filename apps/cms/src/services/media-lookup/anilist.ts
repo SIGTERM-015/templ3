@@ -1,3 +1,4 @@
+import { FETCH_TIMEOUT_MS } from './constants'
 import type { MediaLookupProvider, MediaLookupResult } from './types'
 
 const ANILIST_API = 'https://graphql.anilist.co'
@@ -42,6 +43,7 @@ async function searchAniList(
   type: 'ANIME' | 'MANGA',
 ): Promise<MediaLookupResult[]> {
   const response = await fetch(ANILIST_API, {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

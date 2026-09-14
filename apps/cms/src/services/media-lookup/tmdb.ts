@@ -1,3 +1,4 @@
+import { FETCH_TIMEOUT_MS } from './constants'
 import type { MediaLookupProvider, MediaLookupResult } from './types'
 
 const TMDB_API_BASE = 'https://api.themoviedb.org/3'
@@ -26,6 +27,7 @@ async function getMovieDirector(movieId: number, apiKey: string): Promise<string
   try {
     const res = await fetch(`${TMDB_API_BASE}/movie/${movieId}/credits`, {
       headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     })
     if (!res.ok) return undefined
     const data = (await res.json()) as TmdbMovieCredits
@@ -40,6 +42,7 @@ async function getTvCreator(tvId: number, apiKey: string): Promise<string | unde
   try {
     const res = await fetch(`${TMDB_API_BASE}/tv/${tvId}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     })
     if (!res.ok) return undefined
     const data = (await res.json()) as TmdbTvDetails
@@ -62,6 +65,7 @@ export function createTmdbProvider(apiKey: string): MediaLookupProvider {
       try {
         const res = await fetch(url, {
           headers: { Authorization: `Bearer ${apiKey}` },
+          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
         })
         if (!res.ok) {
           console.warn('TMDB API error:', res.status)
