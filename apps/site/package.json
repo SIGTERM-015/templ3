@@ -18,6 +18,7 @@
 		"@nanostores/react": "^1.0.0",
 		"@payloadcms/richtext-lexical": "3.79.1",
 		"astro": "^5.18.2",
+		"dompurify": "^3.2.7",
 		"marked": "^17.0.4",
 		"react": "19.2.1",
 		"react-dom": "19.2.1",

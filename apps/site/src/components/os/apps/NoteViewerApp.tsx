@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 import type { CmsNote } from '../../../lib/cms'
 import { formatDate } from '../../../lib/formatDate'
@@ -9,11 +10,17 @@ type Props = {
   note: CmsNote
 }
 
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+// marked passes raw HTML through, so its output is sanitized before it reaches the DOM.
+// Without a DOM (SSR) DOMPurify cannot sanitize, so fall back to escaped text.
 function parseMarkdown(content: string): string {
+  if (!DOMPurify.isSupported) return escapeHtml(content)
   try {
-    return marked.parse(content, { async: false }) as string
+    return DOMPurify.sanitize(marked.parse(content, { async: false }) as string)
   } catch {
-    return content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return escapeHtml(content)
   }
 }
 
@@ -37,7 +44,6 @@ export function NoteViewerApp({ note }: Props) {
       </div>
       <div
         className="note-viewer__body markdown-body"
-        // marked output comes from our own CMS — trusted source
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: html }}
       />

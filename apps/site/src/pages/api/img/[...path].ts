@@ -33,7 +33,9 @@ const forwardErrorResponse = (res: Response) => {
 
 export const GET: APIRoute = async ({ params, request, locals }) => {
   const path = params.path
-  if (!path) {
+  // Media files are flat filenames. Anything with a separator or `..` would address other
+  // CMS paths through this unauthenticated proxy, so refuse it.
+  if (!path || /[/\\]|\.\./.test(path)) {
     return new Response('Not found', { status: 404 })
   }
 
