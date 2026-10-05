@@ -16,7 +16,7 @@
 		"@clerk/astro": "^3.0.1",
 		"@excalidraw/excalidraw": "^0.18.0",
 		"@nanostores/react": "^1.0.0",
-		"@payloadcms/richtext-lexical": "3.79.0",
+		"@payloadcms/richtext-lexical": "3.79.1",
 		"astro": "^5.17.1",
 		"marked": "^17.0.4",
 		"react": "19.2.1",
