@@ -199,12 +199,26 @@ type CollectionResponse<T> = {
 const cmsBaseUrl = import.meta.env.PUBLIC_CMS_URL?.replace(/\/$/, '')
 const apiKey = import.meta.env.PAYLOAD_API_KEY
 
-const TTL = {
-  SHORT: 300,    
-  MEDIUM: 900,   
+export const TTL = {
+  SHORT: 300,
+  MEDIUM: 900,
   STANDARD: 3600,
-  LONG: 86400,   
+  LONG: 86400,
 } as const
+
+/** Browsers revalidate at most every 5 minutes; shared caches may keep the CMS TTL. */
+const BROWSER_MAX_AGE = TTL.SHORT
+
+/** JSON response for public CMS data, cached for the same TTL used when reading the CMS. */
+export function cmsJsonResponse(data: unknown, ttl: number, init?: ResponseInit): Response {
+  return new Response(JSON.stringify(data), {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': `public, max-age=${Math.min(ttl, BROWSER_MAX_AGE)}, s-maxage=${ttl}`,
+    },
+  })
+}
 
 const COLLECTION_PATHS = {
   posts: '/api/posts?depth=2&limit=50&where[_status][equals]=published&sort=-publishedAt',

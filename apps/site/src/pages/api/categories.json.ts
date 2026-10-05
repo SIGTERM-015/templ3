@@ -1,14 +1,6 @@
 import type { APIRoute } from 'astro'
-import { getCategories } from '../../lib/cms'
+import { cmsJsonResponse, getCategories, TTL } from '../../lib/cms'
 
 export const prerender = false
 
-export const GET: APIRoute = async () => {
-  const categories = await getCategories()
-  return new Response(JSON.stringify(categories), {
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=300, s-maxage=3600',
-    },
-  })
-}
+export const GET: APIRoute = async () => cmsJsonResponse(await getCategories(), TTL.LONG)
