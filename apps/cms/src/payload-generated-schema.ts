@@ -16,13 +16,13 @@ import {
   varchar,
   timestamp,
   serial,
-  numeric,
   boolean,
+  numeric,
   jsonb,
   pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
-export const enum_users_role = pgEnum('enum_users_role', ['admin', 'editor'])
+export const enum_users_role = pgEnum('enum_users_role', ['admin', 'editor', 'api'])
 export const enum_posts_status = pgEnum('enum_posts_status', ['draft', 'published'])
 export const enum__posts_v_version_status = pgEnum('enum__posts_v_version_status', [
   'draft',
@@ -45,6 +45,16 @@ export const enum_notes_status = pgEnum('enum_notes_status', ['draft', 'publishe
 export const enum__notes_v_version_status = pgEnum('enum__notes_v_version_status', [
   'draft',
   'published',
+])
+export const enum_guestbook_entries_embed_type = pgEnum('enum_guestbook_entries_embed_type', [
+  'none',
+  'spotify',
+  'youtube',
+])
+export const enum_guestbook_entries_status = pgEnum('enum_guestbook_entries_status', [
+  'pending',
+  'approved',
+  'rejected',
 ])
 export const enum_media_types_now_category = pgEnum('enum_media_types_now_category', [
   'none',
@@ -109,6 +119,9 @@ export const users = pgTable(
     createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
+    enableAPIKey: boolean('enable_a_p_i_key'),
+    apiKey: varchar('api_key'),
+    apiKeyIndex: varchar('api_key_index'),
     email: varchar('email').notNull(),
     resetPasswordToken: varchar('reset_password_token'),
     resetPasswordExpiration: timestamp('reset_password_expiration', {
@@ -806,6 +819,40 @@ export const web_apps = pgTable(
   ],
 )
 
+export const guestbook_entries = pgTable(
+  'guestbook_entries',
+  {
+    id: serial('id').primaryKey(),
+    message: varchar('message').notNull(),
+    authorName: varchar('author_name').notNull(),
+    authorAvatar: varchar('author_avatar'),
+    authorDiscordId: varchar('author_discord_id'),
+    clerkUserId: varchar('clerk_user_id'),
+    image: integer('image_id')
+      .notNull()
+      .references(() => media.id, {
+        onDelete: 'set null',
+      }),
+    embedUrl: varchar('embed_url'),
+    embedType: enum_guestbook_entries_embed_type('embed_type').default('none'),
+    status: enum_guestbook_entries_status('status').notNull().default('pending'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('guestbook_entries_author_discord_id_idx').on(columns.authorDiscordId),
+    index('guestbook_entries_clerk_user_id_idx').on(columns.clerkUserId),
+    index('guestbook_entries_image_idx').on(columns.image),
+    index('guestbook_entries_status_idx').on(columns.status),
+    index('guestbook_entries_updated_at_idx').on(columns.updatedAt),
+    index('guestbook_entries_created_at_idx').on(columns.createdAt),
+  ],
+)
+
 export const media_types = pgTable(
   'media_types',
   {
@@ -934,6 +981,7 @@ export const payload_locked_documents_rels = pgTable(
     'favourite-mediaID': integer('favourite_media_id'),
     notesID: integer('notes_id'),
     'web-appsID': integer('web_apps_id'),
+    'guestbook-entriesID': integer('guestbook_entries_id'),
     'media-typesID': integer('media_types_id'),
     'media-statusesID': integer('media_statuses_id'),
     'project-statusesID': integer('project_statuses_id'),
@@ -952,6 +1000,9 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_favourite_media_id_idx').on(columns['favourite-mediaID']),
     index('payload_locked_documents_rels_notes_id_idx').on(columns.notesID),
     index('payload_locked_documents_rels_web_apps_id_idx').on(columns['web-appsID']),
+    index('payload_locked_documents_rels_guestbook_entries_id_idx').on(
+      columns['guestbook-entriesID'],
+    ),
     index('payload_locked_documents_rels_media_types_id_idx').on(columns['media-typesID']),
     index('payload_locked_documents_rels_media_statuses_id_idx').on(columns['media-statusesID']),
     index('payload_locked_documents_rels_project_statuses_id_idx').on(
@@ -1011,6 +1062,11 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['web-appsID']],
       foreignColumns: [web_apps.id],
       name: 'payload_locked_documents_rels_web_apps_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['guestbook-entriesID']],
+      foreignColumns: [guestbook_entries.id],
+      name: 'payload_locked_documents_rels_guestbook_entries_fk',
     }).onDelete('cascade'),
     foreignKey({
       columns: [columns['media-typesID']],
@@ -1449,6 +1505,13 @@ export const relations__notes_v = relations(_notes_v, ({ one }) => ({
   }),
 }))
 export const relations_web_apps = relations(web_apps, () => ({}))
+export const relations_guestbook_entries = relations(guestbook_entries, ({ one }) => ({
+  image: one(media, {
+    fields: [guestbook_entries.image],
+    references: [media.id],
+    relationName: 'image',
+  }),
+}))
 export const relations_media_types = relations(media_types, ({ one }) => ({
   icon: one(media, {
     fields: [media_types.icon],
@@ -1528,6 +1591,11 @@ export const relations_payload_locked_documents_rels = relations(
       fields: [payload_locked_documents_rels['web-appsID']],
       references: [web_apps.id],
       relationName: 'web-apps',
+    }),
+    'guestbook-entriesID': one(guestbook_entries, {
+      fields: [payload_locked_documents_rels['guestbook-entriesID']],
+      references: [guestbook_entries.id],
+      relationName: 'guestbook-entries',
     }),
     'media-typesID': one(media_types, {
       fields: [payload_locked_documents_rels['media-typesID']],
@@ -1644,6 +1712,8 @@ type DatabaseSchema = {
   enum__favourite_media_v_version_status: typeof enum__favourite_media_v_version_status
   enum_notes_status: typeof enum_notes_status
   enum__notes_v_version_status: typeof enum__notes_v_version_status
+  enum_guestbook_entries_embed_type: typeof enum_guestbook_entries_embed_type
+  enum_guestbook_entries_status: typeof enum_guestbook_entries_status
   enum_media_types_now_category: typeof enum_media_types_now_category
   enum_media_types_lookup_source: typeof enum_media_types_lookup_source
   enum_site_identity_status: typeof enum_site_identity_status
@@ -1668,6 +1738,7 @@ type DatabaseSchema = {
   notes: typeof notes
   _notes_v: typeof _notes_v
   web_apps: typeof web_apps
+  guestbook_entries: typeof guestbook_entries
   media_types: typeof media_types
   media_statuses: typeof media_statuses
   project_statuses: typeof project_statuses
@@ -1703,6 +1774,7 @@ type DatabaseSchema = {
   relations_notes: typeof relations_notes
   relations__notes_v: typeof relations__notes_v
   relations_web_apps: typeof relations_web_apps
+  relations_guestbook_entries: typeof relations_guestbook_entries
   relations_media_types: typeof relations_media_types
   relations_media_statuses: typeof relations_media_statuses
   relations_project_statuses: typeof relations_project_statuses
