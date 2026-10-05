@@ -219,8 +219,10 @@ export default buildConfig({
     push: process.env.NODE_ENV !== 'production',
     pool: {
       connectionString: databaseUrl,
-      // In Cloudflare Workers, connections cannot be reused across requests
-      // maxUses: 1 ensures each connection is used only once then discarded
+      // Workers cannot reuse a socket across requests, so each connection is used once and
+      // discarded. This is cheap: Hyperdrive keeps the real pool to Postgres. Don't "optimize"
+      // it into a long-lived pool; that fails with "Cannot perform I/O on behalf of a
+      // different request".
       ...(isProduction && { maxUses: 1 }),
     },
   }),
