@@ -9,10 +9,7 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   integrations: [clerk(), react()],
   adapter: cloudflare({
-    platformProxy: {
-      enabled: true
-    },
-
-    imageService: "cloudflare"
-  })
+    // Images are resized by /api/img through Cloudflare's URL transforms, not astro:assets
+    imageService: 'cloudflare',
+  }),
 });

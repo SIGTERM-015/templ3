@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro'
+import { workerEnv } from '../../../lib/env'
 
 export const prerender = false
 
@@ -31,7 +32,7 @@ const forwardErrorResponse = (res: Response) => {
   })
 }
 
-export const GET: APIRoute = async ({ params, request, locals }) => {
+export const GET: APIRoute = async ({ params, request }) => {
   const path = params.path
   // Media files are flat filenames. Anything with a separator or `..` would address other
   // CMS paths through this unauthenticated proxy, so refuse it.
@@ -39,10 +40,7 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
     return new Response('Not found', { status: 404 })
   }
 
-  // Get env from Cloudflare runtime or import.meta.env
-  const runtime = locals.runtime
-  const env = runtime?.env || import.meta.env
-  const cmsBase = (env.PUBLIC_CMS_URL || CMS_BASE_FALLBACK).replace(/\/$/, '')
+  const cmsBase = ((await workerEnv('PUBLIC_CMS_URL')) || CMS_BASE_FALLBACK).replace(/\/$/, '')
 
   const url = new URL(request.url)
   const rawWidth = url.searchParams.get('w')
