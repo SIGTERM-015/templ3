@@ -3,4 +3,4 @@ import { cmsJsonResponse, getSiteIdentity, TTL } from '../../lib/cms'
 
 export const prerender = false
 
-export const GET: APIRoute = async () => cmsJsonResponse((await getSiteIdentity()) ?? {}, TTL.LONG)
+export const GET: APIRoute = async () => cmsJsonResponse(await getSiteIdentity(), TTL.LONG)

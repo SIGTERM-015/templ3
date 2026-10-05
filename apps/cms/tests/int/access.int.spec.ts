@@ -47,6 +47,7 @@ describe('Access control (non-admin user)', () => {
 
   beforeAll(async () => {
     payload = await getPayload({ config: await config })
+    await payload.delete({ collection: 'users', where: { email: { equals: 'access-test-editor@example.com' } } })
     const editor = await payload.create({
       collection: 'users',
       data: {
