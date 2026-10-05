@@ -131,6 +131,11 @@ export const users = pgTable(
     }),
     salt: varchar('salt'),
     hash: varchar('hash'),
+    resetPasswordRequestedAt: timestamp('reset_password_requested_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
     loginAttempts: numeric('login_attempts', { mode: 'number' }).default(0),
     lockUntil: timestamp('lock_until', { mode: 'string', withTimezone: true, precision: 3 }),
   },
@@ -150,6 +155,7 @@ export const media = pgTable(
     caption: varchar('caption'),
     credit: varchar('credit'),
     prefix: varchar('prefix').default('templ3/media'),
+    _objectKey: varchar('_objectkey'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -935,6 +941,12 @@ export const project_statuses = pgTable(
   ],
 )
 
+export const totp_attempts = pgTable('totp_attempts', {
+  id: varchar('id').primaryKey(),
+  attempts: numeric('attempts', { mode: 'number' }).notNull().default(0),
+  lockUntil: timestamp('lock_until', { mode: 'string', withTimezone: true, precision: 3 }),
+})
+
 export const payload_kv = pgTable(
   'payload_kv',
   {
@@ -1533,6 +1545,7 @@ export const relations_project_statuses = relations(project_statuses, ({ one }) 
     relationName: 'icon',
   }),
 }))
+export const relations_totp_attempts = relations(totp_attempts, () => ({}))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
 export const relations_payload_locked_documents_rels = relations(
   payload_locked_documents_rels,
@@ -1742,6 +1755,7 @@ type DatabaseSchema = {
   media_types: typeof media_types
   media_statuses: typeof media_statuses
   project_statuses: typeof project_statuses
+  totp_attempts: typeof totp_attempts
   payload_kv: typeof payload_kv
   payload_locked_documents: typeof payload_locked_documents
   payload_locked_documents_rels: typeof payload_locked_documents_rels
@@ -1778,6 +1792,7 @@ type DatabaseSchema = {
   relations_media_types: typeof relations_media_types
   relations_media_statuses: typeof relations_media_statuses
   relations_project_statuses: typeof relations_project_statuses
+  relations_totp_attempts: typeof relations_totp_attempts
   relations_payload_kv: typeof relations_payload_kv
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
   relations_payload_locked_documents: typeof relations_payload_locked_documents
