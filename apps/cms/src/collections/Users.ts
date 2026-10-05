@@ -9,7 +9,11 @@ export const Users: CollectionConfig = {
     useAPIKey: true,
   },
   access: {
-    read: () => true,
+    // Never public: user docs carry the decrypted API key. Admins see everyone, others themselves.
+    read: ({ req: { user } }) => {
+      if (user?.role === 'admin') return true
+      return user ? { id: { equals: user.id } } : false
+    },
     create: ({ req: { user } }) => user?.role === 'admin',
     update: ({ req: { user } }) => {
       if (user?.role === 'admin') return true
