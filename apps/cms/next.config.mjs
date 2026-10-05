@@ -4,6 +4,12 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
+  experimental: {
+    // payload.config starts a wrangler platform proxy when evaluated. Next 16 collects page
+    // data in parallel workers, and their proxies race on Miniflare's local SQLite state
+    // (SQLITE_BUSY), so collect in a single worker.
+    cpus: 1,
+  },
   images: {
     unoptimized: true,
   },
