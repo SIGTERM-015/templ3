@@ -32,6 +32,11 @@ type Payload = Awaited<ReturnType<typeof getPayload>>
 async function freshReset() {
   const DATABASE_URL = process.env.DATABASE_URL
   if (!DATABASE_URL) throw new Error('DATABASE_URL not set in environment')
+  // This drops every table. Only ever run it against a database on this machine.
+  const { hostname } = new URL(DATABASE_URL)
+  if (!['localhost', '127.0.0.1', '::1', '[::1]'].includes(hostname)) {
+    throw new Error(`Refusing to reset non-local database at ${hostname}`)
+  }
 
   console.log('⚡ Dropping public schema…')
   const pool = new Pool({ connectionString: DATABASE_URL })
