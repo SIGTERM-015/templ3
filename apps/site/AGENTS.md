@@ -18,8 +18,8 @@ pnpm cf-typegen # wrangler types  → regenerates worker-configuration.d.ts
 **No linter, no test suite.** TypeScript is the only validation layer.
 
 ```bash
-# Type-check manually (from apps/site/)
-tsc --noEmit
+# Type-check (from apps/site/). astro sync generates the astro:* module types tsc needs.
+pnpm typecheck
 ```
 
 ---

@@ -42,7 +42,7 @@ cd apps/cms && pnpm playwright test tests/e2e/mytest.spec.ts
 ### Site App (`apps/site/`)
 *The site has no linter or test suite.* Validation is strictly via TypeScript.
 ```bash
-cd apps/site && pnpm exec tsc --noEmit  # Typecheck site
+pnpm --dir apps/site typecheck         # Typecheck site (astro sync generates astro:* types first)
 pnpm cf-typegen                         # Regenerate Cloudflare worker-configuration.d.ts
 ```
 
