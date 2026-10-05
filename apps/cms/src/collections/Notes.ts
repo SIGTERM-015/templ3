@@ -1,14 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
 import { slugField } from '../fields/slug'
+import { editorWrites, publishedOrAuthenticated } from '../access'
 
 export const Notes: CollectionConfig = {
   slug: 'notes',
   access: {
-    read: ({ req: { user } }) => {
-      if (user) return true
-      return { _status: { equals: 'published' } }
-    },
+    read: publishedOrAuthenticated,
+    ...editorWrites,
   },
   admin: {
     group: 'Content',

@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { isAuthenticated, isEditor } from '../access'
+
 export const GuestbookEntries: CollectionConfig = {
   slug: 'guestbook-entries',
   access: {
@@ -10,10 +12,10 @@ export const GuestbookEntries: CollectionConfig = {
       return { status: { equals: 'approved' } }
     },
     // Both admin and API can create
-    create: ({ req: { user } }) => Boolean(user),
+    create: isAuthenticated,
     // Only admins/editors can update/delete
-    update: ({ req: { user } }) => user?.role === 'admin' || user?.role === 'editor',
-    delete: ({ req: { user } }) => user?.role === 'admin' || user?.role === 'editor',
+    update: isEditor,
+    delete: isEditor,
   },
   admin: {
     group: 'Content',

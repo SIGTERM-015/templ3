@@ -1,10 +1,12 @@
 import type { CollectionConfig } from 'payload'
 import { slugField } from '../fields/slug'
+import { editorWrites, isAuthenticated } from '../access'
 
 export const WebApps: CollectionConfig = {
   slug: 'web-apps',
   access: {
-    read: ({ req: { user } }) => Boolean(user),
+    read: isAuthenticated,
+    ...editorWrites,
   },
   admin: {
     defaultColumns: ['title', 'slug', 'url', 'enabled'],

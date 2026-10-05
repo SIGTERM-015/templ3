@@ -1,9 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
+import { editorWrites, isAuthenticated } from '../access'
+
 export const Links: CollectionConfig = {
   slug: 'links',
   access: {
-    read: ({ req: { user } }) => Boolean(user),
+    read: isAuthenticated,
+    ...editorWrites,
   },
   admin: {
     defaultColumns: ['label', 'platform', 'featured'],

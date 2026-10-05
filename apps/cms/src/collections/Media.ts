@@ -1,12 +1,14 @@
 import type { CollectionConfig } from 'payload'
 
+import { isAuthenticated, isEditor } from '../access'
+
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
     read: () => true, // Public so the site can serve images to users directly
-    create: ({ req: { user } }) => Boolean(user), // Let api, admin, editor create
-    update: ({ req: { user } }) => user?.role === 'admin' || user?.role === 'editor',
-    delete: ({ req: { user } }) => user?.role === 'admin' || user?.role === 'editor',
+    create: isAuthenticated, // The site's api key uploads guestbook drawings
+    update: isEditor,
+    delete: isEditor,
   },
   fields: [
     {

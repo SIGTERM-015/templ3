@@ -1,9 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
+import { editorWrites, isAuthenticated } from '../access'
+
 export const MediaTypes: CollectionConfig = {
   slug: 'media-types',
   access: {
-    read: ({ req: { user } }) => Boolean(user),
+    read: isAuthenticated,
+    ...editorWrites,
   },
   admin: {
     group: 'Config',
