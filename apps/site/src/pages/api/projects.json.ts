@@ -1,11 +1,6 @@
 import type { APIRoute } from 'astro'
-import { getProjects } from '../../lib/cms'
+import { cmsJsonResponse, getProjects, TTL } from '../../lib/cms'
 
 export const prerender = false
 
-export const GET: APIRoute = async () => {
-  const projects = await getProjects()
-  return new Response(JSON.stringify(projects), {
-    headers: { 'Content-Type': 'application/json' },
-  })
-}
+export const GET: APIRoute = async () => cmsJsonResponse(await getProjects(), TTL.STANDARD)

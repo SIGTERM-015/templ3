@@ -17,10 +17,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Migrate & Deploy CMS
+  test:
+    name: Lint & Test CMS
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: templ3
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/templ3
+      CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: postgres://postgres:postgres@localhost:5432/templ3
+      PAYLOAD_SECRET: ci-only-secret
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,6 +53,33 @@ jobs:
 
       - name: Typecheck
         run: pnpm --dir apps/cms exec tsc --noEmit
+
+      - name: Lint
+        run: pnpm --dir apps/cms lint
+
+      - name: Integration tests
+        run: pnpm --dir apps/cms run test:int
+
+  deploy:
+    name: Migrate & Deploy CMS
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       # --forceAcceptWarning: the prod DB has a dev-mode marker row in
       # payload_migrations (from a past `payload dev` push). Without this flag

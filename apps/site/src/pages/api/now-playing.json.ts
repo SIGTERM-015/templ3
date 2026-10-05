@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { getNowPlaying, getRecentTracks } from '../../lib/lastfm'
+import { getLatestTrack } from '../../lib/lastfm'
 
 export const prerender = false
 
@@ -27,34 +27,13 @@ export const GET: APIRoute = async (context) => {
   const apiKey = String(rawApiKey || '').trim()
   const username = String(rawUsername || '').trim()
 
-  if (!apiKey || !username) {
-    return new Response(JSON.stringify({ isPlaying: false }), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'private, max-age=25',
-      },
-    })
-  }
+  const track = apiKey && username ? await getLatestTrack(apiKey, username) : null
 
-  const nowPlaying = await getNowPlaying(apiKey, username)
-
-  if (nowPlaying?.isPlaying) {
-    return new Response(JSON.stringify(nowPlaying), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'private, max-age=25',
-      },
-    })
-  }
-
-  // Not currently playing — return most recent track
-  const recent = await getRecentTracks(apiKey, username, 1)
-  const lastTrack = recent[0]
-
-  return new Response(JSON.stringify(lastTrack ?? { isPlaying: false }), {
+  // Same answer for every visitor, so let the edge share it across the 30s client polls
+  return new Response(JSON.stringify(track ?? { isPlaying: false }), {
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': 'private, max-age=25',
+      'Cache-Control': 'public, max-age=15, s-maxage=15',
     },
   })
 }

@@ -1,14 +1,14 @@
 import type { CollectionConfig } from 'payload'
 
 import { slugField } from '../fields/slug'
+import { editorWrites, publishedOrAuthenticated } from '../access'
+import { safeUrl } from '../fields/url'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
   access: {
-    read: ({ req: { user } }) => {
-      if (user) return true
-      return { _status: { equals: 'published' } }
-    },
+    read: publishedOrAuthenticated,
+    ...editorWrites,
   },
   admin: {
     defaultColumns: ['title', '_status', 'publishedAt', 'updatedAt'],
@@ -83,6 +83,7 @@ export const Posts: CollectionConfig = {
         {
           name: 'canonicalUrl',
           type: 'text',
+          validate: safeUrl(['https:', 'http:']),
         },
       ],
     },

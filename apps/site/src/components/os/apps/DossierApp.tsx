@@ -6,6 +6,7 @@ import {
 import type { CmsSiteIdentity } from '../../../lib/cms'
 import { cachedMediaUrl } from '../../../lib/cms'
 import { NowPlaying } from '../../NowPlaying'
+import { safeHref } from '../../../lib/safeUrl'
 
 type Props = {
   onOpenApp?: (appId: string) => void
@@ -55,7 +56,7 @@ export function DossierApp({ onOpenApp, siteIdentity }: Props) {
             {links.map((link) => (
               <a
                 key={link.id}
-                href={link.href}
+                href={safeHref(link.href)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="dossier-quick-link"

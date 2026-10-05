@@ -3,6 +3,7 @@ import type { CmsProject, CmsProjectStatus } from '../../../lib/cms'
 import { cachedMediaUrl } from '../../../lib/cms'
 import { useCmsResource } from '../../../hooks/useCmsResource'
 import { statusColors } from '../../../data/siteConfig'
+import { safeHref } from '../../../lib/safeUrl'
 
 // Fallback colors if CMS has no project statuses configured
 const FALLBACK_COLORS: Record<string, string> = statusColors
@@ -120,7 +121,7 @@ export function ArmoryApp({ serverData }: Props) {
               <div className="armory-card__links">
                 {project.externalUrl && (
                   <a
-                    href={project.externalUrl}
+                    href={safeHref(project.externalUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="button--ghost"
@@ -131,7 +132,7 @@ export function ArmoryApp({ serverData }: Props) {
                 )}
                 {project.repositoryUrl && (
                   <a
-                    href={project.repositoryUrl}
+                    href={safeHref(project.repositoryUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="button--ghost"

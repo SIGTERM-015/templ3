@@ -1,11 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
 import { slugField } from '../fields/slug'
+import { editorWrites, isAuthenticated } from '../access'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
   access: {
-    read: ({ req: { user } }) => Boolean(user),
+    read: isAuthenticated,
+    ...editorWrites,
   },
   admin: {
     useAsTitle: 'name',

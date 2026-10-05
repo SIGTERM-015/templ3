@@ -1,6 +1,6 @@
 import { verifyToken } from '@clerk/astro/server'
 import type { APIRoute } from 'astro'
-import { getGuestbookEntries } from '../../lib/cms'
+import { cmsJsonResponse, getGuestbookEntries, TTL } from '../../lib/cms'
 
 export const prerender = false
 
@@ -38,15 +38,7 @@ function isAllowedOrigin(origin: string | null): boolean {
   return ALLOWED_ORIGINS.includes(origin)
 }
 
-export const GET: APIRoute = async () => {
-  const entries = await getGuestbookEntries()
-  return new Response(JSON.stringify(entries), {
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=60, s-maxage=300',
-    },
-  })
-}
+export const GET: APIRoute = async () => cmsJsonResponse(await getGuestbookEntries(), TTL.SHORT, 60)
 
 /**
  * POST — submit a new guestbook entry.

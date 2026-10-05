@@ -199,12 +199,39 @@ type CollectionResponse<T> = {
 const cmsBaseUrl = import.meta.env.PUBLIC_CMS_URL?.replace(/\/$/, '')
 const apiKey = import.meta.env.PAYLOAD_API_KEY
 
-const TTL = {
-  SHORT: 300,    
-  MEDIUM: 900,   
+export const TTL = {
+  SHORT: 300,
+  MEDIUM: 900,
   STANDARD: 3600,
-  LONG: 86400,   
+  LONG: 86400,
 } as const
+
+/** Browsers revalidate at most every 5 minutes; shared caches may keep the CMS TTL. */
+const BROWSER_MAX_AGE = TTL.SHORT
+
+/**
+ * JSON response for public CMS data, cached for the same TTL used when reading the CMS.
+ * `null` means the CMS was unavailable: answer 503 uncached so the outage isn't served
+ * from cache after the CMS recovers.
+ */
+export function cmsJsonResponse(
+  data: unknown,
+  ttl: number,
+  browserMaxAge: number = BROWSER_MAX_AGE,
+): Response {
+  if (data === null) {
+    return new Response(JSON.stringify({ error: 'CMS unavailable' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+    })
+  }
+  return new Response(JSON.stringify(data), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': `public, max-age=${Math.min(ttl, browserMaxAge)}, s-maxage=${ttl}`,
+    },
+  })
+}
 
 const COLLECTION_PATHS = {
   posts: '/api/posts?depth=2&limit=50&where[_status][equals]=published&sort=-publishedAt',
@@ -221,26 +248,11 @@ const COLLECTION_PATHS = {
   siteIdentity: '/api/globals/site-identity?depth=2',
 } as const
 
-async function readCollection<T>(path: string, cacheTtl: number = TTL.STANDARD): Promise<T[]> {
-  if (!cmsBaseUrl) return []
-
-  try {
-    const headers: HeadersInit = {}
-    if (apiKey) headers['Authorization'] = `users API-Key ${apiKey}`
-
-    const response = await fetch(`${cmsBaseUrl}${path}`, {
-      headers,
-      cf: { cacheTtl },
-    } as RequestInit)
-    if (!response.ok) return []
-    const data = (await response.json()) as CollectionResponse<T>
-    return Array.isArray(data.docs) ? data.docs : []
-  } catch {
-    return []
-  }
-}
-
-async function readGlobal<T>(path: string, cacheTtl: number = TTL.LONG): Promise<T | null> {
+/**
+ * Fetches a CMS document as JSON. Resolves to `null` when the CMS is unreachable or
+ * answers with an error, so callers can tell "unavailable" apart from "empty".
+ */
+async function readCms<T>(path: string, cacheTtl: number): Promise<T | null> {
   if (!cmsBaseUrl) return null
 
   try {
@@ -258,13 +270,23 @@ async function readGlobal<T>(path: string, cacheTtl: number = TTL.LONG): Promise
   }
 }
 
+/** Collection docs, or `null` when the CMS is unavailable. */
+async function readCollection<T>(path: string, cacheTtl: number = TTL.STANDARD): Promise<T[] | null> {
+  const data = await readCms<CollectionResponse<T>>(path, cacheTtl)
+  return data && Array.isArray(data.docs) ? data.docs : null
+}
+
+async function readGlobal<T>(path: string, cacheTtl: number = TTL.LONG): Promise<T | null> {
+  return readCms<T>(path, cacheTtl)
+}
+
 // ─── Public API ─────────────────────────────────────────────────────────────
 
 export async function getSiteIdentity(): Promise<CmsSiteIdentity | null> {
   return readGlobal<CmsSiteIdentity>(COLLECTION_PATHS.siteIdentity, TTL.LONG)
 }
 
-export async function getPosts(): Promise<CmsPost[]> {
+export async function getPosts(): Promise<CmsPost[] | null> {
   return readCollection<CmsPost>(COLLECTION_PATHS.posts, TTL.SHORT)
 }
 
@@ -273,26 +295,27 @@ export async function getPostBySlug(slug: string): Promise<CmsPost | null> {
     `/api/posts?depth=2&limit=1&where[slug][equals]=${encodeURIComponent(slug)}&where[_status][equals]=published`,
     TTL.STANDARD,
   )
-  return posts.find((post) => post.slug === slug) ?? null
+  return posts?.find((post) => post.slug === slug) ?? null
 }
 
-export async function getProjects(): Promise<CmsProject[]> {
+export async function getProjects(): Promise<CmsProject[] | null> {
   const projects = await readCollection<CmsProject>(COLLECTION_PATHS.projects, TTL.STANDARD)
+  if (!projects) return null
   return projects.map((project) => ({
     ...project,
     stack: project.stack.map((item) => (typeof item === 'string' ? item : item.label)),
   }))
 }
 
-export async function getLinks(): Promise<CmsLink[]> {
+export async function getLinks(): Promise<CmsLink[] | null> {
   return readCollection<CmsLink>(COLLECTION_PATHS.links, TTL.LONG)
 }
 
-export async function getCategories(): Promise<CmsCategory[]> {
+export async function getCategories(): Promise<CmsCategory[] | null> {
   return readCollection<CmsCategory>(COLLECTION_PATHS.categories, TTL.LONG)
 }
 
-export async function getFavouriteMedia(): Promise<CmsFavMedia[]> {
+export async function getFavouriteMedia(): Promise<CmsFavMedia[] | null> {
   return readCollection<CmsFavMedia>(COLLECTION_PATHS.favouriteMedia, TTL.STANDARD)
 }
 
@@ -301,30 +324,30 @@ export async function getFavouriteMediaBySlug(slug: string): Promise<CmsFavMedia
     `/api/favourite-media?depth=2&limit=1&where[slug][equals]=${encodeURIComponent(slug)}&where[_status][equals]=published`,
     TTL.STANDARD,
   )
-  return media.find((item) => item.slug === slug) ?? null
+  return media?.find((item) => item.slug === slug) ?? null
 }
 
-export async function getNotes(): Promise<CmsNote[]> {
+export async function getNotes(): Promise<CmsNote[] | null> {
   return readCollection<CmsNote>(COLLECTION_PATHS.notes, TTL.MEDIUM)
 }
 
-export async function getMediaTypes(): Promise<CmsMediaType[]> {
+export async function getMediaTypes(): Promise<CmsMediaType[] | null> {
   return readCollection<CmsMediaType>(COLLECTION_PATHS.mediaTypes, TTL.LONG)
 }
 
-export async function getMediaStatuses(): Promise<CmsMediaStatus[]> {
+export async function getMediaStatuses(): Promise<CmsMediaStatus[] | null> {
   return readCollection<CmsMediaStatus>(COLLECTION_PATHS.mediaStatuses, TTL.LONG)
 }
 
-export async function getProjectStatuses(): Promise<CmsProjectStatus[]> {
+export async function getProjectStatuses(): Promise<CmsProjectStatus[] | null> {
   return readCollection<CmsProjectStatus>(COLLECTION_PATHS.projectStatuses, TTL.LONG)
 }
 
-export async function getWebApps(): Promise<CmsWebApp[]> {
+export async function getWebApps(): Promise<CmsWebApp[] | null> {
   return readCollection<CmsWebApp>(COLLECTION_PATHS.webApps, TTL.STANDARD)
 }
 
-export async function getGuestbookEntries(): Promise<CmsGuestbookEntry[]> {
+export async function getGuestbookEntries(): Promise<CmsGuestbookEntry[] | null> {
   return readCollection<CmsGuestbookEntry>(COLLECTION_PATHS.guestbookEntries, TTL.SHORT)
 }
 

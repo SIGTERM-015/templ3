@@ -16,17 +16,9 @@ export const GET: APIRoute = async ({ params }) => {
   const { slug } = params
   if (!slug) return notFoundResponse()
 
-  let media: Awaited<ReturnType<typeof getFavouriteMedia>> = []
-  let mediaTypes: Awaited<ReturnType<typeof getMediaTypes>> = []
-  try {
-    const cmsData = await Promise.all([getFavouriteMedia(), getMediaTypes()])
-    media = cmsData[0]
-    mediaTypes = cmsData[1]
-  } catch {
-    // graceful fallback
-  }
+  const [media, mediaTypes] = await Promise.all([getFavouriteMedia(), getMediaTypes()])
 
-  const item = media.find((m) => m.slug === slug)
+  const item = media?.find((m) => m.slug === slug)
   if (!item) return notFoundResponse()
 
   const coverUrl = await fetchImageAsDataUri(resolveMediaCoverUrl(item))
@@ -35,7 +27,7 @@ export const GET: APIRoute = async ({ params }) => {
     title: item.title,
     creator: item.creator ?? '',
     rating: resolveRating(item),
-    mediaType: resolveMediaTypeLabel(item, mediaTypes),
+    mediaType: resolveMediaTypeLabel(item, mediaTypes ?? undefined),
     coverUrl,
   })
 

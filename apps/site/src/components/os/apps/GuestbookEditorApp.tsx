@@ -1,8 +1,7 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { SignInButton } from '@clerk/astro/react'
 import { useStore } from '@nanostores/react'
 import { $userStore, $clerkStore } from '@clerk/astro/client'
-import '@excalidraw/excalidraw/index.css'
 
 type ExcalidrawAPIRef = {
   getSceneElements: () => unknown[]
@@ -21,15 +20,37 @@ function detectEmbedType(url: string): 'spotify' | 'youtube' | 'none' {
   return 'none'
 }
 
+/**
+ * Astro bundles every CSS import reachable from a page (dynamic ones included) into the
+ * page stylesheet, so a plain `import '...css'` would ship ~140KB of Excalidraw rules on
+ * every route. Importing it as `?url` emits a separate asset we link only when needed.
+ */
+async function loadExcalidrawCss(): Promise<void> {
+  const { default: href } = await import('@excalidraw/excalidraw/index.css?url')
+  if (document.querySelector(`link[href="${href}"]`)) return
+  await new Promise<void>((resolve) => {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = href
+    link.onload = () => resolve()
+    link.onerror = () => resolve()
+    document.head.appendChild(link)
+  })
+}
+
 function ExcalidrawCanvas({ excalidrawRef }: { excalidrawRef: React.MutableRefObject<ExcalidrawAPIRef | null> }) {
   const [Comp, setComp] = useState<React.ComponentType<Record<string, unknown>> | null>(null)
 
-  // Lazy-load Excalidraw (it's heavy and uses browser APIs)
-  useState(() => {
-    import('@excalidraw/excalidraw').then((mod) => {
-      setComp(() => mod.Excalidraw)
-    }).catch(() => {})
-  })
+  // Lazy-load Excalidraw and its stylesheet (heavy, browser-only)
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([import('@excalidraw/excalidraw'), loadExcalidrawCss()])
+      .then(([mod]) => {
+        if (!cancelled) setComp(() => mod.Excalidraw)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
 
   if (!Comp) {
     return (

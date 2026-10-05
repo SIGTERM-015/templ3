@@ -226,6 +226,10 @@ const AppLoading = () => (
 
 export function DesktopShell({ initialApp, serverData, maximized: initialMaximized, errorMessage }: Props) {
   const [windows, dispatch] = useReducer(reducer, []) as [WindowState[], (action: Action) => void]
+  // Callbacks read the latest windows through this ref so their identity stays stable;
+  // otherwise renderApp changes on every window action and every open app re-renders.
+  const windowsRef = useRef(windows)
+  windowsRef.current = windows
   const [ready, setReady] = useState(false)
   const [themeId, setThemeId] = useState<ThemePresetId | 'custom'>('default')
   const [customTheme, setCustomTheme] = useState<CustomThemeColors>(DEFAULT_CUSTOM_THEME)
@@ -237,7 +241,10 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
     try { return JSON.parse(serverData) as Record<string, unknown> } catch { return undefined }
   }, [serverData])
   const siteIdentity = parsedServerData?.siteIdentity as CmsSiteIdentity | undefined
-  const webApps = (parsedServerData?.webApps as CmsWebApp[] | undefined) ?? []
+  const webApps = useMemo(
+    () => (parsedServerData?.webApps as CmsWebApp[] | undefined) ?? [],
+    [parsedServerData],
+  )
 
   const defaultWallpaper = resolveWallpaperUrl(siteIdentity, site.wallpaper ?? '')
   const [wallpaper, setWallpaper] = useState(defaultWallpaper)
@@ -357,12 +364,21 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
     } catch { /* QuotaExceededError or SecurityError — ignore */ }
   }, [themeId, customTheme, wallpaper])
 
+  // Persist after the browser is idle so a burst of focus/move dispatches costs one write
   useEffect(() => {
     if (!ready) return
-    try {
-      const serializable = windows.map(({ meta, ...rest }) => rest)
-      sessionStorage.setItem('templ3-windows', JSON.stringify(serializable))
-    } catch { /* ignore */ }
+    const persist = () => {
+      try {
+        const serializable = windows.map(({ meta, ...rest }) => rest)
+        sessionStorage.setItem('templ3-windows', JSON.stringify(serializable))
+      } catch { /* ignore */ }
+    }
+    const timer = setTimeout(persist, 250)
+    window.addEventListener('pagehide', persist)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('pagehide', persist)
+    }
   }, [windows, ready])
 
   useEffect(() => {
@@ -378,26 +394,26 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
 
   const openWindow = useCallback((appId: string, opts?: { maximized?: boolean; meta?: Record<string, unknown> }) => {
     const id = appId as AppId
-    const existing = windows.find(w => w.appId === id)
+    const existing = windowsRef.current.find(w => w.appId === id)
     if (existing) {
       dispatch({ type: 'FOCUS', id: existing.id, zIndex: nextZ() })
       return
     }
     dispatch({ type: 'OPEN', window: createWindow(id, nextZ(), opts?.maximized, opts?.meta) })
-  }, [windows, nextZ])
+  }, [nextZ])
 
   // Helper to open a WebApp by slug
   const openWebApp = useCallback((slug: string) => {
     const webApp = webApps.find(w => w.slug === slug)
     if (!webApp) return
     const appId = `webapp-${slug}` as AppId
-    const existing = windows.find(w => w.appId === appId)
+    const existing = windowsRef.current.find(w => w.appId === appId)
     if (existing) {
       dispatch({ type: 'FOCUS', id: existing.id, zIndex: nextZ() })
       return
     }
     dispatch({ type: 'OPEN', window: createWindow(appId, nextZ(), false, { webApp }) })
-  }, [windows, webApps, nextZ])
+  }, [webApps, nextZ])
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -470,7 +486,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
               const filename = note.filename || `${note.slug}.md`
               // Each note gets its own window; reuse if already open
               const existingId = `note-viewer-${note.id}`
-              const existing = windows.find(w => w.id === existingId)
+              const existing = windowsRef.current.find(w => w.id === existingId)
               if (existing) {
                 dispatch({ type: 'FOCUS', id: existingId, zIndex: nextZ() })
                 return
@@ -549,7 +565,7 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
         }
         return null
     }
-  }, [openWindow, updateRoute, handleNavigate, siteIdentity, webApps, windows, nextZ, dispatch, themeId, setThemeId, customTheme, setCustomTheme, wallpaper, setWallpaper, defaultWallpaper])
+  }, [openWindow, updateRoute, handleNavigate, siteIdentity, webApps, nextZ, dispatch, themeId, setThemeId, customTheme, setCustomTheme, wallpaper, setWallpaper, defaultWallpaper])
 
   const focusedId = [...windows]
     .filter(w => !w.minimized)
