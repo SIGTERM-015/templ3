@@ -9,5 +9,7 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./vitest.setup.ts'],
     include: ['tests/int/**/*.int.spec.ts'],
+    // Files share one database; in parallel each would push the schema and race on CREATE TYPE
+    fileParallelism: false,
   },
 })
