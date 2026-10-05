@@ -92,6 +92,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return jsonResponse({ error: 'Unauthorized' }, 401)
   }
 
+  // Keyed on the verified user, so one account can't flood the moderation queue and R2
+  const limiter = env.GUESTBOOK_RATE_LIMITER as RateLimit | undefined
+  if (limiter && !(await limiter.limit({ key: clerkUserId })).success) {
+    return jsonResponse({ error: 'Too many submissions, try again in a minute.' }, 429)
+  }
+
   try {
     const formData = await request.formData()
     const image = formData.get('image') as File | null
