@@ -364,12 +364,21 @@ export function DesktopShell({ initialApp, serverData, maximized: initialMaximiz
     } catch { /* QuotaExceededError or SecurityError — ignore */ }
   }, [themeId, customTheme, wallpaper])
 
+  // Persist after the browser is idle so a burst of focus/move dispatches costs one write
   useEffect(() => {
     if (!ready) return
-    try {
-      const serializable = windows.map(({ meta, ...rest }) => rest)
-      sessionStorage.setItem('templ3-windows', JSON.stringify(serializable))
-    } catch { /* ignore */ }
+    const persist = () => {
+      try {
+        const serializable = windows.map(({ meta, ...rest }) => rest)
+        sessionStorage.setItem('templ3-windows', JSON.stringify(serializable))
+      } catch { /* ignore */ }
+    }
+    const timer = setTimeout(persist, 250)
+    window.addEventListener('pagehide', persist)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('pagehide', persist)
+    }
   }, [windows, ready])
 
   useEffect(() => {
