@@ -8,11 +8,11 @@ import cloudflare from '@astrojs/cloudflare';
 // https://astro.build/config
 export default defineConfig({
   integrations: [clerk(), react()],
+  // Astro.session is unused; without this the adapter adds a SESSION KV binding that
+  // wrangler provisions on every deploy
+  session: false,
   adapter: cloudflare({
-    platformProxy: {
-      enabled: true
-    },
-
-    imageService: "cloudflare"
-  })
+    // Images are resized by /api/img through Cloudflare's URL transforms, not astro:assets
+    imageService: 'cloudflare',
+  }),
 });

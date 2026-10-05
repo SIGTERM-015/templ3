@@ -1,6 +1,7 @@
 import { verifyToken } from '@clerk/astro/server'
 import type { APIRoute } from 'astro'
 import { cmsJsonResponse, getGuestbookEntries, TTL } from '../../lib/cms'
+import { bindings, workerEnv } from '../../lib/env'
 
 export const prerender = false
 
@@ -57,11 +58,13 @@ export const GET: APIRoute = async () => cmsJsonResponse(await getGuestbookEntri
  * The entry is created with status 'pending' — it won't be visible
  * until approved in the CMS.
  */
-export const POST: APIRoute = async ({ request, locals }) => {
-  const env = (locals as any)?.runtime?.env || import.meta.env
-  const cmsBaseUrl = (env.PUBLIC_CMS_URL || import.meta.env.PUBLIC_CMS_URL)?.replace(/\/$/, '')
-  const apiKey = env.PAYLOAD_API_KEY || import.meta.env.PAYLOAD_API_KEY || ''
-  const clerkSecretKey = env.CLERK_SECRET_KEY || import.meta.env.CLERK_SECRET_KEY || ''
+export const POST: APIRoute = async ({ request }) => {
+  const [rawCmsUrl, apiKey = '', clerkSecretKey] = await Promise.all([
+    workerEnv('PUBLIC_CMS_URL'),
+    workerEnv('PAYLOAD_API_KEY'),
+    workerEnv('CLERK_SECRET_KEY'),
+  ])
+  const cmsBaseUrl = rawCmsUrl?.replace(/\/$/, '')
 
   if (!cmsBaseUrl) {
     return jsonResponse({ error: 'CMS not configured' }, 500)
@@ -93,8 +96,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   // Keyed on the verified user, so one account can't flood the moderation queue and R2
-  const limiter = env.GUESTBOOK_RATE_LIMITER as RateLimit | undefined
-  if (limiter && !(await limiter.limit({ key: clerkUserId })).success) {
+  if (!(await bindings.GUESTBOOK_RATE_LIMITER.limit({ key: clerkUserId })).success) {
     return jsonResponse({ error: 'Too many submissions, try again in a minute.' }, 429)
   }
 

@@ -1,3 +1,5 @@
+import { workerEnv } from './env'
+
 // ─── Shared primitive types ────────────────────────────────────────────────
 
 export type CmsMedia = {
@@ -196,8 +198,6 @@ type CollectionResponse<T> = {
   docs: T[]
 }
 
-const cmsBaseUrl = import.meta.env.PUBLIC_CMS_URL?.replace(/\/$/, '')
-const apiKey = import.meta.env.PAYLOAD_API_KEY
 
 export const TTL = {
   SHORT: 300,
@@ -253,6 +253,11 @@ const COLLECTION_PATHS = {
  * answers with an error, so callers can tell "unavailable" apart from "empty".
  */
 async function readCms<T>(path: string, cacheTtl: number): Promise<T | null> {
+  const [rawCmsUrl, apiKey] = await Promise.all([
+    workerEnv('PUBLIC_CMS_URL'),
+    workerEnv('PAYLOAD_API_KEY'),
+  ])
+  const cmsBaseUrl = rawCmsUrl?.replace(/\/$/, '')
   if (!cmsBaseUrl) return null
 
   try {

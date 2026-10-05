@@ -12,13 +12,13 @@
 		"typecheck": "astro sync && tsc --noEmit"
 	},
 	"dependencies": {
-		"@astrojs/cloudflare": "^12",
-		"@astrojs/react": "^4",
-		"@clerk/astro": "^3.4.20",
+		"@astrojs/cloudflare": "^14.3.3",
+		"@astrojs/react": "^7.0.0",
+		"@clerk/astro": "^4.1.9",
 		"@excalidraw/excalidraw": "^0.18.0",
 		"@nanostores/react": "^1.0.0",
 		"@payloadcms/richtext-lexical": "3.90.2",
-		"astro": "^5.18.2",
+		"astro": "^7.3.5",
 		"dompurify": "^3.2.7",
 		"marked": "^17.0.4",
 		"react": "19.2.1",
