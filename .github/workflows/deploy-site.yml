@@ -47,6 +47,9 @@ jobs:
           PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.PUBLIC_CLERK_PUBLISHABLE_KEY }}
           PAYLOAD_API_KEY: ${{ secrets.PAYLOAD_API_KEY }}
 
+      - name: No server-only code in the browser bundle
+        run: pnpm --dir apps/site run check:client-bundle
+
       - name: Deploy (production)
         if: github.ref == 'refs/heads/main'
         run: pnpm --dir apps/site exec wrangler deploy

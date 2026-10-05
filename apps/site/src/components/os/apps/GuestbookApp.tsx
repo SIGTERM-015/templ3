@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import type { CmsGuestbookEntry, CmsMedia } from '../../../lib/cms'
-import { cachedMediaUrl } from '../../../lib/cms'
+import { cachedMediaUrl } from '../../../lib/media'
 import { formatDate } from '../../../lib/formatDate'
 
 type Props = {
