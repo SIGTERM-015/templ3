@@ -4,6 +4,12 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
+  experimental: {
+    // payload.config starts a wrangler platform proxy when evaluated. Next 16 collects page
+    // data in parallel workers, and their proxies race on Miniflare's local SQLite state
+    // (SQLITE_BUSY), so collect in a single worker.
+    cpus: 1,
+  },
   images: {
     unoptimized: true,
   },
@@ -26,22 +32,6 @@ const nextConfig = {
         headers: [{ key: 'Content-Security-Policy', value: "default-src 'none'; style-src 'unsafe-inline'; sandbox" }],
       },
     ]
-  },
-  webpack: (webpackConfig, { isServer }) => {
-    webpackConfig.resolve.extensionAlias = {
-      '.cjs': ['.cts', '.cjs'],
-      '.js': ['.ts', '.tsx', '.js', '.jsx'],
-      '.mjs': ['.mts', '.mjs'],
-    }
-
-    if (isServer) {
-      webpackConfig.resolve.alias = {
-        ...webpackConfig.resolve.alias,
-        'sharp$': false,
-      }
-    }
-
-    return webpackConfig
   },
 }
 
