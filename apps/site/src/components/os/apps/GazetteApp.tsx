@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CmsPost, CmsCategory } from '../../../lib/cms'
-import { cachedMediaUrl } from '../../../lib/cms'
+import { cachedMediaUrl } from '../../../lib/media'
 import { useCmsResource } from '../../../hooks/useCmsResource'
 import { PayloadRichText } from '../../blog/PayloadRichText'
 import { formatDate } from '../../../lib/formatDate'

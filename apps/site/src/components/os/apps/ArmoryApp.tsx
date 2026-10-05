@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { CmsProject, CmsProjectStatus } from '../../../lib/cms'
-import { cachedMediaUrl } from '../../../lib/cms'
+import { cachedMediaUrl } from '../../../lib/media'
 import { useCmsResource } from '../../../hooks/useCmsResource'
 import { statusColors } from '../../../data/siteConfig'
 import { safeHref } from '../../../lib/safeUrl'

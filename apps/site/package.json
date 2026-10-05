@@ -9,7 +9,8 @@
 		"astro": "astro",
 		"deploy": "wrangler deploy",
 		"cf-typegen": "wrangler types",
-		"typecheck": "astro sync && tsc --noEmit"
+		"typecheck": "astro sync && tsc --noEmit",
+		"check:client-bundle": "bash scripts/check-client-bundle.sh"
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^14.3.3",

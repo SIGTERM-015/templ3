@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CmsFavMedia, CmsMedia, CmsMediaStatus, CmsMediaType, CmsPost } from '../../../lib/cms'
-import { cachedMediaUrl } from '../../../lib/cms'
+import { cachedMediaUrl } from '../../../lib/media'
 import { useCmsResource } from '../../../hooks/useCmsResource'
 import { NowPlaying, NowCard } from '../../NowPlaying'
 import { formatDate } from '../../../lib/formatDate'

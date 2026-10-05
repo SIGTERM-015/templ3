@@ -1,7 +1,7 @@
 import { ImageResponse } from 'workers-og'
 
 import type { CmsFavMedia, CmsMediaType, CmsPost, CmsSiteIdentity } from './cms'
-import { mediaUrl } from './cms'
+import { mediaUrl } from './media'
 import { site } from '../data/siteConfig'
 import logoSvgRaw from '../../public/sigterm-logo.svg?raw'
 

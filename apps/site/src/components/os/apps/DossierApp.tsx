@@ -4,7 +4,7 @@ import {
   inspirations as defaultInspirations,
 } from '../../../data/siteConfig'
 import type { CmsSiteIdentity } from '../../../lib/cms'
-import { cachedMediaUrl } from '../../../lib/cms'
+import { cachedMediaUrl } from '../../../lib/media'
 import { NowPlaying } from '../../NowPlaying'
 import { safeHref } from '../../../lib/safeUrl'
 
