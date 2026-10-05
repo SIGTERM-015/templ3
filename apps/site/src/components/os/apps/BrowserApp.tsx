@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { safeHref } from '../../../lib/safeUrl'
 
 type Props = {
   url: string
@@ -23,7 +24,7 @@ export function BrowserApp({ url, title, showAddressBar = true }: Props) {
                 setLoading(true)
                 setError(false)
                 const iframe = document.querySelector(`iframe[data-browser-url="${url}"]`) as HTMLIFrameElement
-                if (iframe) iframe.src = url
+                if (iframe) iframe.src = safeHref(url) ?? 'about:blank'
               }}
               title="Reload"
             >
@@ -54,7 +55,7 @@ export function BrowserApp({ url, title, showAddressBar = true }: Props) {
         )}
         <iframe
           data-browser-url={url}
-          src={url}
+          src={safeHref(url)}
           title={title}
           className="browser-app__iframe"
           style={{ opacity: loading || error ? 0 : 1 }}

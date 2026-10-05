@@ -1,3 +1,4 @@
+import { safeHref } from '../../lib/safeUrl'
 import './embeds.css'
 
 // ─── YouTube ────────────────────────────────────────────────────────────────
@@ -84,7 +85,7 @@ export function TwitterEmbed({ url }: TwitterProps) {
   return (
     <figure className="embed embed--twitter">
       <blockquote className="twitter-tweet" data-theme="dark">
-        <a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
+        <a href={safeHref(url)} target="_blank" rel="noopener noreferrer">{url}</a>
       </blockquote>
     </figure>
   )
@@ -164,7 +165,7 @@ export function VideoEmbed({ url, caption, autoplay, loop, muted = true }: Video
   return (
     <figure className="embed embed--video">
       <video
-        src={url}
+        src={safeHref(url)}
         controls
         autoPlay={autoplay}
         loop={loop}
@@ -243,7 +244,7 @@ export function BookmarkCard({ url, title, description, thumbnail }: BookmarkPro
   }
 
   return (
-    <a href={url} className="bookmark" target="_blank" rel="noopener noreferrer">
+    <a href={safeHref(url)} className="bookmark" target="_blank" rel="noopener noreferrer">
       <div className="bookmark__content">
         <span className="bookmark__title">{title || url}</span>
         {description && <span className="bookmark__description">{description}</span>}

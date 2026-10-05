@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { isAuthenticated, isEditor } from '../access'
+import { safeUrl } from '../fields/url'
 
 export const GuestbookEntries: CollectionConfig = {
   slug: 'guestbook-entries',
@@ -102,6 +103,7 @@ export const GuestbookEntries: CollectionConfig = {
     {
       name: 'embedUrl',
       type: 'text',
+      validate: safeUrl(['https:', 'spotify:']),
       maxLength: 500,
       admin: {
         description: 'Optional Spotify or YouTube URL to embed alongside the entry',

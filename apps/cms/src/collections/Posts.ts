@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { slugField } from '../fields/slug'
 import { editorWrites, publishedOrAuthenticated } from '../access'
+import { safeUrl } from '../fields/url'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -82,6 +83,7 @@ export const Posts: CollectionConfig = {
         {
           name: 'canonicalUrl',
           type: 'text',
+          validate: safeUrl(['https:', 'http:']),
         },
       ],
     },

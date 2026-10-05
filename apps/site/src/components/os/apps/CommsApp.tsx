@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { CmsLink } from '../../../lib/cms'
 import { useCmsResource } from '../../../hooks/useCmsResource'
+import { safeHref } from '../../../lib/safeUrl'
 
 type Props = {
   serverData?: Record<string, unknown>
@@ -50,7 +51,7 @@ export function CommsApp({ serverData }: Props) {
               return (
                 <a
                   key={link.id}
-                  href={link.href}
+                  href={safeHref(link.href)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="comms-contact"

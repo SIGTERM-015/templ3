@@ -4,6 +4,7 @@ import { cachedMediaUrl } from '../../../lib/cms'
 import { useCmsResource } from '../../../hooks/useCmsResource'
 import { NowPlaying, NowCard } from '../../NowPlaying'
 import { formatDate } from '../../../lib/formatDate'
+import { safeHref } from '../../../lib/safeUrl'
 
 // ─── Fallback static data (used when CMS config not available) ──────────────
 
@@ -446,7 +447,7 @@ const coverUrl = (item: CmsFavMedia, width?: number): string | undefined => {
             )}
             {selected.externalReviewUrl && (
               <a
-                href={selected.externalReviewUrl}
+                href={safeHref(selected.externalReviewUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="button--ghost"

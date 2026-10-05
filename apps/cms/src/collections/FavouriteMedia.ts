@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { slugField } from '../fields/slug'
 import { editorWrites, publishedOrAuthenticated } from '../access'
+import { safeUrl } from '../fields/url'
 
 export const FavouriteMedia: CollectionConfig = {
   slug: 'favourite-media',
@@ -85,6 +86,7 @@ export const FavouriteMedia: CollectionConfig = {
     {
       name: 'externalCoverUrl',
       type: 'text',
+      validate: safeUrl(),
       admin: {
         description: 'Cover image URL from external API (used if no uploaded cover)',
       },
@@ -110,6 +112,7 @@ export const FavouriteMedia: CollectionConfig = {
     {
       name: 'externalUrl',
       type: 'text',
+      validate: safeUrl(['https:', 'http:']),
       admin: {
         position: 'sidebar',
         description: 'Link to the item on the external site',
@@ -127,6 +130,7 @@ export const FavouriteMedia: CollectionConfig = {
     {
       name: 'externalReviewUrl',
       type: 'text',
+      validate: safeUrl(['https:', 'http:']),
       admin: {
         description: 'Link to a review on a third-party site (MAL, Steam, Letterboxd, etc.)',
       },

@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { slugField } from '../fields/slug'
 import { editorWrites, publishedOrAuthenticated } from '../access'
+import { safeUrl } from '../fields/url'
 
 export const Projects: CollectionConfig = {
   slug: 'projects',
@@ -61,10 +62,12 @@ export const Projects: CollectionConfig = {
     {
       name: 'repositoryUrl',
       type: 'text',
+      validate: safeUrl(['https:', 'http:']),
     },
     {
       name: 'externalUrl',
       type: 'text',
+      validate: safeUrl(['https:', 'http:']),
     },
     {
       name: 'coverImage',

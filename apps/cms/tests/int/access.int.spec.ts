@@ -111,3 +111,28 @@ describe("Access control (the site's api key)", () => {
     expect(docs).toEqual([])
   })
 })
+
+describe('URL fields', () => {
+  beforeAll(async () => {
+    payload = await getPayload({ config: await config })
+  })
+
+  it('reject javascript: URLs', async () => {
+    const result = await payload
+      .create({
+        collection: 'links',
+        data: { label: 'x', platform: 'x', href: 'javascript:alert(document.cookie)', description: 'x' },
+      })
+      .then(() => 'created', (e: Error) => e.name)
+    expect(result).toBe('ValidationError')
+  })
+
+  it('accept mailto: links', async () => {
+    const link = await payload.create({
+      collection: 'links',
+      data: { label: 'Email', platform: 'Direct line', href: 'mailto:me@example.com', description: 'x' },
+    })
+    expect(link.href).toBe('mailto:me@example.com')
+    await payload.delete({ collection: 'links', id: link.id })
+  })
+})

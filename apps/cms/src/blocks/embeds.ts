@@ -1,5 +1,7 @@
 import type { Block } from 'payload'
 
+import { safeUrl } from '../fields/url'
+
 export const YouTubeBlock: Block = {
   slug: 'youtube',
   labels: {
@@ -10,6 +12,7 @@ export const YouTubeBlock: Block = {
     {
       name: 'url',
       type: 'text',
+      validate: safeUrl(),
       required: true,
       admin: {
         placeholder: 'https://www.youtube.com/watch?v=... or https://youtu.be/...',
@@ -36,6 +39,7 @@ export const SpotifyBlock: Block = {
     {
       name: 'url',
       type: 'text',
+      validate: safeUrl(),
       required: true,
       admin: {
         placeholder: 'https://open.spotify.com/track/... or /album/... or /playlist/...',
@@ -67,6 +71,7 @@ export const TwitterBlock: Block = {
     {
       name: 'url',
       type: 'text',
+      validate: safeUrl(),
       required: true,
       admin: {
         placeholder: 'https://twitter.com/user/status/... or https://x.com/user/status/...',
@@ -86,6 +91,7 @@ export const GitHubGistBlock: Block = {
     {
       name: 'url',
       type: 'text',
+      validate: safeUrl(),
       required: true,
       admin: {
         placeholder: 'https://gist.github.com/username/gist-id',
@@ -105,6 +111,7 @@ export const CodePenBlock: Block = {
     {
       name: 'url',
       type: 'text',
+      validate: safeUrl(),
       required: true,
       admin: {
         placeholder: 'https://codepen.io/username/pen/pen-id',
@@ -143,6 +150,7 @@ export const VideoBlock: Block = {
     {
       name: 'url',
       type: 'text',
+      validate: safeUrl(),
       required: true,
       admin: {
         placeholder: 'https://example.com/video.mp4',
@@ -240,6 +248,7 @@ export const BookmarkBlock: Block = {
     {
       name: 'url',
       type: 'text',
+      validate: safeUrl(['https:', 'http:']),
       required: true,
       admin: {
         placeholder: 'https://example.com/article',

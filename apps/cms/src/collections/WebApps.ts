@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { slugField } from '../fields/slug'
 import { editorWrites, isAuthenticated } from '../access'
+import { safeUrl } from '../fields/url'
 
 export const WebApps: CollectionConfig = {
   slug: 'web-apps',
@@ -26,6 +27,7 @@ export const WebApps: CollectionConfig = {
     {
       name: 'url',
       type: 'text',
+      validate: safeUrl(),
       required: true,
       admin: {
         description: 'Full URL to embed (e.g. https://cv.sigterm.vodka)',

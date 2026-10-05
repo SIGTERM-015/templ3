@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { editorWrites, isAuthenticated } from '../access'
+import { safeUrl } from '../fields/url'
 
 export const Links: CollectionConfig = {
   slug: 'links',
@@ -27,6 +28,7 @@ export const Links: CollectionConfig = {
     {
       name: 'href',
       type: 'text',
+      validate: safeUrl(['https:', 'http:', 'mailto:']),
       required: true,
     },
     {
