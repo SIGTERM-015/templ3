@@ -48,7 +48,7 @@ graph TD
 
 ### Prerequisites
 
-- Node.js (v18.20.2+ or v20.9.0+)
+- Node.js 22.12+ (Astro 7 and Next 16 both require it; CI uses 22)
 - pnpm (v9 or v10)
 
 ### Setup
