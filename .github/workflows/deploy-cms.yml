@@ -57,6 +57,9 @@ jobs:
       - name: Lint
         run: pnpm --dir apps/cms lint
 
+      - name: Migrations cover the schema
+        run: pnpm --dir apps/cms run check:migrations
+
       - name: Integration tests
         run: pnpm --dir apps/cms run test:int
 
