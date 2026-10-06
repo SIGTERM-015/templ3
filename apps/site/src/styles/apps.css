@@ -972,7 +972,7 @@
 .mediapp-card__status[data-status="completed"] { color: var(--military-bright); }
 .mediapp-card__status[data-status="in-progress"] { color: var(--amber); }
 .mediapp-card__status[data-status="dropped"] { color: var(--stamp); }
-.mediapp-card__status[data-status="planned"] { color: var(--faded); }
+.mediapp-card__status[data-status="paused"] { color: var(--faded); }
 
 .mediapp-detail {
   display: flex;
@@ -1052,6 +1052,13 @@
   line-height: 1.7;
   border-left: 2px solid var(--amber-a20);
   padding-left: var(--space-md);
+  margin: 0;
+}
+
+.mediapp-detail__synopsis {
+  color: var(--faded);
+  font-size: var(--text-sm);
+  line-height: 1.7;
   margin: 0;
 }
 

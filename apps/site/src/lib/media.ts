@@ -42,7 +42,7 @@ export function cachedMediaUrl(
   }
 }
 
-/** Resolve a populated relationship's value field (CmsMediaType, CmsMediaStatus, CmsProjectStatus) */
+/** Resolve a populated relationship's value field (e.g. CmsProjectStatus) */
 export function resolveValue<T extends { value: string }>(
   rel: T | string | null | undefined,
 ): string | undefined {

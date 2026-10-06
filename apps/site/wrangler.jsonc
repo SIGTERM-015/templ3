@@ -33,7 +33,8 @@
 		}
 	],
 	"vars": {
-		"PUBLIC_CMS_URL": "https://cms.sigterm.vodka"
+		"PUBLIC_CMS_URL": "https://cms.sigterm.vodka",
+		"MAGPIE_API_URL": "https://magpie.yellowumbrella.dev"
 	},
 	// Last.fm now-playing is opt-in: add LASTFM_API_KEY and LASTFM_USERNAME
 	// as secrets (wrangler secret put) or Secrets Store bindings when ready.

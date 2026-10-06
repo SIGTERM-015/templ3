@@ -28,26 +28,6 @@ export type CmsCategory = {
 
 // ─── Config collection types ────────────────────────────────────────────────
 
-export type CmsMediaType = {
-  id: string
-  value: string
-  label: string
-  glyph?: string
-  icon?: CmsMedia | string | null
-  nowCategory: 'watching' | 'reading' | 'playing' | 'listening' | 'none'
-  nowLabel?: string
-  order: number
-}
-
-export type CmsMediaStatus = {
-  id: string
-  value: string
-  label: string
-  glyph?: string
-  icon?: CmsMedia | string | null
-  order: number
-}
-
 export type CmsProjectStatus = {
   id: string
   value: string
@@ -71,28 +51,6 @@ export type CmsPost = {
   tags?: CmsTag[]
   heroImage?: CmsMedia | string | null
   content?: unknown
-}
-
-export type CmsFavMedia = {
-  id: string
-  title: string
-  slug: string
-  creator?: string
-  /** Now a relationship to media-statuses (populated object or string ID) */
-  mediaType: CmsMediaType | string
-  /** Now a relationship to media-statuses (populated object or string ID) */
-  progress: CmsMediaStatus | string
-  rating?: number
-  review?: string
-  coverImage?: CmsMedia | string | null
-  /** Cover image URL from external API (fallback if no coverImage) */
-  externalCoverUrl?: string
-  blogPost?: CmsPost | string | null
-  externalReviewUrl?: string
-  /** Link to the item on the external site (IGDB, TMDB, AniList, etc.) */
-  externalUrl?: string
-  completedAt?: string
-  featured?: boolean
 }
 
 export type CmsProject = {
@@ -239,12 +197,9 @@ const COLLECTION_PATHS = {
   projects: '/api/projects?depth=2&limit=12&where[_status][equals]=published&sort=order',
   links: '/api/links?depth=1&limit=50&sort=platform',
   categories: '/api/categories?depth=1&limit=50&sort=name',
-  favouriteMedia: '/api/favourite-media?depth=2&limit=50&where[_status][equals]=published&sort=-completedAt',
   notes: '/api/notes?depth=0&limit=100&where[_status][equals]=published&sort=order',
   webApps: '/api/web-apps?depth=0&limit=50&where[enabled][equals]=true&sort=sortOrder',
   guestbookEntries: '/api/guestbook-entries?depth=1&limit=100&where[status][equals]=approved&sort=-createdAt',
-  mediaTypes: '/api/media-types?depth=1&limit=50&sort=order',
-  mediaStatuses: '/api/media-statuses?depth=1&limit=50&sort=order',
   projectStatuses: '/api/project-statuses?depth=1&limit=50&sort=order',
   siteIdentity: '/api/globals/site-identity?depth=2',
 } as const
@@ -320,28 +275,8 @@ export async function getCategories(): Promise<CmsCategory[] | null> {
   return readCollection<CmsCategory>(COLLECTION_PATHS.categories, TTL.LONG)
 }
 
-export async function getFavouriteMedia(): Promise<CmsFavMedia[] | null> {
-  return readCollection<CmsFavMedia>(COLLECTION_PATHS.favouriteMedia, TTL.STANDARD)
-}
-
-export async function getFavouriteMediaBySlug(slug: string): Promise<CmsFavMedia | null> {
-  const media = await readCollection<CmsFavMedia>(
-    `/api/favourite-media?depth=2&limit=1&where[slug][equals]=${encodeURIComponent(slug)}&where[_status][equals]=published`,
-    TTL.STANDARD,
-  )
-  return media?.find((item) => item.slug === slug) ?? null
-}
-
 export async function getNotes(): Promise<CmsNote[] | null> {
   return readCollection<CmsNote>(COLLECTION_PATHS.notes, TTL.MEDIUM)
-}
-
-export async function getMediaTypes(): Promise<CmsMediaType[] | null> {
-  return readCollection<CmsMediaType>(COLLECTION_PATHS.mediaTypes, TTL.LONG)
-}
-
-export async function getMediaStatuses(): Promise<CmsMediaStatus[] | null> {
-  return readCollection<CmsMediaStatus>(COLLECTION_PATHS.mediaStatuses, TTL.LONG)
 }
 
 export async function getProjectStatuses(): Promise<CmsProjectStatus[] | null> {

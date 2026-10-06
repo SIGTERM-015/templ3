@@ -11,6 +11,8 @@ const BUILD_ENV: Record<keyof ImportMetaEnv, string | undefined> = {
   LASTFM_API_KEY: import.meta.env.LASTFM_API_KEY,
   LASTFM_USERNAME: import.meta.env.LASTFM_USERNAME,
   PAYLOAD_API_KEY: import.meta.env.PAYLOAD_API_KEY,
+  MAGPIE_API_URL: import.meta.env.MAGPIE_API_URL,
+  MAGPIE_API_TOKEN: import.meta.env.MAGPIE_API_TOKEN,
 }
 
 /**
