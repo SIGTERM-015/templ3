@@ -1,3 +1,4 @@
+import { cachedJson } from './edgeCache'
 import { workerEnv } from './env'
 
 // ─── Shared primitive types ────────────────────────────────────────────────
@@ -260,19 +261,18 @@ async function readCms<T>(path: string, cacheTtl: number): Promise<T | null> {
   const cmsBaseUrl = rawCmsUrl?.replace(/\/$/, '')
   if (!cmsBaseUrl) return null
 
-  try {
-    const headers: HeadersInit = {}
-    if (apiKey) headers['Authorization'] = `users API-Key ${apiKey}`
+  return cachedJson<T>(`cms${path}`, cacheTtl, async () => {
+    try {
+      const headers: HeadersInit = {}
+      if (apiKey) headers['Authorization'] = `users API-Key ${apiKey}`
 
-    const response = await fetch(`${cmsBaseUrl}${path}`, {
-      headers,
-      cf: { cacheTtl },
-    } as RequestInit)
-    if (!response.ok) return null
-    return (await response.json()) as T
-  } catch {
-    return null
-  }
+      const response = await fetch(`${cmsBaseUrl}${path}`, { headers })
+      if (!response.ok) return null
+      return (await response.json()) as T
+    } catch {
+      return null
+    }
+  })
 }
 
 /** Collection docs, or `null` when the CMS is unavailable. */
