@@ -1,13 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import { getFavouriteMedia, getMediaTypes, getMediaStatuses, getSiteIdentity, getWebApps } from '../lib/cms'
+import { getSiteIdentity, getWebApps } from '../lib/cms'
+import { getMediaLog } from '../lib/magpie'
 
 export const prerender = false
 
-const [media, mediaTypes, mediaStatuses, siteIdentity, webApps] = await Promise.all([
-  getFavouriteMedia(),
-  getMediaTypes(),
-  getMediaStatuses(),
+const [media, siteIdentity, webApps] = await Promise.all([
+  getMediaLog(),
   getSiteIdentity(),
   getWebApps(),
 ])
@@ -17,7 +16,7 @@ const [media, mediaTypes, mediaStatuses, siteIdentity, webApps] = await Promise.
   title={siteIdentity?.siteName ? `Media | ${siteIdentity.siteName}` : 'Media | Templ3'}
   description="Anime, games, books, and everything Sigterm has watched, read, and played."
   initialApp="media"
-  serverData={JSON.stringify({ media, mediaTypes, mediaStatuses, siteIdentity, webApps })}
+  serverData={JSON.stringify({ media, siteIdentity, webApps })}
   maximized={Astro.url.searchParams.has('maximized')}
   ogImage="/api/og/media.png"
 />

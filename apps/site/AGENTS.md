@@ -40,7 +40,10 @@ src/
 │   └── Layout.astro      # Single layout used by every page
 ├── lib/
 │   ├── cms.ts            # CMS API client + all Cms* types
-│   └── spotify.ts        # Spotify Now Playing integration
+│   ├── magpie.ts         # Media log from Magpie (server-only)
+│   ├── mediaLog.ts       # Media log types/labels (browser-safe)
+│   ├── edgeCache.ts      # Cache API wrapper for upstream reads
+│   └── lastfm.ts         # Last.fm Now Playing integration
 ├── pages/
 │   ├── *.astro           # SSR pages (prerender = false)
 │   └── api/              # Cloudflare Worker API routes (*.json.ts)
@@ -152,24 +155,29 @@ layout and scrolling.
 
 ### Caching Strategy
 
-Caching is handled automatically by Cloudflare CDN via `cf.cacheTtl` in fetch
-options. Different content types have different TTLs:
-- Posts listing: 5 min (300s)
-- Individual post: 1 hour (3600s)
-- Projects: 1 hour (3600s)
-- Links: 24 hours (86400s)
-- Favourite Media: 1 hour (3600s)
-- Notes: 15 min (900s)
-- Site Identity: 24 hours (86400s)
-- Media Types/Statuses/Project Statuses: 24 hours (86400s)
+Upstream reads go through `cachedJson()` (`src/lib/edgeCache.ts`), which stores parsed results
+in the colo's Cache API under a credential-free key. Don't rely on `cf.cacheTtl`: Cloudflare
+never caches subrequests that carry an `Authorization` header, which all CMS and Magpie reads do.
+Failures (`null`) are never cached. TTLs come from `TTL` in `lib/cms.ts`:
+- Posts listing: 5 min. Notes: 15 min.
+- Individual post, projects, web apps, media log: 1 hour.
+- Links, categories, site identity, project statuses, media detail: 24 hours.
 
-To bypass cache for fresh content, append `?v=1` (or any query param) to the URL.
+JSON routes answer through `cmsJsonResponse(data, ttl)`: `null` becomes an uncached 503.
+
+### Media log (Magpie)
+
+The Media app reads the user's Magpie instance (a Yamtrack fork), not the CMS.
+- `src/lib/magpie.ts` is server-only. It reads `MAGPIE_API_URL` (var) and `MAGPIE_API_TOKEN` (Worker secret, read-only token).
+- `src/lib/mediaLog.ts` is browser-safe: types, labels and `parseMediaKey`.
+- Entry URLs are `/media/<type>-<source>-<id>`. Keys are validated before any upstream call.
+- Planned items (Magpie status 0) never reach the site.
 
 ### API routes (`src/pages/api/*.json.ts`)
 
 - All routes: `export const prerender = false`, `export const GET: APIRoute`.
 - Rely on `lib/cms.ts` helpers — do not call the CMS directly from route handlers.
-- Return `new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } })`.
+- Return `cmsJsonResponse(data, TTL.X)` so caching and the outage case stay consistent.
 
 ---
 
@@ -202,7 +210,7 @@ To bypass cache for fresh content, append `?v=1` (or any query param) to the URL
 |---|---|
 | `src/data/siteConfig.ts` | Static fallbacks: site metadata, desktopApps registry, operator profile |
 | `src/lib/cms.ts` | All CMS fetch helpers + every `Cms*` type used in the site |
-| `src/lib/spotify.ts` | Spotify Now Playing API integration |
+| `src/lib/lastfm.ts` | Last.fm Now Playing integration |
 | `src/components/os/DesktopShell.tsx` | Root React component — window reducer, theme, personalization |
 | `src/components/os/themePresets.ts` | Theme preset definitions + CSS variable builders |
 | `src/layouts/Layout.astro` | Single HTML shell for every page |

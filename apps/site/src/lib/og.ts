@@ -1,6 +1,6 @@
 import { ImageResponse } from 'workers-og'
 
-import type { CmsFavMedia, CmsMediaType, CmsPost, CmsSiteIdentity } from './cms'
+import type { CmsPost, CmsSiteIdentity } from './cms'
 import { mediaUrl } from './media'
 import { site } from '../data/siteConfig'
 import logoSvgRaw from '../../public/sigterm-logo.svg?raw'
@@ -178,12 +178,6 @@ function absoluteUrl(url: string | undefined): string | undefined {
   if (url.startsWith('http://') || url.startsWith('https://')) return url
   if (!cmsBaseUrl) return undefined
   return `${cmsBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`
-}
-
-function resolveMediaLabel(rel: CmsMediaType | string | null | undefined): string {
-  if (!rel) return ''
-  if (typeof rel === 'string') return rel
-  return rel.label || rel.value || ''
 }
 
 // ─── Logo element ────────────────────────────────────────────────────────────
@@ -452,40 +446,6 @@ export function resolveSiteDescription(identity: CmsSiteIdentity | null): string
 export function resolvePostCoverUrl(post: CmsPost): string | undefined {
   const url = mediaUrl(post.heroImage)
   return absoluteUrl(url)
-}
-
-export function resolveMediaCoverUrl(item: CmsFavMedia): string | undefined {
-  const cover = mediaUrl(item.coverImage)
-  if (cover) return absoluteUrl(cover)
-  if (item.externalCoverUrl) return item.externalCoverUrl
-  return undefined
-}
-
-export function resolveMediaTypeLabel(item: CmsFavMedia, mediaTypes: CmsMediaType[] = []): string {
-  const label = resolveMediaLabel(item.mediaType)
-  if (label && !/^\d+$/.test(label)) return label
-
-  const mediaTypeId = typeof item.mediaType === 'number' || typeof item.mediaType === 'string'
-    ? String(item.mediaType)
-    : undefined
-  const mediaType = mediaTypes.find((type) => String(type.id) === mediaTypeId)
-  if (mediaType) return mediaType.label || mediaType.value || ''
-
-  const externalSource = 'externalSource' in item && typeof item.externalSource === 'string'
-    ? item.externalSource
-    : ''
-  if (externalSource.includes('anime')) return 'Anime'
-  if (externalSource.includes('manga')) return 'Manga'
-  if (externalSource.includes('movie')) return 'Movie'
-  if (externalSource.includes('tv')) return 'TV'
-  if (externalSource.includes('game')) return 'Game'
-
-  return label
-}
-
-export function resolveRating(item: CmsFavMedia): string | undefined {
-  if (item.rating == null) return undefined
-  return `${item.rating}/10`
 }
 
 export { formatDate }

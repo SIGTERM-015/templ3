@@ -1,82 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { CmsFavMedia, CmsMedia, CmsMediaStatus, CmsMediaType, CmsPost } from '../../../lib/cms'
-import { cachedMediaUrl } from '../../../lib/media'
+import type { MediaDetail, MediaEntry, MediaType } from '../../../lib/mediaLog'
+import {
+  MEDIA_TYPES,
+  NOW_CATEGORIES,
+  STATUS_GLYPHS,
+  STATUS_LABELS,
+  TYPE_GLYPHS,
+  TYPE_LABELS,
+} from '../../../lib/mediaLog'
 import { useCmsResource } from '../../../hooks/useCmsResource'
 import { NowPlaying, NowCard } from '../../NowPlaying'
 import { formatDate } from '../../../lib/formatDate'
 import { safeHref } from '../../../lib/safeUrl'
-
-// ─── Fallback static data (used when CMS config not available) ──────────────
-
-const FALLBACK_TYPE_LABELS: Record<string, string> = {
-  anime: 'Anime',
-  manga: 'Manga',
-  game: 'Games',
-  movie: 'Movies',
-  series: 'Series',
-  book: 'Books',
-  music: 'Music',
-  other: 'Other',
-}
-
-const FALLBACK_STATUS_LABELS: Record<string, string> = {
-  completed: 'Completed',
-  'in-progress': 'In Progress',
-  dropped: 'Dropped',
-  planned: 'Planned',
-}
-
-const FALLBACK_STATUS_GLYPHS: Record<string, string> = {
-  completed: '✓',
-  'in-progress': '▶',
-  dropped: '✕',
-  planned: '◌',
-}
-
-const FALLBACK_NOW_CATEGORIES = [
-  { key: 'listening', label: 'Now listening', types: ['music'] },
-  { key: 'watching', label: 'Now watching', types: ['anime', 'series', 'movie'] },
-  { key: 'reading', label: 'Now reading', types: ['manga', 'book'] },
-  { key: 'playing', label: 'Now playing', types: ['game'] },
-]
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-function resolveMediaTypeValue(mediaType: CmsMediaType | string): string {
-  if (typeof mediaType === 'string') return mediaType
-  return mediaType.value
-}
-
-function resolveStatusValue(progress: CmsMediaStatus | string): string {
-  if (typeof progress === 'string') return progress
-  return progress.value
-}
-
-function resolveMediaUrl(value: CmsMedia | string | null | undefined): string | undefined {
-  if (!value) return undefined
-  if (typeof value === 'string') return undefined
-  return value.url ?? undefined
-}
-
-/** Get the icon URL from a CmsMediaType or CmsMediaStatus relationship */
-function typeIconUrl(mediaType: CmsMediaType | string | undefined): string | undefined {
-  if (!mediaType || typeof mediaType === 'string') return undefined
-  return resolveMediaUrl(mediaType.icon)
-}
-
-function statusIconUrl(progress: CmsMediaStatus | string | undefined): string | undefined {
-  if (!progress || typeof progress === 'string') return undefined
-  return resolveMediaUrl(progress.icon)
-}
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-type NowGroup = {
-  key: string
-  label: string
-  typeValues: string[]
-  items: CmsFavMedia[]
-}
 
 type Props = {
   serverData?: Record<string, unknown>
@@ -84,178 +19,64 @@ type Props = {
   onUpdateRoute?: (route: string) => void
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+const ratingStars = (n: number) =>
+  '★'.repeat(Math.round(n / 2)) + '☆'.repeat(5 - Math.round(n / 2))
 
-export function MediaApp({ serverData, onOpenApp, onUpdateRoute }: Props) {
-  const initialMedia = (serverData?.media as CmsFavMedia[]) ?? []
-  const initialMediaItem = (serverData?.mediaItem as CmsFavMedia) ?? null
-  const initialMediaTypes = (serverData?.mediaTypes as CmsMediaType[]) ?? []
-  const initialMediaStatuses = (serverData?.mediaStatuses as CmsMediaStatus[]) ?? []
+export function MediaApp({ serverData, onUpdateRoute }: Props) {
+  const initialMedia = (serverData?.media as MediaEntry[] | null) ?? []
+  const initialDetail = (serverData?.mediaItem as MediaDetail | undefined) ?? null
 
-  const { data: items, loading: itemsLoading } = useCmsResource<CmsFavMedia[]>(
+  const { data: items, loading } = useCmsResource<MediaEntry[]>(
     initialMedia,
-    initialMedia.length ? null : '/api/favourite-media.json',
+    initialMedia.length ? null : '/api/media.json',
   )
-  const { data: mediaTypes, loading: typesLoading } = useCmsResource<CmsMediaType[]>(
-    initialMediaTypes,
-    initialMediaTypes.length ? null : '/api/media-types.json',
-  )
-  const { data: mediaStatuses, loading: statusesLoading } = useCmsResource<CmsMediaStatus[]>(
-    initialMediaStatuses,
-    initialMediaStatuses.length ? null : '/api/media-statuses.json',
-  )
-  const loading = itemsLoading || typesLoading || statusesLoading
 
-  const [filter, setFilter] = useState<string>('all')
-  const [selected, setSelected] = useState<CmsFavMedia | null>(initialMediaItem)
+  const [filter, setFilter] = useState<MediaType | 'all'>('all')
+  const [selectedKey, setSelectedKey] = useState<string | null>(initialDetail?.key ?? null)
 
   // Sync window route with the deep-linked item on initial load
   useEffect(() => {
-    if (initialMediaItem) {
-      onUpdateRoute?.(`/media/${initialMediaItem.slug}`)
-    }
+    if (initialDetail) onUpdateRoute?.(`/media/${initialDetail.key}`)
   }, [])
 
-  // ── Build lookup maps from CMS config ──────────────────────────────────────
+  // The detail (synopsis, credits) is fetched only when an entry is opened
+  const seededDetail = initialDetail?.key === selectedKey ? initialDetail : null
+  const { data: fetchedDetail } = useCmsResource<MediaDetail | null>(
+    seededDetail,
+    selectedKey && !seededDetail ? `/api/media/${selectedKey}.json` : null,
+  )
+  const selectedEntry = selectedKey ? items.find((i) => i.key === selectedKey) : undefined
+  const detail = fetchedDetail?.key === selectedKey ? fetchedDetail : null
+  const selected: MediaEntry | MediaDetail | undefined = detail ?? selectedEntry ?? seededDetail ?? undefined
 
-  /** Map from mediaType.value → CmsMediaType object */
-  const typeMap = useMemo(() => {
-    const map = new Map<string, CmsMediaType>()
-    for (const t of mediaTypes) map.set(t.value, t)
-    return map
-  }, [mediaTypes])
-
-  /** Map from mediaStatus.value → CmsMediaStatus object */
-  const statusMap = useMemo(() => {
-    const map = new Map<string, CmsMediaStatus>()
-    for (const s of mediaStatuses) map.set(s.value, s)
-    return map
-  }, [mediaStatuses])
-
-  /** "Now X" categories derived from mediaTypes with a nowCategory */
-  const nowCategories = useMemo((): { key: string; label: string; typeValues: string[] }[] => {
-    if (mediaTypes.length === 0) {
-      return FALLBACK_NOW_CATEGORIES.map(c => ({ key: c.key, label: c.label, typeValues: c.types }))
-    }
-
-    // Group types by nowCategory
-    const grouped = new Map<string, { label: string; typeValues: string[] }>()
-    for (const t of mediaTypes) {
-      if (!t.nowCategory || t.nowCategory === 'none') continue
-      const key = t.nowCategory
-      if (!grouped.has(key)) {
-        grouped.set(key, {
-          label: t.nowLabel || `Now ${key}`,
-          typeValues: [],
-        })
-      }
-      grouped.get(key)!.typeValues.push(t.value)
-    }
-
-    return Array.from(grouped.entries()).map(([key, val]) => ({ key, ...val }))
-  }, [mediaTypes])
-
-  // ── Helpers using CMS data ────────────────────────────────────────────────
-
-  const getTypeLabel = (mediaType: CmsMediaType | string): string => {
-    const value = resolveMediaTypeValue(mediaType)
-    if (typeof mediaType !== 'string') return mediaType.label
-    const found = typeMap.get(value)
-    if (found) return found.label
-    return FALLBACK_TYPE_LABELS[value] || value
-  }
-
-  const getTypeGlyph = (mediaType: CmsMediaType | string): string => {
-    const value = resolveMediaTypeValue(mediaType)
-    if (typeof mediaType !== 'string') return mediaType.glyph || value.slice(0, 2).toUpperCase()
-    const found = typeMap.get(value)
-    return found?.glyph || value.slice(0, 2).toUpperCase()
-  }
-
-  const getStatusLabel = (progress: CmsMediaStatus | string): string => {
-    const value = resolveStatusValue(progress)
-    if (typeof progress !== 'string') return progress.label
-    const found = statusMap.get(value)
-    if (found) return found.label
-    return FALLBACK_STATUS_LABELS[value] || value
-  }
-
-  const getStatusGlyph = (progress: CmsMediaStatus | string): string => {
-    const value = resolveStatusValue(progress)
-    if (typeof progress !== 'string') return progress.glyph || '?'
-    const found = statusMap.get(value)
-    return found?.glyph || FALLBACK_STATUS_GLYPHS[value] || '?'
-  }
-
-const coverUrl = (item: CmsFavMedia, width?: number): string | undefined => {
-  // Prefer uploaded cover image (proxied through edge cache + optional resize)
-  if (item.coverImage) {
-    if (typeof item.coverImage === 'string') return item.coverImage
-    return cachedMediaUrl(item.coverImage, width)
-  }
-  // Fall back to external cover URL from API
-  return item.externalCoverUrl
-}
-
-  const blogSlug = (item: CmsFavMedia): string | undefined => {
-    if (!item.blogPost) return undefined
-    if (typeof item.blogPost === 'string') return undefined
-    return (item.blogPost as CmsPost).slug
-  }
-
-  const ratingStars = (n: number) =>
-    '★'.repeat(Math.round(n / 2)) + '☆'.repeat(5 - Math.round(n / 2))
-
-  const selectItem = useCallback((item: CmsFavMedia) => {
-    setSelected(item)
-    onUpdateRoute?.(`/media/${item.slug}`)
+  const selectItem = useCallback((item: MediaEntry) => {
+    setSelectedKey(item.key)
+    onUpdateRoute?.(`/media/${item.key}`)
   }, [onUpdateRoute])
 
   const goBack = useCallback(() => {
-    setSelected(null)
+    setSelectedKey(null)
     onUpdateRoute?.('/media')
   }, [onUpdateRoute])
 
-  // ── Derived data ──────────────────────────────────────────────────────────
-
-  /** Unique type values present in the current items list */
-  const presentTypes = useMemo((): string[] => {
-    const seen = new Set<string>()
-    const result: string[] = []
-    for (const item of items) {
-      const v = resolveMediaTypeValue(item.mediaType)
-      if (!seen.has(v)) { seen.add(v); result.push(v) }
-    }
-    // Sort by CMS order if available
-    if (mediaTypes.length > 0) {
-      const orderMap = new Map<string, number>(mediaTypes.map((t: CmsMediaType, i: number) => [t.value, t.order ?? i]))
-      result.sort((a: string, b: string) => (orderMap.get(a) ?? 99) - (orderMap.get(b) ?? 99))
-    } else {
-      result.sort()
-    }
-    return result
-  }, [items, mediaTypes])
-
-  const inProgress = useMemo(
-    () => items.filter((i: CmsFavMedia) => resolveStatusValue(i.progress) === 'in-progress'),
+  const presentTypes = useMemo(
+    () => MEDIA_TYPES.filter((t) => items.some((i) => i.type === t)),
     [items],
   )
 
-  const nowGroups: NowGroup[] = useMemo(() => {
-    return nowCategories
-      .map((cat: { key: string; label: string; typeValues: string[] }) => ({
+  const nowGroups = useMemo(
+    () =>
+      NOW_CATEGORIES.map((cat) => ({
         ...cat,
-        items: inProgress.filter((i: CmsFavMedia) => cat.typeValues.includes(resolveMediaTypeValue(i.mediaType))),
-      }))
-      .filter((g: { key: string; label: string; typeValues: string[]; items: CmsFavMedia[] }): g is NowGroup => g.items.length > 0)
-  }, [inProgress, nowCategories])
+        item: items.find((i) => i.status === 'in-progress' && cat.types.includes(i.type)),
+      })).filter((g): g is typeof g & { item: MediaEntry } => !!g.item),
+    [items],
+  )
 
-  const filtered = useMemo((): CmsFavMedia[] => {
-    if (filter === 'all') return items
-    return items.filter((i: CmsFavMedia) => resolveMediaTypeValue(i.mediaType) === filter)
-  }, [items, filter])
-
-  // ── Render ────────────────────────────────────────────────────────────────
+  const filtered = useMemo(
+    () => (filter === 'all' ? items : items.filter((i) => i.type === filter)),
+    [items, filter],
+  )
 
   return (
     <div className="mediapp">
@@ -266,110 +87,74 @@ const coverUrl = (item: CmsFavMedia, width?: number): string | undefined => {
               <h3 className="eyebrow">Now listening</h3>
               <NowPlaying />
             </div>
-            {nowGroups.map((group: NowGroup) => {
-              const item = group.items[0]
-              const cover = coverUrl(item, 300)
-              return (
-                <div key={group.key} className="mediapp-now__card">
-                  <h3 className="eyebrow">{group.label}</h3>
-                  <NowCard
-                    cover={cover}
-                    title={item.title}
-                    subtitle={item.creator}
-                    onClick={() => selectItem(item)}
-                  />
-                </div>
-              )
-            })}
+            {nowGroups.map((group) => (
+              <div key={group.key} className="mediapp-now__card">
+                <h3 className="eyebrow">{group.label}</h3>
+                <NowCard
+                  cover={group.item.cover}
+                  title={group.item.title}
+                  subtitle={TYPE_LABELS[group.item.type]}
+                  onClick={() => selectItem(group.item)}
+                />
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      <div className="mediapp-toolbar">
-        <div className="mediapp-filters">
-          <button
-            className={`mediapp-filter ${filter === 'all' ? 'mediapp-filter--active' : ''}`}
-            onClick={() => setFilter('all')}
-          >
-            All
-          </button>
-          {presentTypes.map((typeValue: string) => {
-            const cmsType = typeMap.get(typeValue)
-            const iconUrl = typeIconUrl(cmsType)
-            const label = cmsType ? cmsType.label : (FALLBACK_TYPE_LABELS[typeValue] || typeValue)
-
-            return (
+      {!selected && (
+        <div className="mediapp-toolbar">
+          <div className="mediapp-filters">
+            <button
+              className={`mediapp-filter ${filter === 'all' ? 'mediapp-filter--active' : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              All
+            </button>
+            {presentTypes.map((type) => (
               <button
-                key={typeValue}
-                className={`mediapp-filter ${filter === typeValue ? 'mediapp-filter--active' : ''}`}
-                onClick={() => setFilter(typeValue)}
-                title={label}
+                key={type}
+                className={`mediapp-filter ${filter === type ? 'mediapp-filter--active' : ''}`}
+                onClick={() => setFilter(type)}
+                title={TYPE_LABELS[type]}
               >
-                {iconUrl ? (
-                  <img src={iconUrl} alt={label} className="mediapp-filter__icon" />
-                ) : (
-                  cmsType?.glyph || label
-                )}
+                {TYPE_LABELS[type]}
               </button>
-            )
-          })}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {loading && <div className="mediapp-loading">Loading...</div>}
 
       {!selected && !loading && (
         <div className="mediapp-grid">
-          {filtered.map((item: CmsFavMedia) => {
-            const cover = coverUrl(item, 300)
-            const typeValue = resolveMediaTypeValue(item.mediaType)
-            const cmsType = typeMap.get(typeValue)
-            const tIconUrl = typeIconUrl(cmsType ?? item.mediaType)
-
-            return (
-              <button
-                key={item.id}
-                className="mediapp-card"
-                onClick={() => selectItem(item)}
+          {filtered.map((item) => (
+            <button key={item.key} className="mediapp-card" onClick={() => selectItem(item)}>
+              <div
+                className="mediapp-card__cover"
+                style={item.cover ? { backgroundImage: `url(${item.cover})` } : undefined}
               >
-                <div
-                  className="mediapp-card__cover"
-                  style={cover ? { backgroundImage: `url(${cover})` } : undefined}
-                >
-                  {!cover && (
-                    <span className="mediapp-card__placeholder">
-                      {tIconUrl ? (
-                        <img src={tIconUrl} alt={getTypeLabel(item.mediaType)} className="mediapp-card__type-icon" />
-                      ) : (
-                        getTypeGlyph(item.mediaType)
-                      )}
-                    </span>
-                  )}
-                </div>
-                <div className="mediapp-card__info">
-                  <span className="mediapp-card__title">{item.title}</span>
-                  <span className="mediapp-card__meta">
-                    {item.rating && <span className="mediapp-card__rating">{item.rating}/10</span>}
-                    <span
-                      className="mediapp-card__status"
-                      data-status={resolveStatusValue(item.progress)}
-                      title={getStatusLabel(item.progress)}
-                    >
-                      {(() => {
-                        const sIcon = statusIconUrl(typeof item.progress !== 'string' ? item.progress : undefined)
-                        return sIcon
-                          ? <img src={sIcon} alt={getStatusLabel(item.progress)} className="mediapp-card__status-icon" />
-                          : getStatusGlyph(item.progress)
-                      })()}
-                    </span>
+                {!item.cover && (
+                  <span className="mediapp-card__placeholder">{TYPE_GLYPHS[item.type]}</span>
+                )}
+              </div>
+              <div className="mediapp-card__info">
+                <span className="mediapp-card__title">{item.title}</span>
+                <span className="mediapp-card__meta">
+                  {item.score != null && <span className="mediapp-card__rating">{item.score}/10</span>}
+                  <span
+                    className="mediapp-card__status"
+                    data-status={item.status}
+                    title={STATUS_LABELS[item.status]}
+                  >
+                    {STATUS_GLYPHS[item.status]}
                   </span>
-                </div>
-              </button>
-            )
-          })}
-          {filtered.length === 0 && !loading && (
-            <div className="mediapp-empty">Nothing here yet</div>
-          )}
+                </span>
+              </div>
+            </button>
+          ))}
+          {filtered.length === 0 && <div className="mediapp-empty">Nothing here yet</div>}
         </div>
       )}
 
@@ -377,10 +162,10 @@ const coverUrl = (item: CmsFavMedia, width?: number): string | undefined => {
         <div className="mediapp-detail">
           <button className="gazette-back" onClick={goBack}>← Back</button>
           <div className="mediapp-detail__header">
-            {coverUrl(selected, 1200) && (
+            {selected.cover && (
               <img
                 className="mediapp-detail__cover"
-                src={coverUrl(selected, 1200)}
+                src={selected.cover}
                 alt={selected.title}
                 loading="lazy"
                 decoding="async"
@@ -388,74 +173,45 @@ const coverUrl = (item: CmsFavMedia, width?: number): string | undefined => {
             )}
             <div className="mediapp-detail__meta">
               <h2 className="mediapp-detail__title">{selected.title}</h2>
-              {selected.creator && (
-                <span className="mediapp-detail__creator">{selected.creator}</span>
+              {detail && (detail.creators.length > 0 || detail.year) && (
+                <span className="mediapp-detail__creator">
+                  {[detail.creators.join(', '), detail.year].filter(Boolean).join(' · ')}
+                </span>
               )}
               <div className="mediapp-detail__tags">
-                {/* Type tag */}
-                {(() => {
-                  const typeValue = resolveMediaTypeValue(selected.mediaType)
-                  const cmsType = typeMap.get(typeValue)
-                  const tUrl = typeIconUrl(cmsType ?? selected.mediaType)
-                  return (
-                    <span className="tag">
-                      {tUrl
-                        ? <img src={tUrl} alt={getTypeLabel(selected.mediaType)} className="tag__icon" />
-                        : null}
-                      {getTypeLabel(selected.mediaType)}
-                    </span>
-                  )
-                })()}
-                {/* Status tag */}
-                {(() => {
-                  const statusValue = resolveStatusValue(selected.progress)
-                  const sUrl = statusIconUrl(typeof selected.progress !== 'string' ? selected.progress : undefined)
-                  return (
-                    <span className="tag" data-status={statusValue}>
-                      {sUrl
-                        ? <img src={sUrl} alt={getStatusLabel(selected.progress)} className="tag__icon" />
-                        : null}
-                      {getStatusLabel(selected.progress)}
-                    </span>
-                  )
-                })()}
+                <span className="tag">{TYPE_LABELS[selected.type]}</span>
+                <span className="tag" data-status={selected.status}>
+                  {STATUS_GLYPHS[selected.status]} {STATUS_LABELS[selected.status]}
+                </span>
+                {detail?.genres.map((genre) => (
+                  <span key={genre} className="tag">{genre}</span>
+                ))}
               </div>
-              {selected.rating && (
+              {selected.score != null && (
                 <div className="mediapp-detail__rating">
-                  <span className="mediapp-detail__stars">{ratingStars(selected.rating)}</span>
-                  <span className="mediapp-detail__score">{selected.rating}/10</span>
+                  <span className="mediapp-detail__stars">{ratingStars(selected.score)}</span>
+                  <span className="mediapp-detail__score">{selected.score}/10</span>
                 </div>
               )}
-              {selected.completedAt && (
-                <span className="mediapp-detail__date">
-                  {formatDate(selected.completedAt)}
-                </span>
+              {selected.date && (
+                <span className="mediapp-detail__date">{formatDate(selected.date)}</span>
               )}
             </div>
           </div>
-          {selected.review && (
-            <p className="mediapp-detail__review">{selected.review}</p>
-          )}
-          <div className="mediapp-detail__links">
-            {blogSlug(selected) && (
-              <button
-                className="button--ghost"
-                onClick={() => onOpenApp?.('gazette')}
-              >
-                Read blog review
-              </button>
-            )}
-            {selected.externalReviewUrl && (
+          {selected.notes && <p className="mediapp-detail__review">{selected.notes}</p>}
+          {detail?.synopsis && <p className="mediapp-detail__synopsis">{detail.synopsis}</p>}
+          {detail?.sourceUrl && (
+            <div className="mediapp-detail__links">
               <a
-                href={safeHref(selected.externalReviewUrl)}
+                href={safeHref(detail.sourceUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="button--ghost"
               >
-                ↗ External review
+                ↗ View on {detail.sourceName}
               </a>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </div>
