@@ -266,13 +266,6 @@ export interface Category {
 export interface Post {
   id: number;
   title: string;
-  slug: string;
-  excerpt: string;
-  heroImage?: (number | null) | Media;
-  featured?: boolean | null;
-  publishedAt?: string | null;
-  category?: (number | null) | Category;
-  tags?: (number | Tag)[] | null;
   content: {
     root: {
       type: string;
@@ -288,6 +281,16 @@ export interface Post {
     };
     [k: string]: unknown;
   };
+  slug: string;
+  publishedAt?: string | null;
+  /**
+   * Shown on cards and in link previews (max 240).
+   */
+  excerpt: string;
+  heroImage?: (number | null) | Media;
+  category?: (number | null) | Category;
+  tags?: (number | Tag)[] | null;
+  featured?: boolean | null;
   seo?: {
     metaTitle?: string | null;
     metaDescription?: string | null;
@@ -909,14 +912,14 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  content?: T;
   slug?: T;
+  publishedAt?: T;
   excerpt?: T;
   heroImage?: T;
-  featured?: T;
-  publishedAt?: T;
   category?: T;
   tags?: T;
-  content?: T;
+  featured?: T;
   seo?:
     | T
     | {
