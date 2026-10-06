@@ -48,6 +48,9 @@
   inset: 0;
   display: grid;
   grid-template-rows: 1fr auto;
+  /* One column pinned to the viewport. With the implicit `auto` column, a wide row (many
+     taskbar tabs) widened the grid past the screen and pushed every window off-centre. */
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
   background:
     radial-gradient(ellipse at 30% 40%, var(--bg-deep) 0%, transparent 60%),
@@ -343,7 +346,14 @@
   align-items: center;
   gap: 2px;
   flex: 1;
+  min-width: 0;
   overflow: hidden;
+  /* Scrollable on touch, but without a visible scrollbar stealing height from the tabs */
+  scrollbar-width: none;
+}
+
+.taskbar-apps::-webkit-scrollbar {
+  display: none;
 }
 
 .taskbar-app {
