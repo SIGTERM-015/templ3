@@ -15,32 +15,50 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
   },
   defaultSort: '-publishedAt',
+  // Ghost-style layout: the main column is just the title and the writing canvas;
+  // everything about the post (URL, excerpt, image, taxonomy, SEO) lives in the sidebar.
   fields: [
     {
       name: 'title',
       type: 'text',
       required: true,
+      admin: {
+        placeholder: 'Post title',
+        components: {
+          Field: '/components/PostTitleField#PostTitleField',
+        },
+      },
+    },
+    {
+      name: 'content',
+      type: 'richText',
+      required: true,
+      label: false,
     },
     slugField(),
+    {
+      name: 'publishedAt',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        date: { pickerAppearance: 'dayAndTime' },
+      },
+    },
     {
       name: 'excerpt',
       type: 'textarea',
       maxLength: 240,
       required: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Shown on cards and in link previews (max 240).',
+      },
     },
     {
       name: 'heroImage',
-      type: 'relationship',
+      label: 'Feature image',
+      type: 'upload',
       relationTo: 'media',
-    },
-    {
-      name: 'featured',
-      type: 'checkbox',
-      defaultValue: false,
-    },
-    {
-      name: 'publishedAt',
-      type: 'date',
       admin: {
         position: 'sidebar',
       },
@@ -56,20 +74,27 @@ export const Posts: CollectionConfig = {
     {
       name: 'tags',
       type: 'relationship',
+      hasMany: true,
+      relationTo: 'tags',
       admin: {
         position: 'sidebar',
       },
-      hasMany: true,
-      relationTo: 'tags',
     },
     {
-      name: 'content',
-      type: 'richText',
-      required: true,
+      name: 'featured',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+      },
     },
     {
       name: 'seo',
+      label: 'SEO',
       type: 'group',
+      admin: {
+        position: 'sidebar',
+      },
       fields: [
         {
           name: 'metaTitle',
@@ -89,6 +114,9 @@ export const Posts: CollectionConfig = {
     },
   ],
   versions: {
-    drafts: true,
+    drafts: {
+      // Saves the draft as you type, like Ghost; publishing stays an explicit action
+      autosave: { interval: 1500 },
+    },
   },
 }

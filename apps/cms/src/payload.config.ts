@@ -3,9 +3,7 @@ import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import {
   BlocksFeature,
   CodeBlock,
-  FixedToolbarFeature,
   HeadingFeature,
-  HorizontalRuleFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import {
@@ -138,11 +136,12 @@ export default buildConfig({
   globals: [SiteIdentity],
   endpoints: [mediaLookupEndpoint],
   editor: lexicalEditor({
+    // Ghost-style writing: the defaults already give a floating toolbar on selection
+    // (InlineToolbarFeature), the "/" insert menu, block drag handles and markdown shortcuts.
+    // No fixed toolbar, so the page is just text.
     features: ({ defaultFeatures }) => [
       ...defaultFeatures,
-      HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-      FixedToolbarFeature(),
-      HorizontalRuleFeature(),
+      HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
       BlocksFeature({
         blocks: [
           // Code with syntax highlighting
