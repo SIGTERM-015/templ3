@@ -32,7 +32,7 @@ export const PostTitleField: TextFieldClientComponent = ({ path, field }) => {
         aria-label="Title"
         onChange={(e) => setValue(e.target.value.replace(/\n/g, ' '))}
         onKeyDown={(e) => {
-          if (e.key !== 'Enter') return
+          if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
           e.preventDefault()
           document.querySelector<HTMLElement>('.rich-text-lexical [contenteditable="true"]')?.focus()
         }}
