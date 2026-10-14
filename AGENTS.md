@@ -98,6 +98,16 @@ pnpm cf-typegen                         # Regenerate Cloudflare worker-configura
 - **Types**: Always run `pnpm generate:types` and `pnpm generate:importmap` when modifying schema or components.
 
 ## Environment Variables
-- `apps/cms/.env`: `DATABASE_URI`, `PAYLOAD_SECRET`, R2 credentials, `SMTP_*`.
-- `apps/site/.env` or `.dev.vars`: `PUBLIC_CMS_URL`, `PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, Spotify credentials.
+- `apps/cms/.env`: `DATABASE_URL`, `PAYLOAD_SECRET`, optional `SMTP_*`. Media storage uses the Wrangler R2 binding.
+- `apps/site/.env` or `.dev.vars`: `PUBLIC_CMS_URL`, optional Clerk, Last.fm, and Magpie credentials.
 - Never commit `.env` files.
+
+## Cursor Cloud specific instructions
+
+- Node.js 22.12+ and pnpm 10.30.3 (`packageManager`). Do not use npm or yarn.
+- PostgreSQL 16 is the local database. Package install does not start the cluster (`policy-rc.d` blocks it). Start it with `sudo service postgresql start` and wait until `pg_isready` succeeds. Database `templ3`, role `postgres`, password `postgres`.
+- `apps/cms/.env` must set `DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/templ3`, a local `PAYLOAD_SECRET`, and `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` to that same URL. Payload loads Wrangler on startup, and that variable keeps Hyperdrive on the local database.
+- `apps/site/wrangler.jsonc` sets `PUBLIC_CMS_URL` to production. Astro dev prefers `apps/site/.dev.vars`. Point `PUBLIC_CMS_URL` at `http://localhost:3000` there, or the site reads the production CMS.
+- `pnpm dev` serves the CMS at `http://localhost:3000` and the site at `http://localhost:4321`. The root script quotes `--filter "./apps/*"` so the shell does not turn the glob into a second script name. Open the admin on `localhost`, not `127.0.0.1`, unless `allowedDevOrigins` includes `127.0.0.1`. Next otherwise blocks `/_next` dev resources and the admin stays blank.
+- CMS checks: `pnpm --dir apps/cms exec tsc --noEmit`, `pnpm --dir apps/cms lint`, `pnpm --dir apps/cms run test:int`. Site checks: `pnpm --dir apps/site typecheck` and `pnpm build:site`.
+- Clerk, Last.fm, Magpie, SMTP, and remote R2 are optional. The desktop and published posts work without them. Payload logs that `sharp` is not installed; image resizing is unavailable in local dev.
