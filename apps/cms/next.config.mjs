@@ -4,6 +4,9 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
+  // Next treats 127.0.0.1 as cross-origin against a localhost dev server and then
+  // blocks /_next dev resources, which leaves the admin as a blank page.
+  allowedDevOrigins: ['127.0.0.1'],
   experimental: {
     // payload.config starts a wrangler platform proxy when evaluated. Next 16 collects page
     // data in parallel workers, and their proxies race on Miniflare's local SQLite state
