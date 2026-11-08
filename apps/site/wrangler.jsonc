@@ -11,6 +11,9 @@
 		"binding": "ASSETS",
 		"directory": "./dist/client"
 	},
+	// Branch builds go up with `wrangler versions upload`; without this flag a worker
+	// that only has custom-domain routes gets no preview URL.
+	"preview_urls": true,
 	"observability": {
 		"enabled": true
 	},
