@@ -242,6 +242,28 @@
   color: var(--text);
 }
 
+.dossier-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+
+.dossier-buttons a {
+  display: block;
+  line-height: 0;
+}
+
+.dossier-button {
+  display: block;
+  image-rendering: pixelated;
+  transition: transform 150ms ease;
+}
+
+.dossier-button:hover {
+  transform: translateY(-2px);
+}
+
 /* ── GAZETTE ── */
 
 .gazette {
