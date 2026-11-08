@@ -264,6 +264,28 @@
   transform: translateY(-2px);
 }
 
+.dossier-button--own {
+  margin-top: var(--space-sm);
+}
+
+.dossier-button--own:hover {
+  transform: none;
+}
+
+.dossier-snippet {
+  display: block;
+  margin-top: var(--space-xs);
+  padding: 6px 8px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
 /* ── GAZETTE ── */
 
 .gazette {

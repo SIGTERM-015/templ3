@@ -2,6 +2,7 @@ import {
   operator,
   socialLinks as defaultSocialLinks,
   buttons,
+  ownButton,
   inspirations as defaultInspirations,
 } from '../../../data/siteConfig'
 import type { CmsSiteIdentity } from '../../../lib/cms'
@@ -135,9 +136,25 @@ export function DossierApp({ onOpenApp, siteIdentity }: Props) {
           ))}
         </div>
       </section>
+
+      <section className="dossier-section">
+        <h3 className="eyebrow">Link to me</h3>
+        <img
+          src={ownButton.src}
+          width={88}
+          height={31}
+          alt={ownButton.name}
+          className="dossier-button dossier-button--own"
+        />
+        <code className="dossier-snippet">{ownButtonSnippet}</code>
+      </section>
     </div>
   )
 }
+
+const ownButtonSnippet =
+  `<a href="${ownButton.href}"><img src="${ownButton.href}${ownButton.src}" ` +
+  `width="88" height="31" alt="${ownButton.name}" style="image-rendering: pixelated"></a>`
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
