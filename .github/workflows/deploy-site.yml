@@ -11,6 +11,10 @@ on:
       - 'patches/**'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: write
+
 concurrency:
   group: deploy-site-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_name != 'main' }}
@@ -59,7 +63,33 @@ jobs:
 
       - name: Upload preview
         if: github.ref != 'refs/heads/main'
-        run: pnpm --dir apps/site exec wrangler versions upload
+        id: preview
+        run: |
+          # One stable URL per branch: DNS label, lowercase, max 40 chars.
+          alias="$(echo "$GITHUB_REF_NAME" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-40 | sed -E 's/-+$//')"
+          export WRANGLER_OUTPUT_FILE_PATH="$RUNNER_TEMP/wrangler-output.ndjson"
+          pnpm --dir apps/site exec wrangler versions upload --preview-alias "$alias" \
+            --message "$GITHUB_SHA"
+          url="$(jq -rs 'map(select(.type == "version-upload")) | last | .preview_alias_url // .preview_url // empty' "$WRANGLER_OUTPUT_FILE_PATH")"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Comment preview URL on the PR
+        if: github.ref != 'refs/heads/main' && steps.preview.outputs.url != ''
+        run: |
+          pr="$(gh pr list --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
+          [ -n "$pr" ] || { echo "No open PR for $GITHUB_REF_NAME, skipping comment"; exit 0; }
+          marker='<!-- site-preview-url -->'
+          body="$marker"$'\n'"**Preview:** ${PREVIEW_URL}"$'\n\n'"Commit \`${GITHUB_SHA::7}\`"
+          id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$pr/comments" --paginate \
+            --jq "map(select(.body | startswith(\"$marker\"))) | first | .id // empty")"
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
+          else
+            gh pr comment "$pr" --body "$body"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
