@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   operator,
   socialLinks as defaultSocialLinks,
@@ -9,6 +10,7 @@ import type { CmsSiteIdentity } from '../../../lib/cms'
 import { cachedMediaUrl } from '../../../lib/media'
 import { NowPlaying } from '../../NowPlaying'
 import { safeHref } from '../../../lib/safeUrl'
+import { ButtonModal } from './ButtonModal'
 
 type Props = {
   onOpenApp?: (appId: string) => void
@@ -16,6 +18,8 @@ type Props = {
 }
 
 export function DossierApp({ onOpenApp, siteIdentity }: Props) {
+  const [showOwnButton, setShowOwnButton] = useState(false)
+
   // CMS-first, siteConfig fallback for every field
   const handle = siteIdentity?.handle ?? operator.handle
   const status = siteIdentity?.status?.toUpperCase() ?? operator.status
@@ -121,8 +125,22 @@ export function DossierApp({ onOpenApp, siteIdentity }: Props) {
       </section>
 
       <section className="dossier-section">
-        <h3 className="eyebrow">Friends</h3>
+        <h3 className="eyebrow">Buttons</h3>
         <div className="dossier-buttons">
+          <button
+            type="button"
+            className="dossier-buttons__own"
+            onClick={() => setShowOwnButton(true)}
+            title="Grab my button"
+          >
+            <img
+              src={ownButton.src}
+              width={88}
+              height={31}
+              alt={ownButton.name}
+              className="dossier-button"
+            />
+          </button>
           {buttons.map((button) => (
             <a key={button.href} href={button.href} target="_blank" rel="noopener">
               <img
@@ -137,24 +155,10 @@ export function DossierApp({ onOpenApp, siteIdentity }: Props) {
         </div>
       </section>
 
-      <section className="dossier-section">
-        <h3 className="eyebrow">Link to me</h3>
-        <img
-          src={ownButton.src}
-          width={88}
-          height={31}
-          alt={ownButton.name}
-          className="dossier-button dossier-button--own"
-        />
-        <code className="dossier-snippet">{ownButtonSnippet}</code>
-      </section>
+      {showOwnButton && <ButtonModal {...ownButton} onClose={() => setShowOwnButton(false)} />}
     </div>
   )
 }
-
-const ownButtonSnippet =
-  `<a href="${ownButton.href}"><img src="${ownButton.href}${ownButton.src}" ` +
-  `width="88" height="31" alt="${ownButton.name}" style="image-rendering: pixelated"></a>`
 
 function Field({ label, value }: { label: string; value: string }) {
   return (

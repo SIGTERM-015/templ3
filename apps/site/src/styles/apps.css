@@ -264,26 +264,114 @@
   transform: translateY(-2px);
 }
 
-.dossier-button--own {
-  margin-top: var(--space-sm);
+/* Own button: first in the row, set apart from the friends' buttons by a divider. */
+.dossier-buttons__own {
+  display: block;
+  margin: 0 var(--space-xs) 0 0;
+  padding: 0 calc(var(--space-xs) + 2px) 0 0;
+  border: 0;
+  border-right: 1px solid var(--panel-border);
+  background: none;
+  line-height: 0;
+  cursor: pointer;
 }
 
-.dossier-button--own:hover {
-  transform: none;
+.button-modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  background: oklch(0% 0 0 / 0.7);
+  backdrop-filter: blur(6px);
+  animation: gb-lightbox-fade-in 0.2s var(--ease-out-quart);
 }
 
-.dossier-snippet {
+.button-modal__card {
+  position: relative;
+  width: min(380px, 100%);
+  padding: var(--space-md);
+  border: 1px solid var(--panel-border);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-lg);
+  animation: gb-lightbox-scale-in 0.25s var(--ease-out-quart);
+}
+
+.button-modal__close {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.button-modal__close:hover {
+  color: var(--text-bright);
+}
+
+.button-modal__title {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-bright);
+}
+
+.button-modal__text {
+  margin: var(--space-xs) 0 var(--space-sm);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.button-modal__preview {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-md);
+  border: 1px solid var(--panel-border);
+  background: var(--bg);
+}
+
+.button-modal__preview .dossier-button {
+  width: 176px;
+  height: 62px;
+}
+
+.button-modal__code {
   display: block;
   margin-top: var(--space-xs);
-  padding: 6px 8px;
+  padding: 8px 10px;
   border: 1px solid var(--panel-border);
   background: var(--panel);
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: 10px;
-  line-height: 1.5;
+  line-height: 1.6;
   overflow-wrap: anywhere;
   user-select: all;
+}
+
+.button-modal__copy {
+  margin-top: var(--space-xs);
+  padding: 4px 12px;
+  border: 1px solid var(--amber-a30);
+  background: var(--amber-a10);
+  color: var(--amber);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.button-modal__copy:hover {
+  background: var(--amber-a15);
 }
 
 /* ── GAZETTE ── */
