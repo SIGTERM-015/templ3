@@ -1,6 +1,7 @@
 import {
   operator,
   socialLinks as defaultSocialLinks,
+  buttons,
   inspirations as defaultInspirations,
 } from '../../../data/siteConfig'
 import type { CmsSiteIdentity } from '../../../lib/cms'
@@ -114,6 +115,23 @@ export function DossierApp({ onOpenApp, siteIdentity }: Props) {
         <div className="dossier-inspirations">
           {inspirations.map((tag) => (
             <span key={tag} className="dossier-tag">{tag}</span>
+          ))}
+        </div>
+      </section>
+
+      <section className="dossier-section">
+        <h3 className="eyebrow">Friends</h3>
+        <div className="dossier-buttons">
+          {buttons.map((button) => (
+            <a key={button.href} href={button.href} target="_blank" rel="noopener">
+              <img
+                src={button.src}
+                width={88}
+                height={31}
+                alt={button.name}
+                className="dossier-button"
+              />
+            </a>
           ))}
         </div>
       </section>
