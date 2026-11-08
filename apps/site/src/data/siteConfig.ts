@@ -73,6 +73,8 @@ export const inspirations = [
 export const buttons = [
   { name: 'tiago.zip', href: 'https://tiago.zip', src: '/buttons/tiago.zip.gif' },
   { name: 'lemniscata.net', href: 'https://lemniscata.net', src: '/buttons/lemniscata.net.gif' },
+  { name: 'swimming.cat', href: 'https://swimming.cat', src: '/buttons/swimming.cat.gif' },
+  { name: 'sigterm.vodka', href: 'https://sigterm.vodka', src: '/buttons/sigterm.vodka.gif' },
 ]
 
 export const navGuide = {
