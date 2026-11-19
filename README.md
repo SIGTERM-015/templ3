@@ -185,7 +185,7 @@ All scripts are run from the repository root:
 
 ## Deployment
 
-Both apps deploy to Cloudflare Workers via GitHub Actions:
+Both apps deploy to Cloudflare Workers via GitHub Actions. Required repository secrets, variables and CI caveats are documented in [`docs/ci.md`](docs/ci.md).
 
 - **Deploy Site (`.github/workflows/deploy-site.yml`)** — Runs on pushes to **any branch** modifying `apps/site/**`, `package.json`, `pnpm-lock.yaml`, or `patches/**` (plus manual dispatch). Runs `typecheck`, `pnpm build:site`, and `check:client-bundle` (ensuring no server-only code leaks into the browser bundle). Pushes to `main` deploy to production (`sigterm.vodka`); non-`main` branches upload a Wrangler preview version and post or update the preview URL on any open PR.
 - **Deploy CMS (`.github/workflows/deploy-cms.yml`)** — Runs on pushes to **`main`** modifying `apps/cms/**`, `package.json`, `pnpm-lock.yaml`, or `patches/**` (plus manual dispatch). A `test` job spins up PostgreSQL 17 and runs `tsc --noEmit`, ESLint, `check:migrations`, and Vitest integration tests. Once green, the `deploy` job runs Payload database migrations against `DATABASE_URL_PROD`, builds the OpenNext Cloudflare bundle (`pnpm cf:build:cms`), and deploys to `cms.sigterm.vodka`.
