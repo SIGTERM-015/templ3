@@ -37,10 +37,9 @@
 	],
 	"vars": {
 		"PUBLIC_CMS_URL": "https://cms.sigterm.vodka",
-		"MAGPIE_API_URL": "https://magpie.yellowumbrella.dev"
+		"MAGPIE_API_URL": "https://magpie.yellowumbrella.dev",
+		"LISTENBRAINZ_USERNAME": "Sigterm015"
 	},
-	// Last.fm now-playing is opt-in: add LASTFM_API_KEY and LASTFM_USERNAME
-	// as secrets (wrangler secret put) or Secrets Store bindings when ready.
-	// The feature gracefully degrades — widget simply hidden without credentials.
+	// LISTENBRAINZ_TOKEN (secret, optional) enables cover art for the track that is playing.
 	"secrets_store_secrets": []
 }

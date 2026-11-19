@@ -9,7 +9,8 @@ import {
   TYPE_LABELS,
 } from '../../../lib/mediaLog'
 import { useCmsResource } from '../../../hooks/useCmsResource'
-import { NowPlaying, NowCard } from '../../NowPlaying'
+import { NowCard } from '../../NowCard'
+import { NowPlaying } from '../../NowPlaying'
 import { formatDate } from '../../../lib/formatDate'
 import { safeHref } from '../../../lib/safeUrl'
 

@@ -1,45 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import type { NowPlayingTrack } from '../lib/lastfm'
+import type { NowPlayingTrack } from '../lib/listenbrainz'
+import { NowCard } from './NowCard'
 
 type NowPlayingData = NowPlayingTrack | { isPlaying: false }
 
 const POLL_INTERVAL = 30_000
-
-export type NowCardProps = {
-  cover?: string
-  title: string
-  subtitle?: string
-  href?: string
-  onClick?: () => void
-  isPlaying?: boolean
-}
-
-export function NowCard({ cover, title, subtitle, href, onClick, isPlaying }: NowCardProps) {
-  const Tag = href ? 'a' : 'button'
-  const linkProps = href
-    ? { href, target: '_blank' as const, rel: 'noopener noreferrer' }
-    : { onClick }
-
-  return (
-    <Tag className="now-card" {...(linkProps as any)}>
-      <div
-        className="now-card__cover"
-        style={cover ? { backgroundImage: `url(${cover})` } : undefined}
-      >
-        {!cover && <span className="now-card__placeholder">?</span>}
-        {isPlaying && (
-          <div className="now-card__bars" aria-hidden="true">
-            <span className="now-card__bar" />
-            <span className="now-card__bar" />
-            <span className="now-card__bar" />
-          </div>
-        )}
-      </div>
-      <span className="now-card__title">{title}</span>
-      {subtitle && <span className="now-card__subtitle">{subtitle}</span>}
-    </Tag>
-  )
-}
 
 export function NowPlaying() {
   const [data, setData] = useState<NowPlayingData | null>(null)
@@ -69,15 +34,13 @@ export function NowPlaying() {
 
   if (!data || !('title' in data)) return null
 
-  const track = data as NowPlayingTrack
-
   return (
     <NowCard
-      cover={track.albumArt}
-      title={track.title}
-      subtitle={track.artist}
-      href={track.songUrl}
-      isPlaying={track.isPlaying}
+      cover={data.albumArt}
+      title={data.title}
+      subtitle={data.artist}
+      href={data.songUrl}
+      isPlaying={data.isPlaying}
     />
   )
 }
