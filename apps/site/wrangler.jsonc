@@ -37,10 +37,9 @@
 	],
 	"vars": {
 		"PUBLIC_CMS_URL": "https://cms.sigterm.vodka",
-		"MAGPIE_API_URL": "https://magpie.yellowumbrella.dev"
+		"MAGPIE_API_URL": "https://magpie.yellowumbrella.dev",
+		"LISTENBRAINZ_USERNAME": "Sigterm015"
 	},
-	// Now-playing widget needs LISTENBRAINZ_USERNAME (var) and optionally
-	// LISTENBRAINZ_TOKEN (secret, enables cover art for the currently playing track).
-	// The widget is hidden without LISTENBRAINZ_USERNAME.
+	// LISTENBRAINZ_TOKEN (secret, optional) enables cover art for the track that is playing.
 	"secrets_store_secrets": []
 }
