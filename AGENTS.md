@@ -99,5 +99,5 @@ pnpm cf-typegen                         # Regenerate Cloudflare worker-configura
 
 ## Environment Variables
 - `apps/cms/.env`: `DATABASE_URI`, `PAYLOAD_SECRET`, R2 credentials, `SMTP_*`.
-- `apps/site/.env` or `.dev.vars`: `PUBLIC_CMS_URL`, `PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, Spotify credentials.
+- `apps/site/.env` or `.dev.vars`: `PUBLIC_CMS_URL`, `PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `PAYLOAD_API_KEY`, `MAGPIE_API_TOKEN`.
 - Never commit `.env` files.

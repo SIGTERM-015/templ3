@@ -42,8 +42,7 @@ src/
 │   ├── cms.ts            # CMS API client + all Cms* types
 │   ├── magpie.ts         # Media log from Magpie (server-only)
 │   ├── mediaLog.ts       # Media log types/labels (browser-safe)
-│   ├── edgeCache.ts      # Cache API wrapper for upstream reads
-│   └── lastfm.ts         # Last.fm Now Playing integration
+│   └── edgeCache.ts      # Cache API wrapper for upstream reads
 ├── pages/
 │   ├── *.astro           # SSR pages (prerender = false)
 │   └── api/              # Cloudflare Worker API routes (*.json.ts)
@@ -210,7 +209,6 @@ The Media app reads the user's Magpie instance (a Yamtrack fork), not the CMS.
 |---|---|
 | `src/data/siteConfig.ts` | Static fallbacks: site metadata, desktopApps registry, operator profile |
 | `src/lib/cms.ts` | All CMS fetch helpers + every `Cms*` type used in the site |
-| `src/lib/lastfm.ts` | Last.fm Now Playing integration |
 | `src/components/os/DesktopShell.tsx` | Root React component — window reducer, theme, personalization |
 | `src/components/os/themePresets.ts` | Theme preset definitions + CSS variable builders |
 | `src/layouts/Layout.astro` | Single HTML shell for every page |
