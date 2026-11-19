@@ -8,6 +8,7 @@ import {
 } from '../../../data/siteConfig'
 import type { CmsSiteIdentity } from '../../../lib/cms'
 import { cachedMediaUrl } from '../../../lib/media'
+import { NowPlaying } from '../../NowPlaying'
 import { safeHref } from '../../../lib/safeUrl'
 import { ButtonModal } from './ButtonModal'
 
@@ -87,6 +88,10 @@ export function DossierApp({ onOpenApp, siteIdentity }: Props) {
           {bio.map((p, i) => (
             <p key={i} className="copy">{p}</p>
           ))}
+        </div>
+        <div className="dossier-now-column">
+          <h3 className="eyebrow">Now listening</h3>
+          <NowPlaying />
         </div>
       </div>
 

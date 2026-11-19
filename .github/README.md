@@ -46,7 +46,7 @@ The migrate step passes `--forceAcceptWarning` because the prod DB contains a
 ## Runtime Secrets
 
 Secrets used at runtime by the Workers (Clerk secret key, Magpie token,
-SMTP password, etc.) are managed in Cloudflare directly — either via the
+ListenBrainz token, SMTP password, etc.) are managed in Cloudflare directly — either via the
 **Secrets Store** or `wrangler secret put`. CI does not touch them.
 
 ## Migration Note

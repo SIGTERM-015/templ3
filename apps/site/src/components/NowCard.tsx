@@ -4,9 +4,10 @@ export type NowCardProps = {
   subtitle?: string
   href?: string
   onClick?: () => void
+  isPlaying?: boolean
 }
 
-export function NowCard({ cover, title, subtitle, href, onClick }: NowCardProps) {
+export function NowCard({ cover, title, subtitle, href, onClick, isPlaying }: NowCardProps) {
   const content = (
     <>
       <div
@@ -14,6 +15,13 @@ export function NowCard({ cover, title, subtitle, href, onClick }: NowCardProps)
         style={cover ? { backgroundImage: `url(${cover})` } : undefined}
       >
         {!cover && <span className="now-card__placeholder">?</span>}
+        {isPlaying && (
+          <div className="now-card__bars" aria-hidden="true">
+            <span className="now-card__bar" />
+            <span className="now-card__bar" />
+            <span className="now-card__bar" />
+          </div>
+        )}
       </div>
       <span className="now-card__title">{title}</span>
       {subtitle && <span className="now-card__subtitle">{subtitle}</span>}

@@ -42,7 +42,8 @@ src/
 │   ├── cms.ts            # CMS API client + all Cms* types
 │   ├── magpie.ts         # Media log from Magpie (server-only)
 │   ├── mediaLog.ts       # Media log types/labels (browser-safe)
-│   └── edgeCache.ts      # Cache API wrapper for upstream reads
+│   ├── edgeCache.ts      # Cache API wrapper for upstream reads
+│   └── listenbrainz.ts   # ListenBrainz now-playing (server-only)
 ├── pages/
 │   ├── *.astro           # SSR pages (prerender = false)
 │   └── api/              # Cloudflare Worker API routes (*.json.ts)
@@ -209,6 +210,7 @@ The Media app reads the user's Magpie instance (a Yamtrack fork), not the CMS.
 |---|---|
 | `src/data/siteConfig.ts` | Static fallbacks: site metadata, desktopApps registry, operator profile |
 | `src/lib/cms.ts` | All CMS fetch helpers + every `Cms*` type used in the site |
+| `src/lib/listenbrainz.ts` | ListenBrainz now-playing (server-only) |
 | `src/components/os/DesktopShell.tsx` | Root React component — window reducer, theme, personalization |
 | `src/components/os/themePresets.ts` | Theme preset definitions + CSS variable builders |
 | `src/layouts/Layout.astro` | Single HTML shell for every page |

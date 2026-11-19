@@ -10,6 +10,7 @@ import {
 } from '../../../lib/mediaLog'
 import { useCmsResource } from '../../../hooks/useCmsResource'
 import { NowCard } from '../../NowCard'
+import { NowPlaying } from '../../NowPlaying'
 import { formatDate } from '../../../lib/formatDate'
 import { safeHref } from '../../../lib/safeUrl'
 
@@ -80,9 +81,13 @@ export function MediaApp({ serverData, onUpdateRoute }: Props) {
 
   return (
     <div className="mediapp">
-      {!selected && nowGroups.length > 0 && (
+      {!selected && (
         <div className="mediapp-now">
           <div className="mediapp-now__grid">
+            <div className="mediapp-now__card">
+              <h3 className="eyebrow">Now listening</h3>
+              <NowPlaying />
+            </div>
             {nowGroups.map((group) => (
               <div key={group.key} className="mediapp-now__card">
                 <h3 className="eyebrow">{group.label}</h3>

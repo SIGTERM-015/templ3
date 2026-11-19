@@ -11,6 +11,8 @@ const BUILD_ENV: Record<keyof ImportMetaEnv, string | undefined> = {
   PAYLOAD_API_KEY: import.meta.env.PAYLOAD_API_KEY,
   MAGPIE_API_URL: import.meta.env.MAGPIE_API_URL,
   MAGPIE_API_TOKEN: import.meta.env.MAGPIE_API_TOKEN,
+  LISTENBRAINZ_USERNAME: import.meta.env.LISTENBRAINZ_USERNAME,
+  LISTENBRAINZ_TOKEN: import.meta.env.LISTENBRAINZ_TOKEN,
 }
 
 /**
