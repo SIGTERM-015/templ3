@@ -1,217 +1,133 @@
 # AGENTS.md — apps/site
 
-Astro 5 + React 19 site deployed to Cloudflare Workers. Simulates a desktop OS
-("Templ3 OS") where every page is a draggable window inside a single React shell.
-
----
+Astro 7 + React 19 frontend deployed to Cloudflare Workers (`sigterm.vodka`). Simulates a desktop OS ("Templ3 OS") where every page renders draggable windows inside a single React shell (`DesktopShell`). See root `AGENTS.md` for monorepo-wide rules.
 
 ## Commands
 
-```bash
-pnpm dev        # astro dev (localhost:4321)
-pnpm build      # astro build
-pnpm preview    # astro build && wrangler dev
-pnpm deploy     # astro build && wrangler deploy
-pnpm cf-typegen # wrangler types  → regenerates worker-configuration.d.ts
-```
-
-**No linter, no test suite.** TypeScript is the only validation layer.
+Run from `apps/site/` (or prefix with `pnpm --dir apps/site`):
 
 ```bash
-# Type-check (from apps/site/). astro sync generates the astro:* module types tsc needs.
-pnpm typecheck
+pnpm dev                  # astro dev (localhost:4321)
+pnpm build                # astro build
+pnpm preview              # astro build && wrangler dev
+pnpm deploy               # wrangler deploy (run pnpm build first)
+pnpm typecheck            # astro sync && tsc --noEmit
+pnpm cf-typegen           # wrangler types -> regenerates worker-configuration.d.ts
+pnpm check:client-bundle  # bash scripts/check-client-bundle.sh (fails if cloudflare:* leaks into dist/client)
 ```
 
----
+There is no linter or test suite in `apps/site`. Validate changes with `pnpm typecheck`, and after a build run `pnpm check:client-bundle`.
 
 ## Project Structure
 
 ```
 src/
 ├── components/
-│   ├── os/               # Desktop shell — DesktopShell, WindowFrame, Taskbar,
-│   │   │                 #   BootSequence, DesktopIcons, themePresets
-│   │   └── apps/         # One component per app window (DossierApp, GazetteApp, …)
-│   ├── terminal/         # Terminal easter egg (useTerminal, commands, ascii)
-│   └── blog/             # PayloadRichText renderer
+│   ├── os/               # DesktopShell, WindowFrame, TaskbarReact, AppMenu,
+│   │   │                 #   BootSequence, DesktopIcons, CRTOverlay.astro, themePresets
+│   │   └── apps/         # DossierApp, GazetteApp, ArmoryApp, MediaApp, CommsApp,
+│   │                     #   GuestbookApp, GuestbookEditorApp, NotesApp, NoteViewerApp,
+│   │                     #   ReadmeApp, SettingsApp, TerminalApp, BrowserApp, ButtonModal
+│   ├── terminal/         # Terminal emulator (useTerminal, commands, ascii)
+│   ├── blog/             # PayloadRichText, Embeds, embeds.css
+│   ├── NowPlaying.tsx    # ListenBrainz now-playing widget
+│   └── NowCard.tsx       # Media "Now X" card
 ├── data/
-│   └── siteConfig.ts     # Static fallback config — desktopApps, site, operator, navGuide
+│   └── siteConfig.ts     # Static fallbacks: site, operator, socialLinks, inspirations,
+│                         #   buttons, ownButton, navGuide, desktopApps, statusColors
+├── hooks/
+│   └── useCmsResource.ts # Client fetch hook with AbortController
 ├── layouts/
-│   └── Layout.astro      # Single layout used by every page
+│   └── Layout.astro      # Single HTML shell used by every page
 ├── lib/
-│   ├── cms.ts            # CMS API client + all Cms* types
-│   ├── magpie.ts         # Media log from Magpie (server-only)
-│   ├── mediaLog.ts       # Media log types/labels (browser-safe)
-│   ├── edgeCache.ts      # Cache API wrapper for upstream reads
-│   └── listenbrainz.ts   # ListenBrainz now-playing (server-only)
+│   ├── cms.ts            # Server-only CMS client, Cms* types, TTL, cmsJsonResponse
+│   ├── media.ts          # Browser-safe CMS helpers: mediaUrl, cachedMediaUrl, resolveValue
+│   ├── env.ts            # workerEnv() (Worker env/Secrets Store/build fallback) + bindings
+│   ├── edgeCache.ts      # cachedJson() wrapper over Cloudflare Cache API
+│   ├── magpie.ts         # Server-only Magpie media log client
+│   ├── mediaLog.ts       # Browser-safe media log types, labels, parseMediaKey
+│   ├── listenbrainz.ts   # Server-only ListenBrainz now-playing client (NowPlayingTrack type)
+│   ├── og.ts             # workers-og PNG renderer (serialized queue, cached Monaspace font)
+│   ├── safeUrl.ts        # safeHref() URL scheme guard (https/http/mailto)
+│   └── formatDate.ts     # Date formatting helper
+├── middleware.ts         # Adds security headers (nosniff, Referrer-Policy, HSTS, frame-ancestors 'self')
 ├── pages/
-│   ├── *.astro           # SSR pages (prerender = false)
-│   └── api/              # Cloudflare Worker API routes (*.json.ts)
-└── styles/               # tokens.css, typography.css, animations.css, global.css, os.css
+│   ├── *.astro           # SSR pages (prerender = false): index, about, arsenal, links,
+│   │                     #   notes, guestbook, media, media/[slug], blog/index, blog/[slug], 404
+│   └── api/
+│       ├── *.json.ts     # posts, post/[slug], projects, project-statuses, links, categories,
+│       │                 #   notes, site-identity, guestbook (GET+POST), media, media/[key], now-playing
+│       ├── img/[...path].ts # CMS media proxy & Cloudflare image resize (widths 150/300/600/1200)
+│       └── og/*.png.ts   # Dynamic OG images: home, arsenal, media, blog/[slug], media/[slug]
+├── styles/               # tokens.css, typography.css, animations.css, global.css, os.css, apps.css
+└── env.d.ts              # ImportMetaEnv and *?raw declarations
 ```
 
----
+## Site-Specific TypeScript & Style
 
-## TypeScript
-
-- Extends `astro/tsconfigs/strict` — strict mode is on.
-- No path aliases; use relative imports only.
-- Use `type` (not `interface`) for all props and local types.
-- Use `import type { ... }` for type-only imports.
-- Avoid `any`; use `unknown` with type narrowing.
+- Extends `astro/tsconfigs/strict`; no path aliases (use relative imports only).
 - `worker-configuration.d.ts` is auto-generated by `pnpm cf-typegen` — do not edit.
-- `env.d.ts` declares `ImportMetaEnv` for `import.meta.env` variables.
-
----
-
-## Formatting & Style
-
-No Prettier config in this app. Match the surrounding file when editing:
-
-- Single quotes, no semicolons, trailing commas, ~100 char line width.
-- Arrow functions for callbacks; named `function` declarations for reducers and
-  top-level helpers.
-- Ternary for simple conditional renders; `&&` for conditional JSX.
-
----
-
-## Import Order (observed convention)
-
-1. External packages — React hooks first, then other npm packages
-2. `import type { ... }` statements
-3. Data / config imports (`../../data/siteConfig`)
-4. Lib imports (`../../lib/cms`)
-5. Sibling / child components
-6. Side-effect CSS imports — Astro files only, last
-
----
-
-## Naming Conventions
-
-| Thing | Convention | Example |
-|---|---|---|
-| React components | PascalCase | `DesktopShell`, `GazetteApp` |
-| Astro components | PascalCase | `Layout`, `CRTOverlay` |
-| React hooks | camelCase `use` prefix | `useTerminal` |
-| Functions / variables | camelCase | `createWindow`, `openWindow`, `nextZ` |
-| Types | PascalCase `type` keyword | `type WindowState = ...` |
-| Module-level constants | SCREAMING_SNAKE_CASE | `FULL_BLEED_APPS`, `CACHE_TTL` |
-| CMS-mirrored types | `Cms` prefix | `CmsPost`, `CmsSiteIdentity` |
-| CSS classes | BEM kebab-case | `gazette-card__date` |
-| App IDs | lowercase string literal union | `'dossier' \| 'gazette' \| ...` |
-
----
+- Mirror CMS types with a `Cms` prefix in `src/lib/cms.ts` (relationship fields use `T | string | null`).
+- **Server/client boundary**: `src/lib/cms.ts`, `src/lib/env.ts`, `src/lib/edgeCache.ts`, `src/lib/magpie.ts`, and `src/lib/listenbrainz.ts` are server-only (importing `cloudflare:workers` breaks the browser bundle). Client components may only use `import type` from them; import runtime helpers from `src/lib/media.ts`, `src/lib/mediaLog.ts`, or `src/lib/safeUrl.ts`. CI enforces this via `pnpm check:client-bundle`.
+- Wrap `fetch` calls in `try/catch` and return `null` or `[]` rather than throwing.
+- Wrap `localStorage` / `sessionStorage` access in `try/catch` with an empty `catch {}` (SSR and private browsing can throw).
+- Avoid `console.warn` / `console.error` in production code paths; fail gracefully with fallbacks.
 
 ## Architecture: Desktop OS Shell
 
-Every page renders `Layout.astro` → `DesktopShell` (React, `client:load`).
-The shell manages all windows with a single `useReducer`.
+Every page renders `Layout.astro` -> `BootSequence` (`client:idle`), `DesktopShell` (`client:load`), and `CRTOverlay`. `DesktopShell` manages windows via a single `useReducer` and lazy-loads app components with `React.lazy`.
 
-### Window state flow
+### Window State Flow
+1. SSR Astro page (`export const prerender = false`) fetches CMS/Magpie data and passes a JSON string as `serverData` to `Layout.astro`.
+2. `DesktopShell` parses `serverData` once at mount, creates/focuses the initial `WindowState`, and merges top-level `siteIdentity` into each window's `serverData`.
+3. Open windows persist to `sessionStorage` (`templ3-windows`, excluding `meta`); personalization persists to `localStorage` (`templ3-personalization`).
+4. `window.history.replaceState` keeps the URL synced with the topmost non-minimized window's `route`.
+5. ``Ctrl+` `` opens the terminal from anywhere.
 
-```
-Astro page (SSR, prerender=false)
-  → fetches CMS data via lib/cms.ts
-  → passes JSON string as serverData prop to Layout.astro
-  → Layout renders <DesktopShell serverData={...} initialApp="appId" />
-  → DesktopShell parses serverData once, creates initial WindowState
-  → each app window receives merged serverData via win.meta.serverData
-```
+### Adding a New App Window
+1. Add the lowercase ID to `StaticAppId` in `src/components/os/DesktopShell.tsx` (dynamic CMS web apps use `webapp-${string}`).
+2. Add its desktop entry to `desktopApps` in `src/data/siteConfig.ts` (or `EXTRA_APPS` in `DesktopShell.tsx` if it is not a desktop icon).
+3. Create `src/components/os/apps/MyApp.tsx` and lazy-import it in `DesktopShell.tsx`.
+4. Add a `case` in `renderApp()` in `DesktopShell.tsx`.
+5. Add a corresponding SSR Astro page in `src/pages/` (`export const prerender = false`) if it has a route.
 
-- Windows persist to `sessionStorage` between navigations (meta excluded).
-- Personalization (theme, wallpaper) persists to `localStorage`.
-- URL stays in sync with the topmost focused window's `route`.
-- `Ctrl+`` opens the terminal from anywhere.
+### Full-Bleed Apps
+`FULL_BLEED_APPS` (`gazette`, `terminal`, `notes`, `note-viewer`, `guestbook`, `guestbook-editor`) plus all `webapp-*` windows pass `noPadding` to `WindowFrame` and manage their own internal layout/scrolling.
 
-### Adding a new app window
+### Theme System
+- Presets (`default`, `tokyo-night`, `dracula`) and custom theme builders live in `src/components/os/themePresets.ts`.
+- Active themes set CSS custom properties directly on `document.documentElement`, clearing `THEME_OVERRIDE_KEYS` before applying new values.
 
-1. Add the `AppId` string literal to the union in `DesktopShell.tsx`.
-2. Add an entry to `desktopApps` in `src/data/siteConfig.ts`.
-3. Create `src/components/os/apps/MyApp.tsx` (PascalCase).
-4. Add a `case` in `renderApp()` inside `DesktopShell.tsx`.
-5. If the app needs an Astro page, create `src/pages/myapp.astro`
-   (SSR, `export const prerender = false`).
+## Data Layer, Caching & Integrations
 
-### Full-bleed apps
+### Caching (`src/lib/edgeCache.ts` & `src/lib/cms.ts`)
+- All CMS and Magpie reads use `cachedJson()` over Cloudflare's Cache API (`caches.default`) with credential-free keys. Do not rely on `cf.cacheTtl` for authenticated subrequests: Cloudflare does not cache fetches carrying an `Authorization` header.
+- `null` responses (upstream unavailable) are never cached.
+- TTLs from `TTL` in `src/lib/cms.ts`:
+  - `TTL.SHORT` (5 min): posts listing, guestbook entries
+  - `TTL.MEDIUM` (15 min): notes
+  - `TTL.STANDARD` (1 hr): single post, projects, web apps, media log
+  - `TTL.LONG` (24 hr): links, categories, site identity, project statuses, media detail
+- JSON routes return `cmsJsonResponse(data, ttl)`: `null` produces an uncached `503`.
 
-Apps listed in `FULL_BLEED_APPS` (`gazette`, `terminal`, `notes`) receive
-`noPadding` on their `WindowFrame` — the app is responsible for all internal
-layout and scrolling.
+### Media Log (Magpie)
+- The Media app reads Magpie (a Yamtrack fork), not the CMS.
+- `src/lib/magpie.ts` (server-only) reads `MAGPIE_API_URL` and `MAGPIE_API_TOKEN`.
+- `src/lib/mediaLog.ts` (browser-safe) holds types, labels, and `parseMediaKey`.
+- Detail routes are `/media/<type>-<source>-<id>`; keys are validated by `parseMediaKey` before any upstream call. Planned items (status `0`) are filtered out.
 
----
+### ListenBrainz Now-Playing
+- `src/lib/listenbrainz.ts` + `src/pages/api/now-playing.json.ts` (15s edge + HTTP cache) read `LISTENBRAINZ_USERNAME` and optional `LISTENBRAINZ_TOKEN` (enables cover art metadata lookup for the currently playing track).
 
-## CMS Data Layer (`src/lib/cms.ts`)
+### Guestbook & Images & OG
+- `POST /api/guestbook.json` verifies Clerk session tokens (`@clerk/astro/server`), checks `Origin`, enforces the `GUESTBOOK_RATE_LIMITER` Worker binding (3 req / 60s per Clerk user), validates PNG/JPEG magic bytes (max 5 MB), uploads to CMS media, and creates a `pending` guestbook entry.
+- `/api/img/[...path]` proxies flat filenames from `${PUBLIC_CMS_URL}/api/media/file/<file>`, optionally resizing via Cloudflare image transforms (`ALLOWED_WIDTHS = [150, 300, 600, 1200]`) with 30-day immutable caching. `astro.config.mjs` sets `session: false` and `imageService: 'cloudflare'`.
+- `/api/og/*.png` endpoints render 1200x630 PNGs via `src/lib/og.ts` (`workers-og`), serialized through `ogRenderQueue` with per-isolate font caching.
 
-- All CMS types are manually maintained in `lib/cms.ts` with the `Cms` prefix.
-  They are intentionally loose — relationship fields type as `T | string | null`
-  to handle both populated objects and raw IDs.
-- `readCollection<T>` and `readGlobal<T>` handle fetch with Cloudflare CDN caching
-  via `cf.cacheTtl` fetch option.
-- **Never throw** from fetch helpers — return `[]` or `null` on any failure.
-- The `PUBLIC_CMS_URL` env var must be set; if missing, all fetches short-circuit
-  and return empty data (no crash).
-- Use `mediaUrl()` to safely resolve a `CmsMedia | string | null` to a URL.
-- Use `resolveValue()` to resolve populated relationship objects to their `.value`.
+## Environment Variables & Worker Bindings
 
-### Caching Strategy
+Resolved via `workerEnv()` (`src/lib/env.ts`: Worker env / Secrets Store first, build-time `import.meta.env` fallback). See `.env.example`, `src/env.d.ts`, and `wrangler.jsonc`.
 
-Upstream reads go through `cachedJson()` (`src/lib/edgeCache.ts`), which stores parsed results
-in the colo's Cache API under a credential-free key. Don't rely on `cf.cacheTtl`: Cloudflare
-never caches subrequests that carry an `Authorization` header, which all CMS and Magpie reads do.
-Failures (`null`) are never cached. TTLs come from `TTL` in `lib/cms.ts`:
-- Posts listing: 5 min. Notes: 15 min.
-- Individual post, projects, web apps, media log: 1 hour.
-- Links, categories, site identity, project statuses, media detail: 24 hours.
-
-JSON routes answer through `cmsJsonResponse(data, ttl)`: `null` becomes an uncached 503.
-
-### Media log (Magpie)
-
-The Media app reads the user's Magpie instance (a Yamtrack fork), not the CMS.
-- `src/lib/magpie.ts` is server-only. It reads `MAGPIE_API_URL` (var) and `MAGPIE_API_TOKEN` (Worker secret, read-only token).
-- `src/lib/mediaLog.ts` is browser-safe: types, labels and `parseMediaKey`.
-- Entry URLs are `/media/<type>-<source>-<id>`. Keys are validated before any upstream call.
-- Planned items (Magpie status 0) never reach the site.
-
-### API routes (`src/pages/api/*.json.ts`)
-
-- All routes: `export const prerender = false`, `export const GET: APIRoute`.
-- Rely on `lib/cms.ts` helpers — do not call the CMS directly from route handlers.
-- Return `cmsJsonResponse(data, TTL.X)` so caching and the outage case stay consistent.
-
----
-
-## Theme System
-
-- Theme presets and custom theme logic live in `src/components/os/themePresets.ts`.
-- Active theme is applied by setting CSS custom properties directly on
-  `document.documentElement` at runtime — no class swaps.
-- The `THEME_OVERRIDE_KEYS` array lists all properties that must be cleared before
-  applying a new theme to avoid stale values.
-- Persisted to `localStorage` under the key `templ3-personalization`.
-
----
-
-## Error Handling
-
-- Wrap all `fetch` calls in `try/catch`; return `[]` or `null` — never re-throw.
-- `localStorage` / `sessionStorage` access: always `try/catch` with an empty
-  `catch {}` block — SSR and private browsing can throw.
-- No `console.warn` / `console.error` in production paths — fail silently with
-  graceful fallbacks.
-- API routes: return `Response.json({ error: '...' }, { status: 4xx })` for
-  expected error conditions.
-
----
-
-## Key Files
-
-| Path | Purpose |
-|---|---|
-| `src/data/siteConfig.ts` | Static fallbacks: site metadata, desktopApps registry, operator profile |
-| `src/lib/cms.ts` | All CMS fetch helpers + every `Cms*` type used in the site |
-| `src/lib/listenbrainz.ts` | ListenBrainz now-playing (server-only) |
-| `src/components/os/DesktopShell.tsx` | Root React component — window reducer, theme, personalization |
-| `src/components/os/themePresets.ts` | Theme preset definitions + CSS variable builders |
-| `src/layouts/Layout.astro` | Single HTML shell for every page |
-| `worker-configuration.d.ts` | Auto-generated Cloudflare Worker env types — do not edit |
+- Non-secret vars (`wrangler.jsonc`): `PUBLIC_CMS_URL`, `MAGPIE_API_URL`, `LISTENBRAINZ_USERNAME`.
+- Secrets / local `.env` or `.dev.vars`: `PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `PAYLOAD_API_KEY`, `MAGPIE_API_TOKEN`, `LISTENBRAINZ_TOKEN` (optional).
+- Worker bindings (`wrangler.jsonc`): `ASSETS`, `GUESTBOOK_RATE_LIMITER`.
